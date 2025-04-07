@@ -38,13 +38,7 @@ namespace CelexWebApp.Controllers.Alumno
                     SqlDataReader reader = await command.ExecuteReaderAsync();
                     if (reader.Read())
                     {
-                        HttpContext.Session.SetString("id_personal", reader["id_estudiantes"].ToString());
-                        HttpContext.Session.SetString("nombre", reader["nombre_alumno"].ToString());
-                        HttpContext.Session.SetString("apellidoPa", reader["apellido_paterno"].ToString());
-                        HttpContext.Session.SetString("apellidoMa", reader["apellido_materno"].ToString());
-                        HttpContext.Session.SetInt32("telefono", (int)reader["telefono_alumno"]);
-                        HttpContext.Session.SetInt32("boleta", (int)reader["numero_de_boleta"]);
-                        HttpContext.Session.SetString("matricula", reader["matricula"].ToString());
+                        
                     }
                 }
             }

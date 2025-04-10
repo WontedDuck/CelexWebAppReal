@@ -23,12 +23,6 @@ namespace CelexWebApp.Models.RegistroMV
         [Phone(ErrorMessage = "Formato inválido")]
         public string Telefono { get; set; } = "";
 
-        [Required(ErrorMessage = "El número de boleta es obligatorio")]
-        [StringLength(10, ErrorMessage = "Máximo 10 digitos")]
-        [MinLength(10, ErrorMessage = "Minimo 10 digitos")]
-        [Phone(ErrorMessage = "Formato inválido")]
-        public string NumeroBoleta { get; set; } = "";
-
         [Required(ErrorMessage = "La matrícula es obligatoria")]
         [StringLength(30, ErrorMessage = "Máximo 30 caracteres")]
         public string Matricula { get; set; } = "";

@@ -73,8 +73,8 @@ public IActionResult Registro()
                 {
                     idRol = 1;
                     string queryAlumno = @"INSERT INTO Alumnos 
-                        (nombre_alumno, apellido_paterno, apellido_materno, telefono_alumno, numero_de_boleta, matricula, id_azure) 
-                        VALUES (@Nombre, @ApellidoPaterno, @ApellidoMaterno, @Telefono, @NumeroBoleta, @Matricula, @IdAzure)";
+                        (nombre_alumno, apellido_paterno, apellido_materno, telefono_alumno, matricula, id_azure) 
+                        VALUES (@Nombre, @ApellidoPaterno, @ApellidoMaterno, @Telefono, @Matricula, @IdAzure)";
                     using (var transaction = connection.BeginTransaction())
                     {
                         try
@@ -85,7 +85,6 @@ public IActionResult Registro()
                                 command.Parameters.AddWithValue("@ApellidoPaterno", model.Alumno.ApellidoPaterno.ToString());
                                 command.Parameters.AddWithValue("@ApellidoMaterno", model.Alumno.ApellidoMaterno.ToString());
                                 command.Parameters.AddWithValue("@Telefono", long.Parse(model.Alumno.Telefono.ToString()));
-                                command.Parameters.AddWithValue("@NumeroBoleta", long.Parse(model.Alumno.NumeroBoleta.ToString()));
                                 command.Parameters.AddWithValue("@Matricula", model.Alumno.Matricula.ToString());
                                 command.Parameters.AddWithValue("@IdAzure", user.Id.ToString());
                                 command.ExecuteNonQuery();

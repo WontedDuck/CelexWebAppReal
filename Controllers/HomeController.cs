@@ -65,7 +65,7 @@ public class HomeController : Controller
                     }
                     else if (rol == 3)
                     { 
-                        return RedirectToAction("Index", "Admin");
+                        return RedirectToAction("Index", "Administrador");
                     }
                 }
             }

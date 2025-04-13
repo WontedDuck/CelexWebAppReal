@@ -34,8 +34,6 @@ namespace CelexWebApp.Controllers
         [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
         public IActionResult Index()
         {
-            var user = _graphServiceClient.Me.GetAsync().Result;
-            ViewData["id_azure"] = user.Id.ToString();
             var model = new RegistroViewModel
             {
                 Roles = new List<SelectListItem>
@@ -43,6 +41,8 @@ namespace CelexWebApp.Controllers
                     new SelectListItem { Value = "Alumno", Text = "Alumno" }
                 },
             };
+            var user = _graphServiceClient.Me.GetAsync().Result;
+            ViewData["id_azure"] = user.Id.ToString();
             ViewData["Title"] = "Registro";
             return View(model);
         }
@@ -69,7 +69,7 @@ namespace CelexWebApp.Controllers
 
                 await connection.OpenAsync();
                 string queryAlumno = @"INSERT INTO Alumnos 
-                        (nombre_alumno, apellido_paterno, apellido_materno, telefono_alumno, matricula, id_azure) 
+                        (nombre_alumno, apellido_paterno, apellido_materno, telefono_alumno, matricula, id_registrado) 
                         VALUES (@Nombre, @ApellidoPaterno, @ApellidoMaterno, @Telefono, @Matricula, @IdAzure)";
                 using (var transaction = connection.BeginTransaction())
                 {

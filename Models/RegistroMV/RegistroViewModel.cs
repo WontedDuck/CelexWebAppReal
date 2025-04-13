@@ -8,10 +8,7 @@ namespace CelexWebApp.Models.RegistroMV
     {
         [Required(ErrorMessage = "¡Debes seleccionar un rol!")]
         public string RolSeleccionado { get; set; }
-
         public RegistroAlumnoViewModel Alumno { get; set; } = new RegistroAlumnoViewModel();
-        public RegistroProfesorViewModel Profesor { get; set; } = new RegistroProfesorViewModel();
         public List<SelectListItem> Roles { get; set; }
-        public List<SelectListItem> Niveles { get; set; }
     }
 }

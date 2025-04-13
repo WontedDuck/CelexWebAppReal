@@ -50,7 +50,8 @@
         <input type="submit" value="Registro" class="btn btn-primary" />
     </div>
 </form>
-   <label id="idAzureLabel">@ViewData["id_azure"]</label>
+   <label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label><br />
+   <button id="BtnAzureLabel" asp-controller="Registro" asp-action="EnviarID"> Enviar a Administrador </button>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -58,32 +59,43 @@
     <script>
         document.getElementById("RolSeleccionado").addEventListener("change", function () {
             const rol = this.value;
-            document.getElementById("alumnoForm").style.display = rol === "Alumno" ? "block" : "none";
-        });
+            document.getElementById("alumnoForm").style.display = rol === "Alumno" ? "block" : "none";});
         document.getElementById("RolSeleccionado").addEventListener("change", function () {
-    const rol = this.value;
-    const alumnoForm = document.getElementById("alumnoForm");
-
-    if (rol === "Alumno") {
-        alumnoForm.style.display = "block";
-        // Deshabilitar inputs de profesor
-        alumnoForm.querySelectorAll("input, select").forEach(el => el.disabled = false);;
-    } else {
-        alumnoForm.style.display = "none";
-        profesorForm.style.display = "none";
-    }
-});
+            const rol = this.value;
+            const alumnoForm = document.getElementById("alumnoForm");
+            if (rol === "Alumno") {
+                alumnoForm.style.display = "block";
+                alumnoForm.querySelectorAll("input, select").forEach(el => el.disabled = false);;} 
+            else {
+                alumnoForm.style.display = "none";}});
+        });
     </script>
 }
 <style>
     #idAzureLabel {
         position: fixed;
-        bottom: 10px;
-        right: 10px;
+        bottom: 100px;
+        right: 200px;
         background-color: rgba(0, 0, 0, 0.7);
         color: white;
         padding: 5px 10px;
         border-radius: 5px;
         font-size: 0.9em;
+    }
+
+    #BtnAzureLabel {
+        position: fixed;
+        bottom: 100px;
+        right: 10px;
+        background-color: black;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9em;
+        transition: transform 0.3s ease; 
+    }
+
+    #BtnAzureLabel:hover {
+        transform: scale(1.2);
     }
 </style>

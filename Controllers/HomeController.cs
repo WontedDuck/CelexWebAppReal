@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using CelexWebApp.Models.RegistroMV;
+using Microsoft.AspNetCore.Http;
 
 
 namespace CelexWebApp.Controllers;
@@ -51,21 +52,21 @@ public class HomeController : Controller
             }
             else
             {
-                using (SqlCommand command = new SqlCommand("SELECT id_rol FROM Registrados WHERE id_azure = @id", connection))
+                using (SqlCommand command = new SqlCommand("SELECT id_registrado, id_rol FROM Registrados WHERE id_azure = @id", connection))
                 {
                     command.Parameters.AddWithValue("@id", user.Id.ToString());
-                    int rol = (int)await command.ExecuteScalarAsync();
-                    if (rol == 1)
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
-                        return RedirectToAction("Index", "Alumno");
-                    }
-                    else if (rol == 2)
-                    {
-                        return RedirectToAction("Index", "Profesor");
-                    }
-                    else if (rol == 3)
-                    { 
-                        return RedirectToAction("Index", "Admin");
+                        if (await reader.ReadAsync())
+                        {
+                            HttpContext.Session.SetString("id_registrado", reader.GetInt32(0).ToString());
+                            if (reader.GetInt32(1) == 1)
+                                return RedirectToAction("Index", "Alumno");
+                            else if (reader.GetInt32(1) == 2)
+                                return RedirectToAction("Index", "Profesor");
+                            else if (reader.GetInt32(1) == 3)
+                                return RedirectToAction("Index", "Administrador");
+                        }
                     }
                 }
             }

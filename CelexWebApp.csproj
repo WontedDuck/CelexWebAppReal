@@ -25,4 +25,8 @@
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.6.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Controllers\Profesor\" />
+	</ItemGroup>
+
 </Project>

@@ -31,7 +31,7 @@ namespace CelexWebApp.Controllers.Alumno
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 connection.Open();
-                string query = "SELECT * FROM Alumnos WHERE id_azure = @id";
+                string query = "SELECT * FROM Alumnos WHERE id_registrado = @id";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@id", user.Id.ToString());

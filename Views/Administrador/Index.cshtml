@@ -1,5 +1,259 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-ADMINISTRADOR
-Hola @ViewData["administrador"]
+﻿@{
+    ViewData["Title"] = "Panel de Administrador";
+}
+
+<h1>@ViewData["Title"]</h1>
+<div class="admin-container">
+    
+    <!-- Enviar notificaciones -->
+    <div class="notifications">
+        <h2>Enviar Notificaciones</h2>
+        @if (TempData["MensajeEstado"] != null)
+        {
+            <div class="alert alert-info" role="alert">
+                @TempData["MensajeEstado"]
+            </div>
+        }
+        <form method="post" asp-action="EnviarNotificacion" asp-controller="Administrador">
+            <div class="form-group">
+                <label for="mensaje">Mensaje:</label>
+                <textarea id="mensaje" name="mensaje" class="form-control" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="destinatarios">Destinatarios:</label>
+                <select id="destinatarios" name="destinatarios" class="form-control">
+                    <option value="Todos">Todos</option>
+                    <option value="Alumnos">Alumnos</option>
+                    <option value="Profesores">Profesores</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+
+    <!-- Notificaciones recibidas -->
+    <div class="received-notifications">
+        <h2>Notificaciones Recibidas</h2>
+        <ul>
+            <li class="notification-item">
+                <span>Mensaje de Alumno: "Necesito ayuda con mi grupo" - 10/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Agregar profesor -->
+    <div class="add-professor">
+        <h2>Agregar Profesor</h2>
+        <form method="post" asp-action="AgregarProfesor" asp-controller="Administrador">
+            <div class="form-group">
+                <label for="numeroEmpleado">Numero de Empleado:</label>
+                <input id="numeroEmpleado" name="numeroEmpleado" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="nombreProfesor">Nombre:</label>
+                <input id="nombreProfesor" name="nombreProfesor" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="telefonoProfesor">Teléfono:</label>
+                <input id="telefonoProfesor" name="telefonoProfesor" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="idAzure">Numero de Cuenta:</label>
+                <input id="idAzure" name="idAzure" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Agregar</button>
+        </form>
+    </div>
+
+    <!-- Crear grupo -->
+    <div class="create-group">
+        <h2>Crear Grupo</h2>
+        <form method="post" asp-action="CrearGrupo" asp-controller="Administrador">
+            <div class="form-group">
+                <label for="nombreGrupo">Nombre del Grupo:</label>
+                <input id="nombreGrupo" name="nombreGrupo" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="nivelGrupo">Nivel:</label>
+                <select id="nivelGrupo" name="nivelGrupo" class="form-control">
+                    <option value="Introductorio">Introductorio</option>
+                    <option value="Básico">Básico</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Avanzado">Avanzado</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Crear</button>
+        </form>
+    </div>
+
+    <!-- Historial -->
+    <div class="history">
+        <h2>Generar Historial de Alumno</h2>
+        <form method="post" asp-action="GenerarHistorial" asp-controller="Administrador">
+            <div class="form-group">
+                <label for="alumnoSeleccionado">Seleccionar Alumno:</label>
+                <select id="alumnoSeleccionado" name="alumnoSeleccionado" class="form-control">
+                    <option value="1">Juan Pérez</option>
+                    <option value="2">María López</option>
+                    <option value="3">Carlos García</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Generar Historial</button>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        // Función para marcar una notificación como leída
+        function marcarLeida(button) {
+            const li = button.closest('.notification-item');
+            li.style.textDecoration = "line-through"; // Marca la notificación como leída visualmente
+            button.disabled = true; // Desactiva el botón de "Marcar como Leída"
+        }
+
+        // Función para borrar una notificación
+        function borrarNotificacion(button) {
+            const li = button.closest('.notification-item');
+            li.remove(); // Elimina la notificación de la lista
+        }
+    </script>
+            }
+<style>
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-info {
+        color: #31708f;
+        background-color: #d9edf7;
+        border-color: #bce8f1;
+    }
+    .admin-container {
+        display: grid;
+        grid-template-areas:
+            "notifications received-notifications"
+            "add-professor add-professor"
+            "create-group create-group"
+            "history history";
+        grid-gap: 20px;
+        margin-top: 20px;
+    }
+
+    .notifications {
+        grid-area: notifications;
+        border: 1px solid #ccc;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .received-notifications {
+        grid-area: received-notifications;
+        border: 1px solid #ccc;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .add-professor {
+        grid-area: add-professor;
+        border: 1px solid #ccc;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .create-group {
+        grid-area: create-group;
+        border: 1px solid #ccc;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .history {
+        grid-area: history;
+        border: 1px solid #ccc;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .btn {
+        display: block;
+        width: 100%;
+    }
+
+    .received-notifications {
+        grid-area: received-notifications;
+        border: 1px solid #ccc;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .notification-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+
+    .notification-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        font-size: 0.8em;
+        padding: 5px 10px;
+    }
+</style>

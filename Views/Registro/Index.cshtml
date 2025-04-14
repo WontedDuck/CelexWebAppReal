@@ -46,71 +46,56 @@
             <span asp-validation-for="Alumno.Matricula" class="text-danger"></span>
         </div>
     </div>
-
-    <div id="profesorForm" style="display:none;">
-        <h3>Registro de Profesor</h3>
-        <div class="form-group">
-            <label asp-for="Profesor.NumeroEmpleado" class="control-label"></label>
-            <input asp-for="Profesor.NumeroEmpleado" class="form-control" />
-            <span asp-validation-for="Profesor.NumeroEmpleado" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Profesor.NombreCompleto" class="control-label"></label>
-            <input asp-for="Profesor.NombreCompleto" class="form-control" />
-            <span asp-validation-for="Profesor.NombreCompleto" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Profesor.Telefono" class="control-label"></label>
-            <input asp-for="Profesor.Telefono" class="form-control" />
-            <span asp-validation-for="Profesor.Telefono" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Profesor.NivelImparte" class="control-label"></label>
-            <select asp-for="Profesor.NivelImparte" class="form-control" asp-items="Model.Niveles">
-                <option value="">Seleccione...</option>
-            </select>
-            <span asp-validation-for="Profesor.NivelImparte" class="text-danger"></span>
-        </div>
-    </div>
-
     <div class="form-group">
         <input type="submit" value="Registro" class="btn btn-primary" />
     </div>
 </form>
-
+   <label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label><br />
+   <button id="BtnAzureLabel" asp-controller="Registro" asp-action="EnviarID"> Enviar a Administrador </button>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        // Mostrar/ocultar formularios al cambiar el rol
         document.getElementById("RolSeleccionado").addEventListener("change", function () {
             const rol = this.value;
-            document.getElementById("alumnoForm").style.display = rol === "Alumno" ? "block" : "none";
-            document.getElementById("profesorForm").style.display = rol === "Profesor" ? "block" : "none";
-        });
-
-        // Validar antes de enviar
+            document.getElementById("alumnoForm").style.display = rol === "Alumno" ? "block" : "none";});
         document.getElementById("RolSeleccionado").addEventListener("change", function () {
-    const rol = this.value;
-    const alumnoForm = document.getElementById("alumnoForm");
-    const profesorForm = document.getElementById("profesorForm");
-
-    if (rol === "Alumno") {
-        alumnoForm.style.display = "block";
-        profesorForm.style.display = "none";
-        // Deshabilitar inputs de profesor
-        profesorForm.querySelectorAll("input, select").forEach(el => el.disabled = true);
-        alumnoForm.querySelectorAll("input, select").forEach(el => el.disabled = false);
-    } else if (rol === "Profesor") {
-        alumnoForm.style.display = "none";
-        profesorForm.style.display = "block";
-        alumnoForm.querySelectorAll("input, select").forEach(el => el.disabled = true);
-        profesorForm.querySelectorAll("input, select").forEach(el => el.disabled = false);
-    } else {
-        alumnoForm.style.display = "none";
-        profesorForm.style.display = "none";
-    }
-});
+            const rol = this.value;
+            const alumnoForm = document.getElementById("alumnoForm");
+            if (rol === "Alumno") {
+                alumnoForm.style.display = "block";
+                alumnoForm.querySelectorAll("input, select").forEach(el => el.disabled = false);;} 
+            else {
+                alumnoForm.style.display = "none";}});
+        });
     </script>
 }
+<style>
+    #idAzureLabel {
+        position: fixed;
+        bottom: 100px;
+        right: 200px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9em;
+    }
+
+    #BtnAzureLabel {
+        position: fixed;
+        bottom: 100px;
+        right: 10px;
+        background-color: black;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9em;
+        transition: transform 0.3s ease; 
+    }
+
+    #BtnAzureLabel:hover {
+        transform: scale(1.2);
+    }
+</style>

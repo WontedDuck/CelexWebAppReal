@@ -8,6 +8,12 @@
     <!-- Enviar notificaciones -->
     <div class="notifications">
         <h2>Enviar Notificaciones</h2>
+        @if (TempData["MensajeEstado"] != null)
+        {
+            <div class="alert alert-info" role="alert">
+                @TempData["MensajeEstado"]
+            </div>
+        }
         <form method="post" asp-action="EnviarNotificacion" asp-controller="Administrador">
             <div class="form-group">
                 <label for="mensaje">Mensaje:</label>
@@ -31,6 +37,34 @@
         <ul>
             <li class="notification-item">
                 <span>Mensaje de Alumno: "Necesito ayuda con mi grupo" - 10/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
+                <div class="notification-buttons">
+                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                </div>
+            </li>
+            <li class="notification-item">
+                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
                 <div class="notification-buttons">
                     <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
                     <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
@@ -124,7 +158,18 @@
     </script>
             }
 <style>
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
 
+    .alert-info {
+        color: #31708f;
+        background-color: #d9edf7;
+        border-color: #bce8f1;
+    }
     .admin-container {
         display: grid;
         grid-template-areas:

@@ -6,6 +6,7 @@ using Microsoft.Graph;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CelexWebApp.Controllers.Administrador
@@ -69,27 +70,45 @@ namespace CelexWebApp.Controllers.Administrador
                     rol = 2;
                     break;
             }
-            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            try
             {
-                connection.Open();
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
                 {
-                    command.Parameters.AddWithValue("@rol", destinatarios);
-                    SqlDataReader reader = await command.ExecuteReaderAsync();
-                    string query2 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
-                    while (reader.Read())
+                    await connection.OpenAsync();
+                    List<int> ndestinatarios = new List<int>();
+                    using (SqlCommand command = new SqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@rol", rol);
+
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                ndestinatarios.Add(Convert.ToInt32(reader["id_registrado"]));
+                            }
+                        }
+                    }
+                    foreach (int idDestinatario in ndestinatarios)
+                    {
+                        string query2 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
                         using (SqlCommand command2 = new SqlCommand(query2, connection))
                         {
                             command2.Parameters.AddWithValue("@Id_remitente", int.Parse(HttpContext.Session.GetString("id_registrado")));
-                            command2.Parameters.AddWithValue("@Id_destinatario", reader["id_registrado"].ToString());
+                            command2.Parameters.AddWithValue("@Id_destinatario", idDestinatario);
                             command2.Parameters.AddWithValue("@Contenido", $"Mensaje de Administrador: {mensaje}");
                             await command2.ExecuteNonQueryAsync();
                         }
                     }
                 }
+                TempData["MensajeEstado"] = "El mensaje fue enviado correctamente.";
+                return RedirectToAction("Index");
             }
-            return RedirectToAction("Index");
+            catch (Exception ex)
+            {
+                TempData["MensajeEstado"] = $"Error al enviar el mensaje, enviar de nuevo: {ex.Message}";
+
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost]

@@ -47,6 +47,45 @@ namespace CelexWebApp.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> EnviarID()
+        {
+            int id_registrado = 0;
+            var user = await _graphServiceClient.Me.GetAsync();
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "INSERT INTO Registrados (id_rol, id_azure) VALUES (@Id_rol, @Id_azure)";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_rol", 4);
+                    command.Parameters.AddWithValue("@Id_azure", user.Id.ToString());
+                    await command.ExecuteNonQueryAsync();
+                }
+                string query2 = "SELECT id_registrado FROM Registrados WHERE id_azure = @id";
+                using (SqlCommand command = new SqlCommand(query2, connection))
+                {
+                    command.Parameters.AddWithValue("@id", user.Id.ToString());
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        if (reader.Read())
+                        {
+                            id_registrado = int.Parse(reader["id_registrado"].ToString());
+                        }
+                    }
+                }
+                string query3 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
+                using (SqlCommand command = new SqlCommand(query3, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_remitente", id_registrado);
+                    command.Parameters.AddWithValue("@Id_destinatario", 6);
+                    command.Parameters.AddWithValue("@Contenido", $"Nuevo Profesor: {user.Id}");
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
         [AuthorizeForScopes(ScopeKeySection = "MicrosoftGraph:Scopes")]
 
         [HttpGet]

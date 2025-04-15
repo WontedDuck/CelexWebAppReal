@@ -30,7 +30,7 @@ namespace CelexWebApp.Controllers.Profesor
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 connection.Open();
-                string query = "SELECT * FROM Profesor WHERE id_registrado = @id";
+                string query = "SELECT * FROM Profesores WHERE id_registrado = @id";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@id", user.Id.ToString());
@@ -41,7 +41,6 @@ namespace CelexWebApp.Controllers.Profesor
                         HttpContext.Session.SetString("id", reader["id_profesor"].ToString());
                         HttpContext.Session.SetString("nombre", reader["nombre_profesor"].ToString());
                         HttpContext.Session.SetString("telefono", reader["telefono_profesor"].ToString());
-                        HttpContext.Session.SetString("nivel", reader["niveles_que_imparte"].ToString() ?? "no asignado");
                     }
                 }
             }

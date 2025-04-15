@@ -51,7 +51,9 @@
     </div>
 </form>
    <label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label><br />
-   <button id="BtnAzureLabel" asp-controller="Registro" asp-action="EnviarID"> Enviar a Administrador </button>
+<form asp-controller="Registro" asp-action="EnviarID" method="post">
+    <button id="BtnAzureLabel" type="submit" class="btn btn-primary">Enviar ID</button>
+</form>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

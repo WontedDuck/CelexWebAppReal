@@ -35,54 +35,43 @@
     <div class="received-notifications">
         <h2>Notificaciones Recibidas</h2>
         <ul>
-            <li class="notification-item">
-                <span>Mensaje de Alumno: "Necesito ayuda con mi grupo" - 10/04/2025</span>
-                <div class="notification-buttons">
-                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
-                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
-                </div>
-            </li>
-            <li class="notification-item">
-                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
-                <div class="notification-buttons">
-                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
-                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
-                </div>
-            </li>
-            <li class="notification-item">
-                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
-                <div class="notification-buttons">
-                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
-                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
-                </div>
-            </li>
-            <li class="notification-item">
-                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
-                <div class="notification-buttons">
-                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
-                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
-                </div>
-            </li>
-            <li class="notification-item">
-                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
-                <div class="notification-buttons">
-                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
-                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
-                </div>
-            </li>
-            <li class="notification-item">
-                <span>Mensaje de Profesor: "Solicitud de cambio de horario" - 09/04/2025</span>
-                <div class="notification-buttons">
-                    <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
-                    <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
-                </div>
-            </li>
+            @if (ViewData["Notificaciones"] != null)
+            {
+                var notificaciones = ViewData["Notificaciones"] as List<string>;
+                if (notificaciones.Count > 0)
+                {
+                    foreach (var notificacion in notificaciones)
+                    {
+                        <li class="notification-item">
+                            <span>@notificacion</span>
+                            <div class="notification-buttons">
+                                <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
+                                <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li>No hay notificaciones.</li>
+                }
+            }
+            else
+            {
+                <li>No hay notificaciones.</li>
+            }
         </ul>
     </div>
 
     <!-- Agregar profesor -->
     <div class="add-professor">
         <h2>Agregar Profesor</h2>
+        @if (TempData["MensajeEstadoAgregar"] != null)
+        {
+            <div class="alert alert-info" role="alert">
+                @TempData["MensajeEstadoAgregar"]
+            </div>
+        }
         <form method="post" asp-action="AgregarProfesor" asp-controller="Administrador">
             <div class="form-group">
                 <label for="numeroEmpleado">Numero de Empleado:</label>

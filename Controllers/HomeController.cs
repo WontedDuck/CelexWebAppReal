@@ -60,12 +60,17 @@ public class HomeController : Controller
                         if (await reader.ReadAsync())
                         {
                             HttpContext.Session.SetString("id_registrado", reader.GetInt32(0).ToString());
-                            if (reader.GetInt32(1) == 1)
-                                return RedirectToAction("Index", "Alumno");
-                            else if (reader.GetInt32(1) == 2)
-                                return RedirectToAction("Index", "Profesor");
-                            else if (reader.GetInt32(1) == 3)
-                                return RedirectToAction("Index", "Administrador");
+                            switch (reader.GetInt32(1))
+                            {
+                                case 1:
+                                        return RedirectToAction("Index", "Alumno");
+                                case 2:
+                                    return RedirectToAction("Index", "Profesor");
+                                case 3:
+                                    return RedirectToAction("Index", "Administrador");
+                                case 4:
+                                    return RedirectToAction("Index", "Espera");
+                            }
                         }
                     }
                 }
@@ -73,7 +78,6 @@ public class HomeController : Controller
         }
         return View();
     }
-
 
     public IActionResult Privacy()
     {

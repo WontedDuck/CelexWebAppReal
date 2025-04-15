@@ -30,6 +30,28 @@ namespace CelexWebApp.Controllers.Administrador
         [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
         public async Task<IActionResult> Index()
         {
+            // Al iniciar la aplicacion revisar si le han llegado notificaciones al administrador
+            List<string> notificaciones = new List<string>();
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                // Consulta para obtener las notificaciones del administrador
+                string query = "SELECT contenido, fecha_registro FROM Mensajes WHERE id_destinatario = @Id_destinatario ORDER BY fecha_registro DESC";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_destinatario", int.Parse(HttpContext.Session.GetString("id_registrado")));
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            string contenido = reader["contenido"].ToString();
+                            DateTime fecha = Convert.ToDateTime(reader["fecha_registro"]);
+                            notificaciones.Add($"{contenido} - {fecha:dd/MM/yyyy}");
+                        }
+                    }
+                }
+            }
+            ViewData["Notificaciones"] = notificaciones;
             var user = await _graphServiceClient.Me.GetAsync();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
@@ -112,9 +134,80 @@ namespace CelexWebApp.Controllers.Administrador
         }
 
         [HttpPost]
-        public IActionResult AgregarProfesor(string nombreProfesor, string telefonoProfesor, string nivelProfesor)
+        public async Task<IActionResult> AgregarProfesor(int numeroEmpleado, string nombreProfesor, string telefonoProfesor, string idAzure)
         {
+            int idAzureInt = 0;
+            //Buscar que el profesor no exista en la base de datos
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT COUNT(*) FROM Profesores WHERE numero_empleado = @NumeroEmpleado";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@NumeroEmpleado", numeroEmpleado);
+                    int count = (int)await command.ExecuteScalarAsync();
+                    if (count > 0)
+                    {
+                        TempData["MensajeEstadoAgregar"] = "El profesor ya existe en la base de datos.";
+                        return RedirectToAction("Index");
+                    }
+                }
+            }
+            //Encontrar el id_registrado del profesor en la base de datos con su id_azure
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT id_registrado FROM Registrados WHERE id_azure = @IdAzure";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@IdAzure", idAzure);
+                    SqlDataReader reader = await command.ExecuteReaderAsync();
+                    if (reader.Read())
+                    {
+                        idAzureInt = Convert.ToInt32(reader["id_registrado"]);
+                    }
+                }
+            }
             // Lógica para agregar un profesor
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "INSERT INTO Profesores (numero_empleado, nombre_profesor, telefono_profesor, id_registrado) VALUES (@NumeroEmpleado, @NombreProfesor, @TelefonoProfesor, @IdAzure)";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@NumeroEmpleado", numeroEmpleado);
+                    command.Parameters.AddWithValue("@NombreProfesor", nombreProfesor);
+                    command.Parameters.AddWithValue("@TelefonoProfesor", telefonoProfesor);
+                    command.Parameters.AddWithValue("@IdAzure", idAzureInt);
+                    command.ExecuteNonQuery();
+                }
+            }
+            //Actualizar el rol del profesor en la base de datos
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "UPDATE Registrados SET id_rol = 2 WHERE id_registrado = @IdAzure";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@IdAzure", idAzureInt);
+                    command.ExecuteNonQuery();
+                }
+            }
+            // Enviar notificación al profesor
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_remitente", int.Parse(HttpContext.Session.GetString("id_registrado")));
+                    command.Parameters.AddWithValue("@Id_destinatario", idAzureInt);
+                    command.Parameters.AddWithValue("@Contenido", $"Hola {nombreProfesor}, has sido agregado como profesor.");
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+            // Enviar mensaje de que salio skibidibien
+            TempData["MensajeEstadoAgregar"] = $"El profesor {nombreProfesor} se a agregado exitosamente";
             return RedirectToAction("Index");
         }
 

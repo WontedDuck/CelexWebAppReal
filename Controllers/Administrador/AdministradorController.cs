@@ -212,16 +212,100 @@ namespace CelexWebApp.Controllers.Administrador
         }
 
         [HttpPost]
+        public async Task<IActionResult> CrearGrupo(string nombreGrupo, string nivelGrupo, string tipoCurso, DateTime fechaInicio, DateTime fechaFin, int cantidadEstudiantes)
+        {
+            try
+            {
+                int idnivel, idtipo;
+                switch(nivelGrupo)
+                {
+                    case "Introductorio":
+                        idnivel = 1; break;
+                    case "Basico1":
+                        idnivel = 2; break;
+                    case "Basico2":
+                        idnivel = 3; break;
+                    case "Basico3":
+                        idnivel = 4; break;
+                    case "Basico4":
+                        idnivel = 5; break;
+                    case "Basico5":
+                        idnivel = 6; break;
+                    case "Intermedio1":
+                        idnivel = 7; break;
+                    case "Intermedio2":
+                        idnivel = 8; break;
+                    case "Intermedio3":
+                        idnivel = 9; break;
+                    case "Intermedio4":
+                        idnivel = 10; break;
+                    case "Intermedio5":
+                        idnivel = 11; break;
+                    case "Avanzado1":
+                        idnivel = 12; break;
+                    case "Avanzado2":
+                        idnivel = 13; break;
+                    case "Avanzado3":
+                        idnivel = 14; break;
+                    case "Avanzado4":
+                        idnivel = 15; break;
+                    case "Avanzado5":
+                        idnivel = 16; break;
+                    case "FCE":
+                        idnivel = 17; break;
+                    default:
+                        TempData["MensajeEstadoCrearGrupo"] = "Nivel de Curso no seleccionado";
+                        return RedirectToAction("Index");
+                }
+                switch (tipoCurso)
+                {
+                    case "Semanal":
+                        idtipo = 1; break;
+                    case "Sabatino":
+                        idtipo = 2; break;
+                    case "Intensivo":
+                        idtipo = 3; break;
+                    default:
+                        TempData["MensajeEstadoCrearGrupo"] = "Tipo de Curso no seleccionado";
+                        return RedirectToAction("Index");
+                }
+                if (fechaInicio >= fechaFin)
+                {
+                    TempData["MensajeEstadoCrearGrupo"] = "La fecha de inicio debe ser anterior a la fecha de fin.";
+                    return RedirectToAction("Index");
+                }
+                using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+                {
+                    await connection.OpenAsync();
+                    string query = @"
+                INSERT INTO Curso (nombre_curso, id_nivel, id_tipo_curso, fecha_inicio, fecha_fin, capacidad) 
+                VALUES (@NombreCurso, @Id_Nivel, @Id_TipoCurso, @FechaInicio, @FechaFin, @Capacidad)";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@NombreCurso", nombreGrupo);
+                        command.Parameters.AddWithValue("@Id_Nivel", idnivel);
+                        command.Parameters.AddWithValue("@Id_TipoCurso", idtipo);
+                        command.Parameters.AddWithValue("@FechaInicio", fechaInicio);
+                        command.Parameters.AddWithValue("@FechaFin", fechaFin);
+                        command.Parameters.AddWithValue("@Capacidad", cantidadEstudiantes);
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
+                TempData["MensajeEstadoCrearGrupo"] = "El grupo se creó exitosamente.";
+                return RedirectToAction("Index");
+            }   
+            catch (Exception ex)
+            {
+                TempData["MensajeEstadoCrearGrupo"] = $"Error al crear el grupo: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+
+        [HttpPost]
         public IActionResult GenerarHistorial(int alumnoSeleccionado)
         {
             // Lógica para generar el historial del alumno seleccionado
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public IActionResult CrearGrupo(string nombreGrupo, string nivelGrupo)
-        {
-            // Lógica para crear un grupo
             return RedirectToAction("Index");
         }
     }

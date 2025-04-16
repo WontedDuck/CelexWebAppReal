@@ -33,7 +33,7 @@ namespace CelexWebApp.Controllers.Profesor
                 string query = "SELECT * FROM Profesores WHERE id_registrado = @id";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", user.Id.ToString());
+                    command.Parameters.AddWithValue("@id", int.Parse(HttpContext.Session.GetString("id_registrado")));
                     SqlDataReader reader = await command.ExecuteReaderAsync();
                     if (reader.Read())
                     {

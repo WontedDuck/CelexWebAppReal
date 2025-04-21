@@ -1,4 +1,5 @@
 ﻿using CelexWebApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -13,6 +14,7 @@ namespace CelexWebApp.Controllers.Administrador
 {
     public class AdministradorController : Controller
     {
+
         private readonly IDownstreamApi _downstreamApi;
         private readonly GraphServiceClient _graphServiceClient;
         private readonly ILogger<HomeController> _logger;
@@ -25,9 +27,9 @@ namespace CelexWebApp.Controllers.Administrador
             _downstreamApi = downstreamApi; ;
             _conexion = conexion;
         }
-
         [AuthorizeForScopes(ScopeKeySection = "MicrosoftGraph:Scopes")]
         [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
+
         public async Task<IActionResult> Index()
         {
             // Al iniciar la aplicacion revisar si le han llegado notificaciones al administrador
@@ -35,7 +37,7 @@ namespace CelexWebApp.Controllers.Administrador
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                // Consulta para obtener las notificaciones del administrador
+                // Consulta para obtener las notificaciones
                 string query = "SELECT contenido, fecha_registro FROM Mensajes WHERE id_destinatario = @Id_destinatario ORDER BY fecha_registro DESC";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

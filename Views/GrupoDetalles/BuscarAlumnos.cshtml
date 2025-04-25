@@ -1,0 +1,27 @@
+﻿@model List<CelexWebApp.Models.AlumnoMMV.AlumnoModel>
+
+<h1>Buscar Alumnos</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido Paterno</th>
+            <th>Apellido Materno</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var alumno in Model)
+        {
+            <tr>
+                <td>@alumno.Nombre</td>
+                <td>@alumno.ApellidoPa</td>
+                <td>@alumno.ApellidoMa</td>
+                <td>
+                    <a class="btn btn-primary btn-sm" asp-controller="GrupoDetalles" asp-action="AgregarAlumno" asp-route-id="@alumno.Id">Agregar</a>
+                </td>
+            </tr>                
+        }
+    </tbody>
+</table>

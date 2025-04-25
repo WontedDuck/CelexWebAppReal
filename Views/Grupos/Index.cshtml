@@ -1,0 +1,39 @@
+﻿@model List<CelexWebApp.Models.AdministradorMMV.GrupoModel>
+
+@{
+    ViewData["Title"] = "Grupos Creados";
+}
+
+<h1 style="text-align: center;">Grupos Creados</h1>
+
+<div style="width: 100%; margin: 0; padding: 0;">
+    <table class="table table-bordered table-striped" style="width: 100%; margin: 0 auto;">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Nivel</th>
+                <th>Tipo de Curso</th>
+                <th>Fecha de Inicio</th>
+                <th>Fecha de Fin</th>
+                <th>Cupos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var grupo in Model)
+            {
+                <tr>
+                    <td>@grupo.Nombre</td>
+                    <td>@grupo.Nivel</td>
+                    <td>@grupo.TipoCurso</td>
+                    <td>@grupo.FechaInicio.ToString("dd/MM/yyyy")</td>
+                    <td>@grupo.FechaFin.ToString("dd/MM/yyyy")</td>
+                    <td>@grupo.capacidad</td>
+                    <td>
+                        <a class="btn btn-primary" asp-controller="GrupoDetalles" asp-action="Index" asp-route-id="@grupo.Id">Ver Detalles</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

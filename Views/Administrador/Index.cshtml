@@ -34,34 +34,46 @@
     <!-- Notificaciones recibidas -->
     <div class="received-notifications">
         <h2>Notificaciones Recibidas</h2>
-        <ul>
+        <ul class="list-group">
             @if (ViewData["Notificaciones"] != null)
             {
-                var notificaciones = ViewData["Notificaciones"] as List<string>;
+                var notificaciones = ViewData["Notificaciones"] as List<Notificaciones>;
                 if (notificaciones.Count > 0)
                 {
                     foreach (var notificacion in notificaciones)
                     {
-                        <li class="notification-item">
-                            <span>@notificacion</span>
+                        var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
+                        <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")">
+                            <div>
+                                <strong>@notificacion.Contenido</strong><br />
+                                <small>@notificacion.Fecha_Registro.ToString("g")</small>
+                            </div>
                             <div class="notification-buttons">
-                                <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
-                                <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                                <form method="post" asp-action="MarcarComoLeida" asp-controller="Administrador" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
+                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                    <button type="submit" class="btn btn-success btn-sm">✓</button>
+                                </form>
+                                <form method="post" asp-action="BorrarNotificacion" asp-controller="Administrador" style="display:inline;" >
+                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                    <button type="submit" class="btn btn-danger btn-sm">✖</button>
+                                </form>
                             </div>
                         </li>
+
                     }
                 }
                 else
                 {
-                    <li>No hay notificaciones.</li>
+                    <li class="list-group-item">No hay notificaciones.</li>
                 }
             }
             else
             {
-                <li>No hay notificaciones.</li>
+                <li class="list-group-item">No hay notificaciones.</li>
             }
         </ul>
     </div>
+
 
     <!-- Agregar profesor -->
     <div class="add-professor">
@@ -96,20 +108,72 @@
     <!-- Crear grupo -->
     <div class="create-group">
         <h2>Crear Grupo</h2>
+        @if (TempData["MensajeEstadoCrearGrupo"] != null)
+        {
+            <div class="alert alert-info" role="alert">
+                @TempData["MensajeEstadoCrearGrupo"]
+            </div>
+        }
         <form method="post" asp-action="CrearGrupo" asp-controller="Administrador">
+            <!-- Campo para el nombre del grupo -->
             <div class="form-group">
                 <label for="nombreGrupo">Nombre del Grupo:</label>
-                <input id="nombreGrupo" name="nombreGrupo" class="form-control" />
+                <input id="nombreGrupo" name="nombreGrupo" class="form-control" oninput="mostrarNivel()" />
             </div>
-            <div class="form-group">
+            <!-- Lista desplegable para el nivel -->
+            <div class="form-group" id="nivelGrupoContainer" style="display: none;">
                 <label for="nivelGrupo">Nivel:</label>
-                <select id="nivelGrupo" name="nivelGrupo" class="form-control">
+                <select id="nivelGrupo" name="nivelGrupo" class="form-control" onchange="mostrarTipoCurso()">
+                    <option value="">Seleccione un nivel</option>
                     <option value="Introductorio">Introductorio</option>
-                    <option value="Básico">Básico</option>
-                    <option value="Intermedio">Intermedio</option>
-                    <option value="Avanzado">Avanzado</option>
+                    <option value="Basico1">Basico 1</option>
+                    <option value="Basico2">Basico 2</option>
+                    <option value="Basico3">Basico 3</option>
+                    <option value="Basico4">Basico 4</option>
+                    <option value="Basico5">Basico 5</option>
+                    <option value="Intermedio1">Intermedio 1</option>
+                    <option value="Intermedio2">Intermedio 2</option>
+                    <option value="Intermedio3">Intermedio 3</option>
+                    <option value="Intermedio4">Intermedio 4</option>
+                    <option value="Intermedio5">Intermedio 5</option>
+                    <option value="Avanzado1">Avanzado 1</option>
+                    <option value="Avanzado2">Avanzado 2</option>
+                    <option value="Avanzado3">Avanzado 3</option>
+                    <option value="Avanzado4">Avanzado 4</option>
+                    <option value="Avanzado5">Avanzado 5</option>
+                    <option value="FCE">FCE</option>
                 </select>
             </div>
+
+            <!-- Lista desplegable para el tipo de curso -->
+            <div class="form-group" id="tipoCursoContainer" style="display: none;">
+                <label for="tipoCurso">Tipo de Curso:</label>
+                <select id="tipoCurso" name="tipoCurso" class="form-control" onchange="mostrarCamposAdicionales()">
+                    <option value="">Seleccione un tipo de curso</option>
+                    <option value="Semanal">Semanal</option>
+                    <option value="Sabatino">Sabatino</option>
+                    <option value="Intensivo">Intensivo</option>
+                </select>
+            </div>
+
+            <!-- Campo para seleccionar la fecha de inicio -->
+            <div class="form-group" id="fechaInicioContainer" style="display: none;">
+                <label for="fechaInicio">Fecha de Inicio:</label>
+                <input id="fechaInicio" name="fechaInicio" type="date" class="form-control" />
+            </div>
+
+            <!-- Campo para seleccionar la fecha de fin -->
+            <div class="form-group" id="fechaFinContainer" style="display: none;">
+                <label for="fechaFin">Fecha de Fin:</label>
+                <input id="fechaFin" name="fechaFin" type="date" class="form-control" />
+            </div>
+
+            <!-- Campo para ingresar la cantidad de estudiantes -->
+            <div class="form-group" id="cantidadEstudiantesContainer" style="display: none;">
+                <label for="cantidadEstudiantes">Cantidad de Estudiantes:</label>
+                <input id="cantidadEstudiantes" name="cantidadEstudiantes" type="number" class="form-control" min="1" />
+            </div>
+
             <button type="submit" class="btn btn-primary">Crear</button>
         </form>
     </div>
@@ -132,20 +196,85 @@
 </div>
 @section Scripts {
     <script>
+
         // Función para marcar una notificación como leída
         function marcarLeida(button) {
             const li = button.closest('.notification-item');
             li.style.textDecoration = "line-through"; // Marca la notificación como leída visualmente
             button.disabled = true; // Desactiva el botón de "Marcar como Leída"
         }
-
         // Función para borrar una notificación
         function borrarNotificacion(button) {
             const li = button.closest('.notification-item');
             li.remove(); // Elimina la notificación de la lista
         }
-    </script>
+        // Mostrar la lista de niveles si el nombre del grupo no está vacío
+        function mostrarNivel() {
+            const nombreGrupo = document.getElementById("nombreGrupo").value;
+            const nivelGrupoContainer = document.getElementById("nivelGrupoContainer");
+            if (nombreGrupo.trim() !== "") {
+                nivelGrupoContainer.style.display = "block";
+            } else {
+                nivelGrupoContainer.style.display = "none";
+                document.getElementById("tipoCursoContainer").style.display = "none";
+                document.getElementById("fechaInicioContainer").style.display = "none";
+                document.getElementById("fechaFinContainer").style.display = "none";
+                document.getElementById("cantidadEstudiantesContainer").style.display = "none";
             }
+        }
+
+        // Mostrar la lista de tipos de curso si se selecciona un nivel
+        function mostrarTipoCurso() {
+            const nivelGrupo = document.getElementById("nivelGrupo").value;
+            const tipoCursoContainer = document.getElementById("tipoCursoContainer");
+            if (nivelGrupo !== "") {
+                tipoCursoContainer.style.display = "block";
+            } else {
+                tipoCursoContainer.style.display = "none";
+                document.getElementById("fechaInicioContainer").style.display = "none";
+                document.getElementById("fechaFinContainer").style.display = "none";
+                document.getElementById("cantidadEstudiantesContainer").style.display = "none";
+            }
+        }
+
+        // Mostrar los campos adicionales (fecha de inicio, fecha de fin, cantidad de estudiantes) si se selecciona un tipo de curso
+        function mostrarCamposAdicionales() {
+            const tipoCurso = document.getElementById("tipoCurso").value;
+            const fechaInicioContainer = document.getElementById("fechaInicioContainer");
+            const fechaFinContainer = document.getElementById("fechaFinContainer");
+            const cantidadEstudiantesContainer = document.getElementById("cantidadEstudiantesContainer");
+
+            if (tipoCurso !== "") {
+                fechaInicioContainer.style.display = "block";
+                fechaFinContainer.style.display = "block";
+                cantidadEstudiantesContainer.style.display = "block";
+            } else {
+                fechaInicioContainer.style.display = "none";
+                fechaFinContainer.style.display = "none";
+                cantidadEstudiantesContainer.style.display = "none";
+            }
+        }
+
+                document.querySelector("form").addEventListener("submit", function (e) {
+            const fechaInicio = document.getElementById("fechaInicio").value;
+            const fechaFin = document.getElementById("fechaFin").value;
+            const cantidadEstudiantes = document.getElementById("cantidadEstudiantes").value;
+
+            if (!fechaInicio || !fechaFin || !cantidadEstudiantes) {
+                e.preventDefault();
+                alert("Por favor, complete todos los campos.");
+                return;
+            }
+
+            if (new Date(fechaInicio) >= new Date(fechaFin)) {
+                e.preventDefault();
+                alert("La fecha de inicio debe ser anterior a la fecha de fin.");
+                return;
+            }
+        });
+
+    </script>    
+}
 <style>
     .alert {
         padding: 15px;
@@ -245,4 +374,14 @@
         font-size: 0.8em;
         padding: 5px 10px;
     }
+
+    .no-leido {
+        background-color: #fff3cd;
+    }
+
+    .leido {
+        background-color: #e2e3e5;
+        text-decoration: line-through;
+    }
+
 </style>

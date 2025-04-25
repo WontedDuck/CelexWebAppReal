@@ -74,13 +74,35 @@ namespace CelexWebApp.Controllers
                         }
                     }
                 }
-                string query3 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
+                int[] administradores;
+                string query3 = "SELECT COUNT(*) FROM Registrados WHERE id_rol = 3";
                 using (SqlCommand command = new SqlCommand(query3, connection))
                 {
-                    command.Parameters.AddWithValue("@Id_remitente", id_registrado);
-                    command.Parameters.AddWithValue("@Id_destinatario", 6);
-                    command.Parameters.AddWithValue("@Contenido", $"Nuevo Profesor: {user.Id}");
-                    await command.ExecuteNonQueryAsync();
+                    administradores = new int[(int)await command.ExecuteScalarAsync()];
+                }
+                string query4 = "SELECT id_registrado FROM Registrados WHERE id_rol = 3";
+                using (SqlCommand command = new SqlCommand(query4, connection))
+                {
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        int i = 0;
+                        while (reader.Read())
+                        {
+                            administradores[i] = int.Parse(reader["id_registrado"].ToString());
+                            i++;
+                        }
+                    }
+                }
+                string query5 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
+                for (int i = 0; i < administradores.Length; i++)
+                {
+                    using (SqlCommand command = new SqlCommand(query5, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id_remitente", id_registrado);
+                        command.Parameters.AddWithValue("@Id_destinatario", administradores[i]);
+                        command.Parameters.AddWithValue("@Contenido", $"Nuevo Profesor: {user.Id}");
+                        await command.ExecuteNonQueryAsync();
+                    }
                 }
             }
             return RedirectToAction("Index", "Home");
@@ -101,12 +123,31 @@ namespace CelexWebApp.Controllers
                 {
                     new SelectListItem { Value = "Alumno", Text = "Alumno" },
                 };
-            int idRol = 1;
+            int id_registrado = 0;
             var user = await _graphServiceClient.Me.GetAsync();
             using (var connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
 
                 await connection.OpenAsync();
+                string queryRegistro = "INSERT INTO Registrados (id_rol, id_azure) VALUES (@Id_rol, @Id_azure)";
+                using (SqlCommand command = new SqlCommand(queryRegistro, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_rol", 1);
+                    command.Parameters.AddWithValue("@Id_azure", user.Id.ToString());
+                    command.ExecuteNonQuery();
+                }
+                string queryId = "SELECT id_registrado FROM Registrados WHERE id_azure = @id";
+                using (SqlCommand command = new SqlCommand(queryId, connection))
+                {
+                    command.Parameters.AddWithValue("@id", user.Id.ToString());
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        if (reader.Read())
+                        {
+                            id_registrado = int.Parse(reader["id_registrado"].ToString());
+                        }
+                    }
+                }
                 string queryAlumno = @"INSERT INTO Alumnos 
                         (nombre_alumno, apellido_paterno, apellido_materno, telefono_alumno, matricula, id_registrado) 
                         VALUES (@Nombre, @ApellidoPaterno, @ApellidoMaterno, @Telefono, @Matricula, @IdAzure)";
@@ -121,7 +162,7 @@ namespace CelexWebApp.Controllers
                             command.Parameters.AddWithValue("@ApellidoMaterno", model.Alumno.ApellidoMaterno.ToString());
                             command.Parameters.AddWithValue("@Telefono", long.Parse(model.Alumno.Telefono.ToString()));
                             command.Parameters.AddWithValue("@Matricula", model.Alumno.Matricula.ToString());
-                            command.Parameters.AddWithValue("@IdAzure", user.Id.ToString());
+                            command.Parameters.AddWithValue("@IdAzure", id_registrado);
                             command.ExecuteNonQuery();
                         }
                         transaction.Commit();
@@ -131,13 +172,6 @@ namespace CelexWebApp.Controllers
                         transaction.Rollback();
                         throw;
                     }
-                }
-                string queryRegistro = "INSERT INTO Registrados (id_rol, id_azure) VALUES (@Id_rol, @Id_azure)";
-                using (SqlCommand command = new SqlCommand(queryRegistro, connection))
-                {
-                    command.Parameters.AddWithValue("@Id_rol", idRol);
-                    command.Parameters.AddWithValue("@Id_azure", user.Id.ToString());
-                    command.ExecuteNonQuery();
                 }
                 return RedirectToAction("Index", "Home");
             }

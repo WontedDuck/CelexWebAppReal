@@ -60,6 +60,7 @@ public class HomeController : Controller
                         if (await reader.ReadAsync())
                         {
                             HttpContext.Session.SetString("id_registrado", reader.GetInt32(0).ToString());
+                            HttpContext.Session.SetString("id_rol", reader.GetInt32(1).ToString());
                             switch (reader.GetInt32(1))
                             {
                                 case 1:

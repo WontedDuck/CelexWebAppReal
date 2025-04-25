@@ -1,0 +1,63 @@
+﻿@model CelexWebApp.Models.AdministradorMMV.GrupoDetallesModel
+
+@{
+    ViewData["Title"] = "Detalles del Grupo";
+}
+
+@if (TempData["informacion"] != null)
+{
+    <div class="alert alert-info">
+        @TempData["informacion"]
+    </div>
+}
+
+<h1>Detalles del Grupo</h1>
+
+<div>
+    <p><strong>Nombre del Grupo:</strong> @Model.Nombre</p>
+    <p><strong>Nivel:</strong> @Model.Nivel</p>
+    <p><strong>Tipo de Curso:</strong> @Model.TipoCurso</p>
+    <p><strong>Fecha de Inicio:</strong> @Model.FechaInicio.ToString("dd/MM/yyyy")</p>
+    <p><strong>Fecha de Fin:</strong> @Model.FechaFin.ToString("dd/MM/yyyy")</p>
+    <p><strong>Capacidad:</strong> @Model.Capacidad</p>
+    <p><strong>Ocupados:</strong> @Model.Ocupados</p>
+</div>
+
+<h2>Profesor</h2>
+@if (!string.IsNullOrEmpty(Model.Profesor))
+{
+    <p>@Model.Profesor</p>
+}
+else if (TempData["informacion"]?.ToString() == "Grupo Vacio")
+{
+    <a class="btn btn-warning" asp-controller="GrupoDetalles" asp-action="BuscarProfesor">Agregar Profesor</a>
+}
+else
+{
+    <p>No hay profesor asignado.</p>
+}
+
+
+<h2>Alumnos</h2>
+@if (TempData["informacion"]?.ToString() == "Grupo Vacio")
+{
+    <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
+}
+else
+{
+    <ul>
+        @foreach (var alumno in Model.Alumnos)
+        {
+            <li>
+                @alumno.Nombre
+                @alumno.ApellidoPa
+                @alumno.ApellidoMa
+                <a class="btn btn-danger btn-sm" asp-controller="GrupoDetalles" asp-action="BajaAlumno" asp-route-id="@alumno.Id">Dar de Baja</a>
+            </li>
+        }
+    </ul>
+    @if (Model.Ocupados < Model.Capacidad)
+    {
+        <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
+    }
+}

@@ -1,0 +1,29 @@
+﻿@model List<CelexWebApp.Models.ProfesorMMV.ProfesorModel>
+
+<h1>Lista de Profesores</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Numero de empleado</th>
+            <th>Nombre</th>
+            <th>Telefono</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var profesor in Model)
+        {
+            <tr>
+                <td>@profesor.Id</td>
+                <td>@profesor.Numero_Empleado</td>
+                <td>@profesor.Nombre</td>
+                <td>@profesor.Telefono</td>
+                <td>
+                    <a class="btn btn-primary" asp-action="AgregarProfesor" asp-controller="GrupoDetalles" asp-route-id="@profesor.Id" asp-route-nombre="@profesor.Nombre">Asignar a este grupo</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

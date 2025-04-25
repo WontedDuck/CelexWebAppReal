@@ -85,9 +85,11 @@ namespace CelexWebApp.Controllers
                 {
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
-                        for(int i = 0; i < administradores.Length; i++)
+                        int i = 0;
+                        while (reader.Read())
                         {
                             administradores[i] = int.Parse(reader["id_registrado"].ToString());
+                            i++;
                         }
                     }
                 }

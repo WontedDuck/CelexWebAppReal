@@ -101,7 +101,7 @@ namespace CelexWebApp.Models.ModelGrupos
             {
                 await connection.OpenAsync();
 
-                string query = "SELECT * FROM Profesores WHERE niveles_que_imparte IS NULL";
+                string query = "SELECT * FROM Profesores";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
@@ -148,7 +148,7 @@ namespace CelexWebApp.Models.ModelGrupos
             }
             return alumnos;
         }
-        public async Task<string> ProfesorInfo(string nombre_profesor)
+        public async Task<string> ProfesorNombre(string nombre_profesor)
         {
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
@@ -168,6 +168,10 @@ namespace CelexWebApp.Models.ModelGrupos
             }
             return nombre_profesor;
         }
+        public string ProfesorId()
+        {
+            return id_profesor.ToString();
+        }
         public async Task<List<AlumnoModel>> AlumnosInfo()
         {
             var alumnos = new List<AlumnoModel>();
@@ -182,7 +186,7 @@ namespace CelexWebApp.Models.ModelGrupos
                         command.Parameters.AddWithValue("@id", id_alumno[i]);
                         using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            while (await reader.ReadAsync())
+                            if(await reader.ReadAsync())
                             {
                                 alumnos.Add(new AlumnoModel
                                 {
@@ -229,6 +233,25 @@ namespace CelexWebApp.Models.ModelGrupos
                 
             }
             return grupo;
+        }
+        public async Task BorrarAlumno(int id_alumno, int id_curso)
+        {
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "DELETE FROM Avance_Alumnos WHERE id_estudiantes = @id";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@id", id_alumno);
+                    await command.ExecuteNonQueryAsync();
+                }
+                string query2 = "UPDATE Curso SET ocupados = ISNULL(ocupados, 0) - 1 WHERE id_cursos = @id_curso;";
+                using (SqlCommand command = new SqlCommand(query2, connection))
+                {
+                    command.Parameters.AddWithValue("@id_curso", id_curso);
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
         }
     }
 }

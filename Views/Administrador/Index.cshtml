@@ -34,34 +34,46 @@
     <!-- Notificaciones recibidas -->
     <div class="received-notifications">
         <h2>Notificaciones Recibidas</h2>
-        <ul>
+        <ul class="list-group">
             @if (ViewData["Notificaciones"] != null)
             {
-                var notificaciones = ViewData["Notificaciones"] as List<string>;
+                var notificaciones = ViewData["Notificaciones"] as List<Notificaciones>;
                 if (notificaciones.Count > 0)
                 {
                     foreach (var notificacion in notificaciones)
                     {
-                        <li class="notification-item">
-                            <span>@notificacion</span>
+                        var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
+                        <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")">
+                            <div>
+                                <strong>@notificacion.Contenido</strong><br />
+                                <small>@notificacion.Fecha_Registro.ToString("g")</small>
+                            </div>
                             <div class="notification-buttons">
-                                <button class="btn btn-success btn-sm" onclick="marcarLeida(this)">Marcar como Leída</button>
-                                <button class="btn btn-danger btn-sm" onclick="borrarNotificacion(this)">Borrar</button>
+                                <form method="post" asp-action="MarcarComoLeida" asp-controller="Administrador" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
+                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                    <button type="submit" class="btn btn-success btn-sm">✓</button>
+                                </form>
+                                <form method="post" asp-action="BorrarNotificacion" asp-controller="Administrador" style="display:inline;" >
+                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                    <button type="submit" class="btn btn-danger btn-sm">✖</button>
+                                </form>
                             </div>
                         </li>
+
                     }
                 }
                 else
                 {
-                    <li>No hay notificaciones.</li>
+                    <li class="list-group-item">No hay notificaciones.</li>
                 }
             }
             else
             {
-                <li>No hay notificaciones.</li>
+                <li class="list-group-item">No hay notificaciones.</li>
             }
         </ul>
     </div>
+
 
     <!-- Agregar profesor -->
     <div class="add-professor">
@@ -362,4 +374,14 @@
         font-size: 0.8em;
         padding: 5px 10px;
     }
+
+    .no-leido {
+        background-color: #fff3cd;
+    }
+
+    .leido {
+        background-color: #e2e3e5;
+        text-decoration: line-through;
+    }
+
 </style>

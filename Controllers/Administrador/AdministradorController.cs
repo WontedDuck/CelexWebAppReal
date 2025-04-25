@@ -33,27 +33,36 @@ namespace CelexWebApp.Controllers.Administrador
         public async Task<IActionResult> Index()
         {
             // Al iniciar la aplicacion revisar si le han llegado notificaciones al administrador
-            List<string> notificaciones = new List<string>();
+            List<Notificaciones> notificaciones = new List<Notificaciones>();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
                 // Consulta para obtener las notificaciones
-                string query = "SELECT contenido, fecha_registro FROM Mensajes WHERE id_destinatario = @Id_destinatario ORDER BY fecha_registro DESC";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                string query2 = "SELECT id_mensaje, contenido, fecha_registro, leido FROM Mensajes WHERE id_destinatario = @Id_destinatario ORDER BY leido ASC, fecha_registro DESC";
+                using (SqlCommand command = new SqlCommand(query2, connection))
                 {
                     command.Parameters.AddWithValue("@Id_destinatario", int.Parse(HttpContext.Session.GetString("id_registrado")));
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
-                            string contenido = reader["contenido"].ToString();
-                            DateTime fecha = Convert.ToDateTime(reader["fecha_registro"]);
-                            notificaciones.Add($"{contenido} - {fecha:dd/MM/yyyy}");
+                            Notificaciones notificacion = new Notificaciones
+                            {
+                                Id_Mensaje = reader.GetInt32(0),
+                                Contenido = reader.GetString(1),
+                                Fecha_Registro = reader.GetDateTime(2),
+                                Leido = reader.GetBoolean(3)
+                            };
+                            notificaciones.Add(notificacion);
                         }
                     }
                 }
             }
             ViewData["Notificaciones"] = notificaciones;
+
+
+
+
             var user = await _graphServiceClient.Me.GetAsync();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
@@ -301,6 +310,34 @@ namespace CelexWebApp.Controllers.Administrador
                 TempData["MensajeEstadoCrearGrupo"] = $"Error al crear el grupo: {ex.Message}";
                 return RedirectToAction("Index");
             }
+        }
+        public IActionResult MarcarComoLeida(string id_mensaje)
+        {
+            using (SqlConnection connection = new SqlConnection(_conexion.GetConexionAsync().Result))
+            {
+                connection.Open();
+                string query = "UPDATE Mensajes SET leido = 1 WHERE id_mensaje = @Id_mensaje";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_mensaje", id_mensaje);
+                    command.ExecuteNonQuery();
+                }
+            }
+            return RedirectToAction("Index");
+        }
+        public IActionResult BorrarNotificacion(string id_mensaje)
+        {
+            using (SqlConnection connection = new SqlConnection(_conexion.GetConexionAsync().Result))
+            {
+                connection.Open();
+                string query = "DELETE FROM Mensajes WHERE id_mensaje = @Id_mensaje";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_mensaje", id_mensaje);
+                    command.ExecuteNonQuery();
+                }
+            }
+            return RedirectToAction("Index");
         }
 
 

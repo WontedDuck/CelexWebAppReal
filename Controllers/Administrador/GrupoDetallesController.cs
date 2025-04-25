@@ -3,6 +3,7 @@ using CelexWebApp.Models.AdministradorMMV;
 using CelexWebApp.Models.AlumnoMMV;
 using CelexWebApp.Models.ModelGrupos;
 using CelexWebApp.Models.ProfesorMMV;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Graph;
@@ -39,10 +40,19 @@ namespace CelexWebApp.Controllers.Administrador
             TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id);
             if (TempData["Informacion"] == "Informacion")
             {
-                profesor = await extraerInformacion.ProfesorInfo(profesor);
-                grupo.Alumnos = await extraerInformacion.AlumnosInfo();
+                HttpContext.Session.SetString("id_profesor", extraerInformacion.ProfesorId());
+                HttpContext.Session.SetString("profesor_nombre", await extraerInformacion.ProfesorNombre(profesor));
+                profesor = HttpContext.Session.GetString("profesor_nombre");
             }
             grupo = await extraerInformacion.GrupoInfo(id, profesor);
+            if (TempData["Informacion"] == "Informacion")
+            {
+                grupo.Alumnos = await extraerInformacion.AlumnosInfo();
+            }
+            else
+            {
+                grupo.Alumnos = new List<AlumnoModel>();
+            }
             return View(grupo);
         }
         public async Task<IActionResult> BuscarProfesor()
@@ -53,7 +63,7 @@ namespace CelexWebApp.Controllers.Administrador
         public async Task<IActionResult> AgregarProfesor(int id, string nombre)
         {
             HttpContext.Session.SetString("id_profesor", id.ToString());
-            HttpContext.Session.SetString("nombre_profesor", nombre.ToString());
+            HttpContext.Session.SetString("profesor_nombre", nombre.ToString());
             int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
             ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
             TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id_curso);
@@ -69,7 +79,7 @@ namespace CelexWebApp.Controllers.Administrador
         {
             int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
             int id_profesor = int.Parse(HttpContext.Session.GetString("id_profesor"));
-            string nombre_profesor = HttpContext.Session.GetString("nombre_profesor");
+            string nombre_profesor = HttpContext.Session.GetString("profesor_nombre");
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
@@ -92,15 +102,41 @@ namespace CelexWebApp.Controllers.Administrador
             TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id_curso);
             if (TempData["Informacion"] == "Informacion")
             {
-                nombre_profesor = await extraerInformacion.ProfesorInfo(nombre_profesor);
-                grupo.Alumnos = await extraerInformacion.AlumnosInfo();
+                nombre_profesor = await extraerInformacion.ProfesorNombre(nombre_profesor);
             }
             grupo = await extraerInformacion.GrupoInfo(id_curso, nombre_profesor);
-            return View();
+            if (TempData["Informacion"] == "Informacion")
+            {
+                grupo.Alumnos = await extraerInformacion.AlumnosInfo();
+            }
+            else
+            {
+                grupo.Alumnos = new List<AlumnoModel>();
+            }
+            return View("Index", grupo);
         }
-        public async Task<IActionResult> BajaAlumno()
+        public async Task<IActionResult> BajaAlumno(int id)
         {
-            return View();
+            int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
+            int id_profesor = int.Parse(HttpContext.Session.GetString("id_profesor"));
+            string nombre_profesor = HttpContext.Session.GetString("profesor_nombre");
+            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
+            await extraerInformacion.BorrarAlumno(id, id_curso);
+            TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id_curso);
+            if (TempData["Informacion"] == "Informacion")
+            {
+                nombre_profesor = await extraerInformacion.ProfesorNombre(nombre_profesor);
+            }
+            grupo = await extraerInformacion.GrupoInfo(id_curso, nombre_profesor);
+            if (TempData["Informacion"] == "Informacion")
+            {
+                grupo.Alumnos = await extraerInformacion.AlumnosInfo();
+            }
+            else
+            {
+                grupo.Alumnos = new List<AlumnoModel>();
+            }
+            return View("Index", grupo);
         }
     }
 }

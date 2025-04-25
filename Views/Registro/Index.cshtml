@@ -18,7 +18,7 @@
         <span asp-validation-for="RolSeleccionado" class="text-danger"></span>
     </div>
 
-    <div id="alumnoForm" style="display:none;">
+    <div class="role-form" data-role="Alumno" style="display:none;">
         <h3>Registro de Alumno</h3>
         <div class="form-group">
             <label asp-for="Alumno.Nombre" class="control-label"></label>
@@ -46,33 +46,38 @@
             <span asp-validation-for="Alumno.Matricula" class="text-danger"></span>
         </div>
     </div>
+
     <div class="form-group">
         <input type="submit" value="Registro" class="btn btn-primary" />
     </div>
 </form>
-   <label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label><br />
+
+<label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label>
+<br />
 <form asp-controller="Registro" asp-action="EnviarID" method="post">
     <button id="BtnAzureLabel" type="submit" class="btn btn-primary">Enviar ID</button>
 </form>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
         document.getElementById("RolSeleccionado").addEventListener("change", function () {
-            const rol = this.value;
-            document.getElementById("alumnoForm").style.display = rol === "Alumno" ? "block" : "none";});
-        document.getElementById("RolSeleccionado").addEventListener("change", function () {
-            const rol = this.value;
-            const alumnoForm = document.getElementById("alumnoForm");
-            if (rol === "Alumno") {
-                alumnoForm.style.display = "block";
-                alumnoForm.querySelectorAll("input, select").forEach(el => el.disabled = false);;} 
-            else {
-                alumnoForm.style.display = "none";}});
+            const selectedRole = this.value;
+            document.querySelectorAll(".role-form").forEach(form => {
+                if (form.dataset.role === selectedRole) {
+                    form.style.display = "block";
+                    form.querySelectorAll("input, select").forEach(el => el.disabled = false);
+                } else {
+                    form.style.display = "none";
+                    form.querySelectorAll("input, select").forEach(el => el.disabled = true);
+                }
+            });
         });
     </script>
 }
+
 <style>
     #idAzureLabel {
         position: fixed;
@@ -94,10 +99,10 @@
         padding: 5px 10px;
         border-radius: 5px;
         font-size: 0.9em;
-        transition: transform 0.3s ease; 
+        transition: transform 0.3s ease;
     }
 
-    #BtnAzureLabel:hover {
-        transform: scale(1.2);
-    }
+        #BtnAzureLabel:hover {
+            transform: scale(1.2);
+        }
 </style>

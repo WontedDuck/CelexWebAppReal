@@ -41,7 +41,7 @@ else
 <h2>Alumnos</h2>
 @if (TempData["informacion"]?.ToString() == "Grupo Vacio")
 {
-    <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="AgregarAlumno">Agregar Alumno</a>
+    <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
 }
 else
 {
@@ -49,17 +49,15 @@ else
         @foreach (var alumno in Model.Alumnos)
         {
             <li>
-                @alumno.Id
                 @alumno.Nombre
                 @alumno.ApellidoPa
                 @alumno.ApellidoMa
-                @alumno.Matricula
                 <a class="btn btn-danger btn-sm" asp-controller="GrupoDetalles" asp-action="BajaAlumno" asp-route-id="@alumno.Id">Dar de Baja</a>
             </li>
         }
     </ul>
     @if (Model.Ocupados < Model.Capacidad)
     {
-        <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="AgregarAlumno">Agregar Alumno</a>
+        <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
     }
 }

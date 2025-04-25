@@ -27,18 +27,18 @@ namespace CelexWebApp.Controllers.Alumno
         [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
         public async Task<IActionResult> Index()
         {
-            var user = await _graphServiceClient.Me.GetAsync();
+            int id_registrado = int.Parse(HttpContext.Session.GetString("id_registrado"));
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 string query = "SELECT * FROM Alumnos WHERE id_registrado = @id";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", user.Id.ToString());
+                    command.Parameters.AddWithValue("@id", id_registrado);
                     SqlDataReader reader = await command.ExecuteReaderAsync();
                     if (reader.Read())
                     {
-                        
+                        ViewData["alumno"] = reader["nombre_alumno"].ToString();
                     }
                 }
             }

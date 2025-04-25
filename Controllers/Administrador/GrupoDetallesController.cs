@@ -1,5 +1,7 @@
 ﻿using CelexWebApp.Models;
 using CelexWebApp.Models.AdministradorMMV;
+using CelexWebApp.Models.AlumnoMMV;
+using CelexWebApp.Models.ModelGrupos;
 using CelexWebApp.Models.ProfesorMMV;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -7,6 +9,7 @@ using Microsoft.Graph;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CelexWebApp.Controllers.Administrador
 {
@@ -30,120 +33,69 @@ namespace CelexWebApp.Controllers.Administrador
         [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
         public async Task<IActionResult> Index(int id)
         {
+            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
+            string profesor = "";
             HttpContext.Session.SetString("id_curso", id.ToString());
-            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id);
+            if (TempData["Informacion"] == "Informacion")
             {
-                await connection.OpenAsync();
-                string query = "SELECT * FROM Curso WHERE id_cursos = @id";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            grupo = new GrupoDetallesModel()
-                            {
-                                Nombre = reader["nombre_curso"].ToString(),
-                                Nivel = reader["id_nivel"].ToString(),
-                                TipoCurso = reader["id_tipo_curso"].ToString(),
-                                FechaInicio = DateTime.Parse(reader["fecha_inicio"].ToString()),
-                                FechaFin = DateTime.Parse(reader["fecha_fin"].ToString()),
-                                Capacidad = int.Parse(reader["capacidad"].ToString()),
-                                Ocupados = reader["ocupados"] != DBNull.Value ? int.Parse(reader["ocupados"].ToString()) : 0
-                            };
-                        }
-                    }
-                }
-                string query2 = "SELECT * FROM Avance_Alumnos WHERE id_cursos = @id";
-                using (SqlCommand command = new SqlCommand(query2, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        if (!await reader.ReadAsync())
-                        {
-                            TempData["Informacion"] = "Grupo Vacio";
-                        }
-                    }
-                }
+                profesor = await extraerInformacion.ProfesorInfo(profesor);
+                grupo.Alumnos = await extraerInformacion.AlumnosInfo();
             }
+            grupo = await extraerInformacion.GrupoInfo(id, profesor);
             return View(grupo);
         }
         public async Task<IActionResult> BuscarProfesor()
         {
-            var profesores = new List<ProfesorModel>();
-
-            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT * FROM Profesores WHERE niveles_que_imparte IS NULL";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            profesores.Add(new ProfesorModel
-                            {
-                                Id = int.Parse(reader["id_profesor"].ToString()),
-                                Numero_Empleado = int.Parse(reader["numero_empleado"].ToString()),
-                                Nombre = reader["nombre_profesor"].ToString(),
-                                Telefono = reader["telefono_profesor"].ToString(),
-                            });
-                        }
-                    }
-                }
-            }
-            return View(profesores);
+            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);            
+            return View(await extraerInformacion.BusquedaProfesor());
         }
         public async Task<IActionResult> AgregarProfesor(int id, string nombre)
         {
             HttpContext.Session.SetString("id_profesor", id.ToString());
+            HttpContext.Session.SetString("nombre_profesor", nombre.ToString());
             int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
+            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
+            TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id_curso);
+            grupo = await extraerInformacion.GrupoInfo(id_curso, nombre);
+            return View("Index", grupo);
+        }
+        public async Task<IActionResult> BuscarAlumnos()
+        {
+            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
+            return View(await extraerInformacion.BusquedaAlumno());
+        }
+        public async Task<IActionResult> AgregarAlumno(int id)
+        {
+            int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
+            int id_profesor = int.Parse(HttpContext.Session.GetString("id_profesor"));
+            string nombre_profesor = HttpContext.Session.GetString("nombre_profesor");
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                string query = "SELECT * FROM Curso WHERE id_cursos = @id";
+                string query = "INSERT INTO Avance_Alumnos (id_estudiantes, id_cursos, id_profesor) VALUES (@id, @id_curso, @id_profesor)";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", id_curso);
-                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            grupo = new GrupoDetallesModel()
-                            {
-                                Profesor = nombre,
-                                Nombre = reader["nombre_curso"].ToString(),
-                                Nivel = reader["id_nivel"].ToString(),
-                                TipoCurso = reader["id_tipo_curso"].ToString(),
-                                FechaInicio = DateTime.Parse(reader["fecha_inicio"].ToString()),
-                                FechaFin = DateTime.Parse(reader["fecha_fin"].ToString()),
-                                Capacidad = int.Parse(reader["capacidad"].ToString()),
-                                Ocupados = reader["ocupados"] != DBNull.Value ? int.Parse(reader["ocupados"].ToString()) : 0
-                            };
-                        }
-                    }
+                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@id_curso", id_curso);
+                    command.Parameters.AddWithValue("@id_profesor", id_profesor);
+                    await command.ExecuteNonQueryAsync();
                 }
-                string query2 = "SELECT * FROM Avance_Alumnos WHERE id_cursos = @id";
+                string query2 = "UPDATE Curso SET ocupados = ISNULL(ocupados, 0) + 1 WHERE id_cursos = @id_curso;";
                 using (SqlCommand command = new SqlCommand(query2, connection))
                 {
-                    command.Parameters.AddWithValue("@id", id);
-                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        if (!await reader.ReadAsync())
-                        {
-                            TempData["Informacion"] = "Grupo Vacio";
-                        }
-                    }
+                    command.Parameters.AddWithValue("@id_curso", id_curso);
+                    await command.ExecuteNonQueryAsync();
                 }
             }
-            return View("Index", grupo);
-        }
-        public async Task<IActionResult> AgregarAlumno()
-        {
+            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
+            TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id_curso);
+            if (TempData["Informacion"] == "Informacion")
+            {
+                nombre_profesor = await extraerInformacion.ProfesorInfo(nombre_profesor);
+                grupo.Alumnos = await extraerInformacion.AlumnosInfo();
+            }
+            grupo = await extraerInformacion.GrupoInfo(id_curso, nombre_profesor);
             return View();
         }
         public async Task<IActionResult> BajaAlumno()

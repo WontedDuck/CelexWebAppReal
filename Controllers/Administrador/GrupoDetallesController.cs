@@ -57,7 +57,7 @@ namespace CelexWebApp.Controllers.Administrador
         }
         public async Task<IActionResult> BuscarProfesor()
         {
-            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);            
+            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
             return View(await extraerInformacion.BusquedaProfesor());
         }
         public async Task<IActionResult> AgregarProfesor(int id, string nombre)

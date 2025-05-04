@@ -1,4 +1,5 @@
-﻿@{
+﻿@using CelexWebApp.Models.NotificacionesMMV
+@{
     ViewData["Title"] = "Panel de Administrador";
 }
 
@@ -37,8 +38,8 @@
         <ul class="list-group">
             @if (ViewData["Notificaciones"] != null)
             {
-                var notificaciones = ViewData["Notificaciones"] as List<Notificaciones>;
-                if (notificaciones.Count > 0)
+                var notificaciones = ViewData["Notificaciones"] as List<NotificacionesModel>;
+                if (notificaciones != null && notificaciones.Count > 0)
                 {
                     foreach (var notificacion in notificaciones)
                     {
@@ -55,11 +56,10 @@
                                 </form>
                                 <form method="post" asp-action="BorrarNotificacion" asp-controller="Administrador" style="display:inline;" >
                                     <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                    <button type="submit" class="btn btn-danger btn-sm">✖</button>
+                                    <button type="submit" class="btn btn-danger btn-sm">✖</button>4
                                 </form>
                             </div>
                         </li>
-
                     }
                 }
                 else
@@ -114,7 +114,7 @@
                 @TempData["MensajeEstadoCrearGrupo"]
             </div>
         }
-        <form method="post" asp-action="CrearGrupo" asp-controller="Administrador">
+        <form id="crearGrupoForm" method="post" asp-action="CrearGrupo" asp-controller="Administrador">
             <!-- Campo para el nombre del grupo -->
             <div class="form-group">
                 <label for="nombreGrupo">Nombre del Grupo:</label>
@@ -176,6 +176,7 @@
 
             <button type="submit" class="btn btn-primary">Crear</button>
         </form>
+
     </div>
 
     <!-- Historial -->
@@ -236,14 +237,12 @@
                 document.getElementById("cantidadEstudiantesContainer").style.display = "none";
             }
         }
-
         // Mostrar los campos adicionales (fecha de inicio, fecha de fin, cantidad de estudiantes) si se selecciona un tipo de curso
         function mostrarCamposAdicionales() {
             const tipoCurso = document.getElementById("tipoCurso").value;
             const fechaInicioContainer = document.getElementById("fechaInicioContainer");
             const fechaFinContainer = document.getElementById("fechaFinContainer");
             const cantidadEstudiantesContainer = document.getElementById("cantidadEstudiantesContainer");
-
             if (tipoCurso !== "") {
                 fechaInicioContainer.style.display = "block";
                 fechaFinContainer.style.display = "block";
@@ -254,8 +253,7 @@
                 cantidadEstudiantesContainer.style.display = "none";
             }
         }
-
-                document.querySelector("form").addEventListener("submit", function (e) {
+                        document.getElementById("crearGrupoForm").addEventListener("submit", function (e) {
             const fechaInicio = document.getElementById("fechaInicio").value;
             const fechaFin = document.getElementById("fechaFin").value;
             const cantidadEstudiantes = document.getElementById("cantidadEstudiantes").value;

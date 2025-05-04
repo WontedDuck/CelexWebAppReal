@@ -32,6 +32,7 @@ namespace CelexWebApp.Controllers.Administrador
         [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
         public async Task<IActionResult> Index()
         {
+            TipoGrupoModel tipoGrupo = new TipoGrupoModel();
             string nivelcurso = "", tipocurso = "";
             var grupos = new List<GrupoModel>();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
@@ -41,55 +42,11 @@ namespace CelexWebApp.Controllers.Administrador
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                    {                        
+                    {
                         while (await reader.ReadAsync())
                         {
-                            switch (reader["id_nivel"].ToString())
-                            {
-                                case "1":
-                                    nivelcurso = "Introductorio"; break;
-                                case "2":
-                                    nivelcurso = "Basico1"; break;
-                                case "3":
-                                    nivelcurso = "Basico2"; break;
-                                case "4":
-                                    nivelcurso = "Basico3"; break;
-                                case "5":
-                                    nivelcurso = "Basico4"; break;
-                                case "6":
-                                    nivelcurso = "Basico5"; break;
-                                case "7":
-                                    nivelcurso = "Intermedio1"; break;
-                                case "8":
-                                    nivelcurso = "Intermedio2"; break;
-                                case "9":
-                                    nivelcurso = "Intermedio3"; break;
-                                case "10":
-                                    nivelcurso = "Intermedio4"; break;
-                                case "11":
-                                    nivelcurso = "Intermedio5"; break;
-                                case "12":
-                                    nivelcurso = "Avanzado1"; break;
-                                case "13":
-                                    nivelcurso = "Avanzado2"; break;
-                                case "14":
-                                    nivelcurso = "Avanzado3"; break;
-                                case "15":
-                                    nivelcurso = "Avanzado4"; break;
-                                case "16":
-                                    nivelcurso = "Avanzado5"; break;
-                                case "17":
-                                    nivelcurso = "FCE"; break;
-                            }
-                            switch (reader["id_tipo_curso"].ToString())
-                            {
-                                case "1":
-                                    tipocurso = "Semanal"; break;
-                                case "2":
-                                    tipocurso = "Sabatino"; break;
-                                case "3":
-                                    tipocurso = "Intensivo"; break;
-                            }
+                            nivelcurso = tipoGrupo.Niveles(reader["id_nivel"].ToString());
+                            tipocurso = tipoGrupo.Niveles(reader["id_tipo_curso"].ToString());
                             grupos.Add(new GrupoModel
                             {
                                 Id = Convert.ToInt32(reader["id_cursos"]),

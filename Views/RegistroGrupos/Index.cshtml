@@ -1,0 +1,172 @@
+﻿@{
+    ViewData["Title"] = "Avance de Alumnos";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<!-- Filtros -->
+<button class="btn btn-primary" onclick="irAGraficas()">Ver Gráfica</button>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <label>Grupo:</label>
+        <select id="grupo" class="form-control"></select>
+    </div>
+    <div class="col-md-3">
+        <label>Maestro:</label>
+        <select id="maestro" class="form-control"></select>
+    </div>
+    <div class="col-md-3">
+        <label>Nivel:</label>
+        <select id="nivel" class="form-control"></select>
+    </div>
+    <div class="col-md-3">
+        <label>Tipo de Curso:</label>
+        <select id="tipoCurso" class="form-control"></select>
+    </div>
+    <div class="col-md-3">
+        <label>Rango de fechas - Desde:</label>
+        <input type="date" id="fechaInicio" class="form-control" onchange="validarFechas()">
+    </div>
+    <div class="col-md-3">
+        <label>Rango de fechas - Hasta:</label>
+        <input type="date" id="fechaFin" class="form-control" onchange="validarFechas()">
+    </div>
+</div>
+
+<!-- Tabla -->
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Alumno</th>
+            <th>Grupo</th>
+            <th>Maestro</th>
+            <th>Nivel</th>
+            <th>Tipo de Curso</th>
+            <th>Fecha de Creación</th>
+        </tr>
+    </thead>
+    <tbody id="tabla-avance">
+        <tr>
+            <td colspan="7" class="text-center">Seleccione filtros para ver datos.</td>
+        </tr>
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+                function validarFechas() {
+            var fechaDesde = $("#fechaInicio").val();
+            var fechaHasta = $("#fechaFin").val();
+
+            if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+                alert("La fecha 'Desde' no puede ser mayor que la fecha 'Hasta'");
+                $("#fechaFin").val("");
+            }
+        }
+
+        $(document).ready(function () {
+            cargarFiltros();
+
+            $("#grupo, #maestro, #nivel, #tipoCurso, #fechaInicio, #fechaFin").on("change", function () {
+                buscarAvance();
+            });
+        });
+
+                                function cargarFiltros() {
+            $.get("/RegistroGrupos/ObtenerFiltros", function (data) {
+                console.log("Datos recibidos:", data);
+                cargarOpciones("#grupo", data.grupos);
+                cargarOpciones("#maestro", data.maestros);
+                cargarOpciones("#nivel", data.niveles);  
+                cargarOpciones("#tipoCurso", data.tiposCurso);  
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Error en la solicitud AJAX:", textStatus, errorThrown);
+            });
+        }
+
+                        function cargarOpciones(selector, opciones) {
+            $(selector).empty();
+            $(selector).append('<option value="">Todos</option>');
+
+            if (opciones && opciones.length > 0) {
+                $.each(opciones, function (index, item) {
+                    var value = item.value !== undefined ? item.value : item;
+                    var text = item.text !== undefined ? item.text : item;
+
+                    $(selector).append('<option value="' + value + '">' + text + '</option>');
+                });
+            }
+        }
+                        function buscarAvance() {
+            var grupo = $("#grupo").val();
+            var maestro = $("#maestro").val();
+            var nivel = $("#nivel").val();
+            var tipoCurso = $("#tipoCurso").val();
+            var fechaDesde = $("#fechaInicio").val();
+            var fechaHasta = $("#fechaFin").val();
+
+                if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+            alert("La fecha 'Desde' no puede ser mayor que la fecha 'Hasta'");
+            $("#fechaFin").val("");
+            return;
+        }
+
+            $("#tabla-avance").html('<tr><td colspan="6" class="text-center">Cargando...</td></tr>');
+
+            $.ajax({
+                url: "/RegistroGrupos/BuscarAvance",
+                method: "GET",
+                data: {
+                    grupo: grupo || null,
+                    maestro: maestro || null,
+                    nivel: nivel || null,
+                    tipoCurso: tipoCurso || null,
+                    fechaDesde: fechaDesde || null,
+                    fechaHasta: fechaHasta || null
+                },
+                success: function(data) {
+                    var rows = "";
+                    if (data.length > 0) {
+                        $.each(data, function(i, item) {
+                            rows += "<tr>" +
+                                "<td>" + item.alumnoNombre + "</td>" +
+                                "<td>" + item.grupoNombre + "</td>" +
+                                "<td>" + item.maestroNombre + "</td>" +
+                                "<td>" + item.nivel + "</td>" +
+                                "<td>" + item.tipoCurso + "</td>" +
+                                "<td>" + formatDate(item.fechaCreacion) + "</td>" +
+                                "</tr>";
+                        });
+                    } else {
+                        rows = "<tr><td colspan='6' class='text-center'>No se encontraron resultados con los filtros aplicados.</td></tr>";
+                            }
+                    $("#tabla-avance").html(rows);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al buscar avance:", error);
+                    $("#tabla-avance").html("<tr><td colspan='6' class='text-center text-danger'>Error al cargar los datos. Intente nuevamente.</td></tr>");
+                }
+            });
+        }
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            var date = new Date(dateStr);
+            return date.toLocaleDateString('es-MX');
+        }
+                function irAGraficas() {
+            const grupo = $("#grupo").val() || '';
+            const maestro = $("#maestro").val() || '';
+            const nivel = $("#nivel").val() || '';
+            const tipoCurso = $("#tipoCurso").val() || '';
+            const fechaDesde = $("#fechaInicio").val() || '';
+            const fechaHasta = $("#fechaFin").val() || '';
+
+            const url = `/RegistroGrupos/Graficas?grupo=${grupo}&maestro=${maestro}&nivel=${nivel}&tipoCurso=${tipoCurso}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`;
+            window.location.href = url;
+        }
+
+    </script>
+}

@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Comparación de Datos";
+    var avanceJson = ViewData["AvanceJson"] as string;
+}
+
+<h2 id="tituloGrafica">Comparación</h2>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label for="campo1">Comparar:</label>
+        <select id="campo1" class="form-control">
+            <option value="TipoCurso">Tipo de Curso</option>
+            <option value="Nivel">Nivel</option>
+            <option value="GrupoNombre">Grupo</option>
+            <option value="MaestroNombre">Maestro</option>
+            <option value="FechaCreacion">Fecha</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label for="campo2">Con:</label>
+        <select id="campo2" class="form-control">
+            <option value="Nivel">Nivel</option>
+            <option value="TipoCurso">Tipo de Curso</option>
+            <option value="GrupoNombre">Grupo</option>
+            <option value="MaestroNombre">Maestro</option>
+            <option value="FechaCreacion">Fecha</option>
+        </select>
+    </div>
+</div>
+
+<canvas id="grafica" height="100"></canvas>
+
+<a asp-controller="RegistroGrupos" asp-action="Index" class="btn btn-secondary mt-4">Volver</a>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const avanceData = @Html.Raw(avanceJson);
+        let chart;
+
+        const ctx = document.getElementById('grafica').getContext('2d');
+
+        document.getElementById("campo1").addEventListener("change", generarGrafica);
+        document.getElementById("campo2").addEventListener("change", generarGrafica);
+
+        function generarGrafica() {
+            const campo1 = document.getElementById("campo1").value;
+            const campo2 = document.getElementById("campo2").value;
+
+            const agrupados = {};
+
+            avanceData.forEach(item => {
+                let valor1 = item[campo1];
+                let valor2 = item[campo2];
+
+                if (campo1 === "FechaCreacion") valor1 = new Date(valor1).toLocaleDateString('es-MX');
+                if (campo2 === "FechaCreacion") valor2 = new Date(valor2).toLocaleDateString('es-MX');
+
+                const clave = `${valor1} - ${valor2}`;
+                if (!agrupados[clave]) agrupados[clave] = 0;
+                agrupados[clave]++;
+            });
+
+            const etiquetas = Object.keys(agrupados);
+            const valores = Object.values(agrupados);
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Cantidad',
+                        data: valores,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            document.getElementById("tituloGrafica").innerText = `Comparación: ${campo1} con ${campo2}`;
+        }
+        generarGrafica();
+    </script>
+}

@@ -1,6 +1,6 @@
-﻿namespace CelexWebApp.Models
+﻿namespace CelexWebApp.Models.NotificacionesMMV
 {
-    public class Notificaciones
+    public class NotificacionesModel
     {
         public int Id_Mensaje { get; set; }
         public string Id_Remitente { get; set; }

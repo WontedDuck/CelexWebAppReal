@@ -1,4 +1,5 @@
 ﻿using CelexWebApp.Models;
+using CelexWebApp.Models.NotificacionesMMV;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,8 +33,7 @@ namespace CelexWebApp.Controllers.Administrador
 
         public async Task<IActionResult> Index()
         {
-            // Al iniciar la aplicacion revisar si le han llegado notificaciones al administrador
-            List<Notificaciones> notificaciones = new List<Notificaciones>();
+            List<NotificacionesModel> notificaciones = new List<NotificacionesModel>();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
@@ -46,7 +46,7 @@ namespace CelexWebApp.Controllers.Administrador
                     {
                         while (await reader.ReadAsync())
                         {
-                            Notificaciones notificacion = new Notificaciones
+                            NotificacionesModel notificacion = new NotificacionesModel
                             {
                                 Id_Mensaje = reader.GetInt32(0),
                                 Contenido = reader.GetString(1),
@@ -60,9 +60,6 @@ namespace CelexWebApp.Controllers.Administrador
             }
             ViewData["Notificaciones"] = notificaciones;
 
-
-
-
             var user = await _graphServiceClient.Me.GetAsync();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
@@ -74,7 +71,6 @@ namespace CelexWebApp.Controllers.Administrador
                     SqlDataReader reader = await command.ExecuteReaderAsync();
                     if (reader.Read())
                     {
-                        //Guardar la informacion del administrador de manera local para su uso durante todo el proyecto
                         HttpContext.Session.SetString("id", reader["id_administrador"].ToString());
                         HttpContext.Session.SetString("nombre", reader["nombre"].ToString());
                         HttpContext.Session.SetString("telefono", reader["telefono"].ToString());

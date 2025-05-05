@@ -15,7 +15,8 @@ namespace CelexWebApp.Models.AdministradorMMV
         public int Ocupados { get; set; } = 0;
         public DateTime FechaCreacion { get; set; }
         public string Profesor { get; set; }
-        public List<AlumnoModel> Alumnos { get; set; } = new List<AlumnoModel>();
+
+        public List<AlumnoModelView> Alumnos { get; set; } = new List<AlumnoModelView>();
 
 
     }

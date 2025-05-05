@@ -172,13 +172,13 @@ namespace CelexWebApp.Models.ModelGrupos
         {
             return id_profesor.ToString();
         }
-        public async Task<List<AlumnoModel>> AlumnosInfo()
+        public async Task<List<AlumnoModelView>> AlumnosInfo()
         {
-            var alumnos = new List<AlumnoModel>();
+            var alumnos = new List<AlumnoModelView>();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                string query = "SELECT * FROM Alumnos WHERE id_estudiantes = @id";
+                string query = "SELECT A.id_estudiantes, A.nombre_alumno, A.apellido_paterno, A.apellido_materno, AA.asistencia FROM Alumnos A INNER JOIN Avance_Alumnos AA ON A.id_estudiantes = AA.id_estudiantes WHERE A.id_estudiantes = @id";
                 for (int i = 0; i < id_alumno.Length; i++)
                 {
                     using (SqlCommand command = new SqlCommand(query, connection))
@@ -188,12 +188,16 @@ namespace CelexWebApp.Models.ModelGrupos
                         {
                             if(await reader.ReadAsync())
                             {
-                                alumnos.Add(new AlumnoModel
+                                alumnos.Add(new AlumnoModelView
                                 {
-                                    Id = int.Parse(reader["id_estudiantes"].ToString()),
-                                    Nombre = reader["nombre_alumno"].ToString(),
-                                    ApellidoPa = reader["apellido_paterno"].ToString(),
-                                    ApellidoMa = reader["apellido_materno"].ToString()
+                                    alumno = new AlumnoModel
+                                    {
+                                        Id = int.Parse(reader["id_estudiantes"].ToString()),
+                                        Nombre = reader["nombre_alumno"].ToString(),
+                                        ApellidoPa = reader["apellido_paterno"].ToString(),
+                                        ApellidoMa = reader["apellido_materno"].ToString(),
+                                        Asistencia = reader["asistencia"] != DBNull.Value? Convert.ToDecimal(reader["asistencia"]) : 0                                
+                                    },
                                 });
                             }
                         }

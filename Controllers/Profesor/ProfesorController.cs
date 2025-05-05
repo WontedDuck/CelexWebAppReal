@@ -68,19 +68,18 @@ namespace CelexWebApp.Controllers.Profesor
                     command.Parameters.AddWithValue("@id", int.Parse(HttpContext.Session.GetString("id_registrado")));
                     SqlDataReader reader = await command.ExecuteReaderAsync();
                     {
-
-                    }
-                    if (reader.Read())
-                    {
-                        profesor = new ProfesorModel
+                        if (reader.Read())
                         {
-                            Id = int.Parse(reader["id_profesor"].ToString()),
-                            Nombre = reader["nombre_profesor"].ToString(),
-                            Telefono = reader["telefono_profesor"].ToString(),
-                        };
-                        HttpContext.Session.SetString("id", profesor.Id.ToString());
-                        HttpContext.Session.SetString("nombre", profesor.Nombre);
-                        HttpContext.Session.SetString("telefono", profesor.Telefono);
+                            profesor = new ProfesorModel
+                            {
+                                Id = int.Parse(reader["id_profesor"].ToString()),
+                                Nombre = reader["nombre_profesor"].ToString(),
+                                Telefono = reader["telefono_profesor"].ToString(),
+                            };
+                            HttpContext.Session.SetString("id", profesor.Id.ToString());
+                            HttpContext.Session.SetString("nombre", profesor.Nombre);
+                            HttpContext.Session.SetString("telefono", profesor.Telefono);
+                        }
                     }
                     reader.Close();
                 }

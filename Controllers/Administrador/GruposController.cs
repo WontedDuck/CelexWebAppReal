@@ -46,7 +46,7 @@ namespace CelexWebApp.Controllers.Administrador
                         while (await reader.ReadAsync())
                         {
                             nivelcurso = tipoGrupo.Niveles(reader["id_nivel"].ToString());
-                            tipocurso = tipoGrupo.Niveles(reader["id_tipo_curso"].ToString());
+                            tipocurso = tipoGrupo.Tipo(reader["id_tipo_curso"].ToString());
                             grupos.Add(new GrupoModel
                             {
                                 Id = Convert.ToInt32(reader["id_cursos"]),

@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Detalles del Grupo";
 }
+@{
+    var idRol = Context.Session.GetString("id_rol");
+}
 
 @if (TempData["informacion"] != null)
 {
@@ -52,12 +55,24 @@ else
                 @alumno.Nombre
                 @alumno.ApellidoPa
                 @alumno.ApellidoMa
-                <a class="btn btn-danger btn-sm" asp-controller="GrupoDetalles" asp-action="BajaAlumno" asp-route-id="@alumno.Id">Dar de Baja</a>
+                @if (idRol == "3")
+                {
+                    <a class="btn btn-danger btn-sm" asp-controller="GrupoDetalles" asp-action="BajaAlumno" asp-route-id="@alumno.Id">Dar de Baja</a>
+                }
+                @if (idRol == "2")
+                {
+                    <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="Calificaciones" asp-route-id="@alumno.Id">Ver Calificaciones</a>
+                }
             </li>
+            <br />
         }
     </ul>
     @if (Model.Ocupados < Model.Capacidad)
     {
-        <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
+        <br />
+        @if (idRol == "3")
+        {
+            <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
+        }                
     }
 }

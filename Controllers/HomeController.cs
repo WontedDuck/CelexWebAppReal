@@ -37,10 +37,10 @@ public class HomeController : Controller
     {
         var user = await _graphServiceClient.Me.GetAsync();
         int result = 0;
-
+        string tipousuario = "";
         using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
         {
-            connection.Open();
+            await connection.OpenAsync();
             using (SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM Registrados WHERE id_azure = @id", connection))
             {
                 command.Parameters.AddWithValue("@id", user.Id.ToString());
@@ -64,19 +64,25 @@ public class HomeController : Controller
                             switch (reader.GetInt32(1))
                             {
                                 case 1:
-                                        return RedirectToAction("Index", "Alumno");
+                                    tipousuario = "Alumno";
+                                    break;
                                 case 2:
-                                    return RedirectToAction("Index", "Profesor");
+                                    tipousuario = "Profesor";
+                                    break;
                                 case 3:
-                                    return RedirectToAction("Index", "Administrador");
+                                    tipousuario = "Administrador";
+                                    break;
                                 case 4:
-                                    return RedirectToAction("Index", "Espera");
+                                    tipousuario = "Espera";
+                                    break;
                             }
                         }
                     }
                 }
             }
         }
+        if(tipousuario != "")
+            return RedirectToAction("Index", tipousuario);
         return View();
     }
 

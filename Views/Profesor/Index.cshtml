@@ -1,5 +1,172 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-PROFESOR
-Hola  @ViewData["Id"] @ViewData["Nombre"]  @ViewData["Telefono"]  @ViewData["Nivel"]
+﻿@model CelexWebApp.Models.ProfesorMMV.ProfesorViewModel
+
+@{
+    ViewData["Title"] = "Panel del Profesor";
+}
+
+<h1>Bienvenido, @ViewData["Nombre"]</h1>
+
+<!-- Notificaciones recibidas -->
+    <div class="received-notifications">
+        <h2>Notificaciones Recibidas</h2>
+        <ul class="list-group">
+            @if (ViewData["Notificaciones"] != null)
+            {
+                var notificaciones = ViewData["Notificaciones"] as List<CelexWebApp.Models.NotificacionesMMV.NotificacionesModel>;
+                if (notificaciones != null && notificaciones.Count > 0)
+                {
+                    foreach (var notificacion in notificaciones)
+                    {
+                        var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
+                        <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")">
+                            <div>
+                                <strong>@notificacion.Contenido</strong><br />
+                                <small>@notificacion.Fecha_Registro.ToString("g")</small>
+                            </div>
+                            <div class="notification-buttons">
+                                <form method="post" asp-action="MarcarComoLeida" asp-controller="Profesor" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
+                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                    <button type="submit" class="btn btn-success btn-sm">✓</button>
+                                </form>
+                                <form method="post" asp-action="BorrarNotificacion" asp-controller="Profesor" style="display:inline;">
+                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                    <button type="submit" class="btn btn-danger btn-sm">✖</button>
+                                </form>
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item">No hay notificaciones.</li>
+                }
+            }
+            else
+            {
+                <li class="list-group-item">No hay notificaciones.</li>
+            }
+        </ul>
+    </div>
+
+<!-- Ver Mis Grupos -->
+<div class="professor-groups">
+    <h2>Mis Grupos</h2>
+    @if (Model.Grupos != null && Model.Grupos.Count > 0)
+    {
+        <ul class="list-group">
+            @foreach (var grupo in Model.Grupos)
+            {
+                <li class="list-group-item">
+                    <strong>@grupo.Nombre</strong> - @grupo.Nivel
+                    <a class="btn btn-primary btn-sm" asp-controller="GrupoDetalles" asp-action="Index" asp-route-id="@grupo.Id">Detalles</a>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No tienes grupos asignados.</p>
+    }
+</div>
+
+<!-- Enviar Mensajes -->
+<div class="send-messages">
+    <h2>Enviar Mensajes</h2>
+    <form method="post" asp-action="EnviarMensaje" asp-controller="Profesor">
+        <div class="form-group">
+            <label for="destinatarios">Destinatarios:</label>
+            <select id="destinatarios" name="destinatarios" class="form-control">
+                <option value="Alumnos">Alumnos</option>
+                <option value="Administradores">Administradores</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="mensaje">Mensaje:</label>
+            <textarea id="mensaje" name="mensaje" class="form-control" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+
+        // Función para marcar una notificación como leída
+        function marcarLeida(button) {
+            const li = button.closest('.notification-item');
+            li.style.textDecoration = "line-through"; // Marca la notificación como leída visualmente
+            button.disabled = true; // Desactiva el botón de "Marcar como Leída"
+        }
+        // Función para borrar una notificación
+        function borrarNotificacion(button) {
+            const li = button.closest('.notification-item');
+            li.remove(); // Elimina la notificación de la lista
+        }
+    </script>
+
+    }
+
+<style>
+    .received-notifications {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+    }
+
+    .notification-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+
+    .notification-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .no-leido {
+        background-color: #fff3cd;
+    }
+
+    .leido {
+        background-color: #e2e3e5;
+        text-decoration: line-through;
+    }
+    .professor-groups {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+    }
+
+    .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .btn {
+        font-size: 0.8em;
+        padding: 5px 10px;
+        margin-left: 10px;
+    }
+    .send-messages {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+</style>

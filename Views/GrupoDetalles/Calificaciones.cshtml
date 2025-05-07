@@ -1,0 +1,94 @@
+﻿@model CelexWebApp.Models.AlumnoMMV.AlumnoModelView
+
+@{
+    ViewData["Title"] = "Calificaciones del Alumno";
+}
+
+<div class="container">
+    <div class="row">
+        <!-- Foto de perfil -->
+        <div class="col-md-3">
+            <div class="profile-picture" style="width: 150px; height: 150px; border: 1px solid #ccc; text-align: center; line-height: 150px;">
+                Foto de Perfil
+            </div>
+        </div>
+        <form asp-action="ActualizarInformacion" asp-controller="GrupoDetalles" method="post">
+            <!-- ID del alumno (HIDDEN obligatorio para que se envíe) -->
+            <input asp-for="alumno.Id" type="hidden" />
+
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input asp-for="alumno.Nombre" class="form-control" readonly />
+            </div>
+            <div class="form-group">
+                <label>Apellido Paterno:</label>
+                <input asp-for="alumno.ApellidoPa" class="form-control" readonly />
+            </div>
+            <div class="form-group">
+                <label>Apellido Materno:</label>
+                <input asp-for="alumno.ApellidoMa" class="form-control" readonly />
+            </div>
+            <div class="form-group">
+                <label>Calificación Continua:</label>
+                <input asp-for="CalContinua" class="form-control" type="number" max="10" />
+            </div>
+            <div class="form-group">
+                <label>Calificación Examen Medio:</label>
+                <input asp-for="CalExMedia" class="form-control" type="number" max="10" />
+            </div>
+            <div class="form-group">
+                <label>Calificación Examen Final:</label>
+                <input asp-for="CaliExFinal" class="form-control" type="number" max="10" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Actualizar Información</button>
+        </form>
+    </div>
+</div>
+
+    <!-- Gráfica de pastel -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>Comparación de Calificaciones</h3>
+            <div style="display: flex; justify-content: center;">
+                <canvas id="graficaCalificaciones" style="max-width: 400px; max-height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('graficaCalificaciones').getContext('2d');
+        const data = {
+            labels: ['Calificación Continua', 'Examen Medio', 'Examen Final', 'Faltante para 30'],
+            datasets: [{
+                label: 'Calificaciones',
+                data: [
+                    @Model.CalContinua,
+                    @Model.CalExMedia,
+                    @Model.CaliExFinal,
+                     Math.max(0, 30 - (
+                    @Model.CalContinua +
+                    @Model.CalExMedia +
+                    @Model.CaliExFinal
+                    ))
+                ],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#CCCCCC'],
+            }]
+        };
+
+        const config = {
+            type: 'pie',
+            data: data,
+        };
+
+        new Chart(ctx, config);
+
+        function subirInformacion() {
+            alert('Infomacion Actualizada con exito.');
+        }
+    </script>
+}

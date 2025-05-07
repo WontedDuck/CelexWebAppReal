@@ -127,7 +127,7 @@ namespace CelexWebApp.Controllers
                                     FechaFin = Convert.ToDateTime(reader["fecha_fin"]),
                                     Capacidad = Convert.ToInt32(reader["capacidad"]),
                                     FechaCreacion = Convert.ToDateTime(reader["fecha_creacion"]),
-                                    Alumnos = new List<AlumnoModel>()
+                                    Alumnos = new List<AlumnoModelView>()
                                 };
                                 cursos.Add(curso);
                             }

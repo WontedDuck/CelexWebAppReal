@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Detalles del Grupo";
 }
+@{
+    var idRol = Context.Session.GetString("id_rol");
+}
 
 @if (TempData["informacion"] != null)
 {
@@ -45,19 +48,62 @@ else
 }
 else
 {
-    <ul>
+    <ul class="list-group" id="lista-alumnos">
         @foreach (var alumno in Model.Alumnos)
         {
-            <li>
-                @alumno.Nombre
-                @alumno.ApellidoPa
-                @alumno.ApellidoMa
-                <a class="btn btn-danger btn-sm" asp-controller="GrupoDetalles" asp-action="BajaAlumno" asp-route-id="@alumno.Id">Dar de Baja</a>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    @alumno.alumno.Nombre @alumno.alumno.ApellidoPa @alumno.alumno.ApellidoMa
+                </div>
+
+                <div class="d-flex align-items-center">
+                    @if (idRol == "3")
+                    {
+                        <a class="btn btn-danger btn-sm me-2"
+                           asp-controller="GrupoDetalles"
+                           asp-action="BajaAlumno"
+                           asp-route-id="@alumno.alumno.Id">
+                            Dar de Baja
+                        </a>
+                    }
+
+                    @if (idRol == "2")
+                    {
+                        <a class="btn btn-success btn-sm me-2"
+                           asp-controller="GrupoDetalles"
+                           asp-action="Calificaciones"
+                           asp-route-id="@alumno.alumno.Id">
+                            Ver Calificaciones
+                        </a>
+
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-2">Asistencia: @(alumno.alumno.Asistencia)</span>
+
+                            <form method="post" class="d-inline me-1"
+                                  asp-controller="GrupoDetalles"
+                                  asp-action="AgregarAsistencia"
+                                  asp-route-id="@alumno.alumno.Id">
+                                <button type="submit" class="btn btn-primary btn-sm">+</button>
+                            </form>
+
+                            <form method="post" class="d-inline"
+                                  asp-controller="GrupoDetalles"
+                                  asp-action="QuitarAsistencia"
+                                  asp-route-id="@alumno.alumno.Id">
+                                <button type="submit" class="btn btn-secondary btn-sm @((alumno.alumno.Asistencia) <= 0 ? "disabled" : "")">-</button>
+                            </form>
+                        </div>
+                    }
+                </div>
             </li>
         }
     </ul>
     @if (Model.Ocupados < Model.Capacidad)
     {
-        <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
-    }
+        <br />
+        @if (idRol == "3")
+        {
+            <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
+        }                
+    }    
 }

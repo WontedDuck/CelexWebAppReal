@@ -1,6 +1,136 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-ALUMNO
-Hola @ViewData["alumno"]
+﻿@model CelexWebApp.Models.AdministradorMMV.GrupoDetallesModel
+@{
+    ViewData["Title"] = "Panel del Alumno";
+    var Alumno = Model.Alumnos.FirstOrDefault();
 
+}
+
+<div class="container mt-4">
+    <!-- Información del alumno y grupo -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Información del Alumno y Grupo</h2>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-primary">Bienvenido, <strong>@Alumno?.alumno.Nombre @Alumno?.alumno.ApellidoMa @Alumno?.alumno.ApellidoPa</strong></h3>
+                    <hr />
+                    <p><strong>Grupo:</strong> <span class="text-secondary">@Model.Nombre</span></p>
+                    <p><strong>Nivel:</strong> <span class="text-secondary">@Model.Nivel</span></p>
+                    <p><strong>Tipo de Curso:</strong> <span class="text-secondary">@Model.TipoCurso</span></p>
+                    <p><strong>Fecha de Inicio:</strong> <span class="text-secondary">@Model.FechaInicio.ToString("dd/MM/yyyy")</span></p>
+                    <p><strong>Fecha de Fin:</strong> <span class="text-secondary">@Model.FechaFin.ToString("dd/MM/yyyy")</span></p>
+                    <p><strong>Profesor:</strong> <span class="text-secondary">@Model.Profesor</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificaciones recibidas -->
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Notificaciones Recibidas</h2>
+            <ul class="list-group">
+                @if (ViewData["Notificaciones"] != null)
+                {
+                    var notificaciones = ViewData["Notificaciones"] as List<CelexWebApp.Models.NotificacionesMMV.NotificacionesModel>;
+                    if (notificaciones != null && notificaciones.Count > 0)
+                    {
+                        foreach (var notificacion in notificaciones)
+                        {
+                            var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
+                            <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido") list-group-item">
+                                <div>
+                                    <strong>@notificacion.Contenido</strong><br />
+                                    <small>@notificacion.Fecha_Registro.ToString("g")</small>
+                                </div>
+                                <div class="notification-buttons mt-2">
+                                    <form method="post" asp-action="MarcarComoLeida" asp-controller="Profesor" style="display:inline;">
+                                        <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                        <button type="submit" class="btn btn-success btn-sm">✓</button>
+                                    </form>
+                                    <form method="post" asp-action="BorrarNotificacion" asp-controller="Profesor" style="display:inline;">
+                                        <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                        <button type="submit" class="btn btn-danger btn-sm">✖</button>
+                                    </form>
+                                </div>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item">No hay notificaciones.</li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item">No hay notificaciones.</li>
+                }
+            </ul>
+        </div>
+
+        <!-- Calificaciones -->
+        <div class="col-md-6">
+            <h2>Calificaciones</h2>
+            <div>
+                <p><strong>Calificación Continua:</strong> @Alumno?.CalContinua</p>
+                <p><strong>Examen Medio:</strong> @Alumno?.CalExMedia</p>
+                <p><strong>Examen Final:</strong> @Alumno?.CaliExFinal</p>
+            </div>
+            <div>
+                <h3>Gráfica de Calificaciones</h3>
+                <canvas id="graficaCalificaciones" style="max-width: 300px; max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opciones de notificaciones -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h2>Opciones de Notificaciones</h2>
+            <div class="d-flex justify-content-between">
+                <!-- Opción para enviar mensaje al administrador -->
+                <form method="post" asp-action="EnviarMensajeAdministrador" asp-controller="Alumno">
+                    <input type="hidden" name="contenido" value="Solicito mi historial." />
+                    <button type="submit" class="btn btn-info">Solicitar Historial al Administrador</button>
+                </form>
+
+                <!-- Opción para enviar mensaje al profesor -->
+                <form method="post" asp-action="EnviarMensajeProfesor" asp-controller="Profesor">
+                    <div class="form-group">
+                        <label for="contenido">Escribir mensaje al Profesor:</label>
+                        <textarea id="contenido" name="contenido" class="form-control" rows="2" placeholder="Escribe tu mensaje aquí..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Enviar Mensaje al Profesor</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('graficaCalificaciones').getContext('2d');
+        const data = {
+            labels: ['Calificación Continua', 'Examen Medio', 'Examen Final'],
+            datasets: [{
+                label: 'Calificaciones',
+                data: [
+        @Alumno?.CalContinua,
+        @Alumno?.CalExMedia,
+        @Alumno?.CaliExFinal
+                ],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+            }]
+        };
+
+        const config = {
+            type: 'pie',
+            data: data,
+        };
+
+        new Chart(ctx, config);
+    </script>
+}

@@ -160,8 +160,24 @@ namespace CelexWebApp.Controllers.Alumno
             return RedirectToAction("Index");
         }
         public async Task<IActionResult> EnviarMensajeProfesor(string contenido)
-        {            
-            EnviarMensaje(contenido, 2, int.Parse(HttpContext.Session.GetString("id_registrado")));
+        {
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT nombre_alumno FROM Alumnos WHERE id_registrado = @Id_registrado";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_registrado", int.Parse(HttpContext.Session.GetString("id_registrado")));
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        if (reader.Read())
+                        {
+                            contenido = $"{reader["nombre_alumno"]}: {contenido}";
+                        }
+                    }
+                }
+            }
+            EnviarMensaje(contenido , 2, int.Parse(HttpContext.Session.GetString("id_registrado")));
             return RedirectToAction("Index");
         }
         public async void EnviarMensaje(string contenido, int id, int id_registrado)

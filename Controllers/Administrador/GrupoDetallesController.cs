@@ -268,7 +268,7 @@ namespace CelexWebApp.Controllers.Administrador
                 }
             }
             int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
-            int id_profesor = int.Parse(HttpContext.Session.GetString("id_profesor"));
+            int id_profesor = int.Parse(HttpContext.Session.GetString("id_profesor")); 
             string nombre_profesor = HttpContext.Session.GetString("profesor_nombre");
             ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
             TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id_curso);
@@ -277,6 +277,149 @@ namespace CelexWebApp.Controllers.Administrador
                 nombre_profesor = await extraerInformacion.ProfesorNombre(nombre_profesor);
             }
             grupo = await extraerInformacion.GrupoInfo(id_curso, nombre_profesor);
+            if (TempData["Informacion"] == "Informacion")
+            {
+                grupo.Alumnos = (await extraerInformacion.AlumnosInfo())
+                    .Select(alumno => new AlumnoModelView
+                    {
+                        alumno = alumno.alumno,
+                        CalContinua = 0,
+                        CalExMedia = 0,
+                        CaliExFinal = 0
+                    }).ToList();
+            }
+            else
+            {
+                grupo.Alumnos = new List<AlumnoModelView>();
+            }
+            return View("Index", grupo);
+        }
+        [HttpPost]
+        public async Task<IActionResult> BorrarGrupo(int IdGrupo)
+        {
+            using(SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "DELETE FROM Avance_Alumnos WHERE id_cursos = @id";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@id", IdGrupo);
+                    await command.ExecuteNonQueryAsync();
+                }
+                string query2 = "DELETE FROM Curso WHERE id_cursos = @id";
+                using (SqlCommand command = new SqlCommand(query2, connection))
+                {
+                    command.Parameters.AddWithValue("@id", IdGrupo);
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+            return RedirectToAction("Index", "Grupos");
+        }
+        [HttpPost]
+        public async Task<IActionResult> GuardarGrupo(int IdGrupo, string Nombre, string Nivel, string TipoCurso, DateTime FechaInicio, DateTime FechaFin, int Capacidad, int Ocupados, string accion)
+        {
+            if (accion == "modificar")
+            {
+                if (Capacidad < Ocupados)
+                {
+                    TempData["mensaje"] = "La capacidad no puede ser menor a los ocupados.";
+                }
+                else
+                {
+                    using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+                    {
+                        await connection.OpenAsync();
+                        string query = "UPDATE Curso SET nombre_curso = @Nombre, id_nivel = @Nivel, id_tipo_curso = @TipoCurso, fecha_inicio = @FechaInicio, fecha_fin = @FechaFin, capacidad = @Capacidad, ocupados = @Ocupados WHERE id_cursos = @IdGrupo";
+                        using (SqlCommand command = new SqlCommand(query, connection))
+                        {
+                            command.Parameters.AddWithValue("@Nombre", Nombre);
+                            command.Parameters.AddWithValue("@Nivel", Nivel);
+                            command.Parameters.AddWithValue("@TipoCurso", TipoCurso);
+                            command.Parameters.AddWithValue("@FechaInicio", FechaInicio);
+                            command.Parameters.AddWithValue("@FechaFin", FechaFin);
+                            command.Parameters.AddWithValue("@Capacidad", Capacidad);
+                            command.Parameters.AddWithValue("@Ocupados", Ocupados);
+                            command.Parameters.AddWithValue("@IdGrupo", IdGrupo);
+                            await command.ExecuteNonQueryAsync();
+                        }
+                    }
+                    TempData["mensaje"] = "Se ejecutó el bloque MODIFICAR.";                    
+                }
+            }
+            else if (accion == "terminar")
+            {
+                var InfoAlumnos = new List<HistorialAvanceAlumno>();
+                using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+                {
+                    await connection.OpenAsync();
+                    string query = "SELECT * FROM Avance_Alumnos WHERE id_cursos = @Id_cursos";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id_cursos", IdGrupo);
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                        {
+                            while (reader.Read())
+                            {
+                                int id_estudiantes = reader.GetInt16(0);
+                                int id_prof = reader.GetInt16(1);
+                                int id_cursos = reader.GetInt16(2);
+                                if (reader.IsDBNull(3) || reader.IsDBNull(4) || reader.IsDBNull(5) || reader.IsDBNull(6))
+                                {
+                                    TempData["error"] = "Alumnos sin algun valor (asistencia, calificacion; continua, media o final) fueron eliminados";
+                                    continue;
+                                }
+                                InfoAlumnos.Add(new HistorialAvanceAlumno
+                                {
+                                    IdEstudiante = reader.GetInt16(0),
+                                    IdProfesor = reader.GetInt16(1),
+                                    IdCurso = reader.GetInt16(2),
+                                    Asistencia = reader.GetDecimal(3),
+                                    CalContinua = reader.GetDecimal(4),
+                                    CalExMedia = reader.GetDecimal(5),
+                                    CalExFinal = reader.GetDecimal(6)
+                                });
+                            }
+                        }
+                    }
+                    foreach (var dato in InfoAlumnos)
+                    {
+                        string insertQuery = "INSERT INTO Historial_Avance_Alumnos (id_estudiantes, id_profesor, id_cursos, asistencia, calcontinua, calexmedia, caliexfinal) VALUES (@Id_estudiantes, @Id_profesor, @Id_cursos, @Asistencia, @Calcontinua, @Calexmedia, @Caliexfinal)";
+                        using (SqlCommand insertCmd = new SqlCommand(insertQuery, connection))
+                        {
+                            insertCmd.Parameters.AddWithValue("@Id_estudiantes", dato.IdEstudiante);
+                            insertCmd.Parameters.AddWithValue("@Id_profesor", dato.IdProfesor);
+                            insertCmd.Parameters.AddWithValue("@Id_cursos", dato.IdCurso);
+                            insertCmd.Parameters.AddWithValue("@Asistencia", dato.Asistencia);
+                            insertCmd.Parameters.AddWithValue("@Calcontinua", dato.CalContinua);
+                            insertCmd.Parameters.AddWithValue("@Calexmedia", dato.CalExMedia);
+                            insertCmd.Parameters.AddWithValue("@Caliexfinal", dato.CalExFinal);
+                            await insertCmd.ExecuteNonQueryAsync();
+                        }
+                    }
+                    string query4 = "DELETE FROM Avance_Alumnos WHERE id_cursos = @Id_cursos";
+                    using (SqlCommand command = new SqlCommand(query4, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id_cursos", IdGrupo);
+                        await command.ExecuteNonQueryAsync();
+                    }
+                    string query5 = "UPDATE Curso SET ocupados = 0 WHERE id_cursos = @Id_cursos";
+                    using (SqlCommand command = new SqlCommand(query5, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id_cursos", IdGrupo);
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
+                TempData["mensaje"] = "Se ejecutó el bloque TERMINAR.";
+            }
+            int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
+            ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
+            TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id_curso);
+            if (TempData["Informacion"] == "Informacion")
+            {
+                string nombre_profesor = HttpContext.Session.GetString("profesor_nombre");
+                nombre_profesor = await extraerInformacion.ProfesorNombre(nombre_profesor);
+                grupo = await extraerInformacion.GrupoInfo(id_curso, nombre_profesor);
+            }
             if (TempData["Informacion"] == "Informacion")
             {
                 grupo.Alumnos = (await extraerInformacion.AlumnosInfo())

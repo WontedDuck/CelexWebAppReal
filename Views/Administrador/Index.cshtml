@@ -178,22 +178,6 @@
         </form>
 
     </div>
-
-    <!-- Historial -->
-    <div class="history">
-        <h2>Generar Historial de Alumno</h2>
-        <form method="post" asp-action="GenerarHistorial" asp-controller="Administrador">
-            <div class="form-group">
-                <label for="alumnoSeleccionado">Seleccionar Alumno:</label>
-                <select id="alumnoSeleccionado" name="alumnoSeleccionado" class="form-control">
-                    <option value="1">Juan Pérez</option>
-                    <option value="2">María López</option>
-                    <option value="3">Carlos García</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Generar Historial</button>
-        </form>
-    </div>
 </div>
 @section Scripts {
     <script>

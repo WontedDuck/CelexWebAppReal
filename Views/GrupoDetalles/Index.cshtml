@@ -16,16 +16,74 @@
 
 <h1>Detalles del Grupo</h1>
 
-<div>
-    <p><strong>Nombre del Grupo:</strong> @Model.Nombre</p>
-    <p><strong>Nivel:</strong> @Model.Nivel</p>
-    <p><strong>Tipo de Curso:</strong> @Model.TipoCurso</p>
-    <p><strong>Fecha de Inicio:</strong> @Model.FechaInicio.ToString("dd/MM/yyyy")</p>
-    <p><strong>Fecha de Fin:</strong> @Model.FechaFin.ToString("dd/MM/yyyy")</p>
-    <p><strong>Capacidad:</strong> @Model.Capacidad</p>
-    <p><strong>Ocupados:</strong> @Model.Ocupados</p>
-</div>
+<!-- FORMULARIO: Modificar Información -->
+<form asp-action="GuardarGrupo" asp-controller="GrupoDetalles" method="post" class="mb-4">
+    <input type="hidden" name="IdGrupo" value="@Model.Id" />
 
+    <div class="card shadow-sm">
+        <div class="card-body row align-items-end">
+            <div class="col-md-9">
+                @if (TempData["mensaje"] != null)
+                {
+                    <div class="alert alert-info">@TempData["mensaje"]</div>
+                }
+                @if (TempData["error"] != null)
+                {
+                    <div class="alert alert-info">@TempData["error"]</div>
+                }
+                <div class="mb-2">
+                    <label class="form-label"><strong>Nombre del Grupo:</strong></label>
+                    <input type="text" name="Nombre" class="form-control" value="@Model.Nombre" required />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label"><strong>Nivel:</strong></label>
+                    <input type="text" name="Nivel" class="form-control" value="@Model.Nivel" required />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label"><strong>Tipo de Curso:</strong></label>
+                    <input type="text" name="TipoCurso" class="form-control" value="@Model.TipoCurso" required />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label"><strong>Fecha de Inicio:</strong></label>
+                    <input type="date" name="FechaInicio" class="form-control" value="@Model.FechaInicio.ToString("yyyy-MM-dd")" required />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label"><strong>Fecha de Fin:</strong></label>
+                    <input type="date" name="FechaFin" class="form-control" value="@Model.FechaFin.ToString("yyyy-MM-dd")" required />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label"><strong>Capacidad:</strong></label>
+                    <input type="number" name="Capacidad" class="form-control" value="@Model.Capacidad" min="1" required />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label"><strong>Ocupados:</strong></label>
+                    <input type="number" id="OcupadosDisplay" class="form-control" value="@Model.Ocupados" min="0" readonly />
+                    <input type="hidden" name="Ocupados" id="Ocupados" value="@Model.Ocupados" />
+                </div>
+            </div>
+            @if (idRol == "3")
+            {
+                <div class="col-md-3 d-flex flex-column align-items-end gap-2">
+                    <button type="submit" name="accion" value="modificar" class="btn btn-primary w-100 mb-2" onclick="return confirm('¿Estás seguro de modificar el curso?');">
+                        Modificar Información
+                    </button>
+                    <button type="submit" name="accion" value="terminar" class="btn btn-success w-100" onclick="return confirm('¿Estás seguro de terminar el ciclo?');">
+                        Terminar Ciclo
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</form>
+
+<!-- FORMULARIO: Borrar Grupo -->
+@if (idRol == "3")
+{
+    <form asp-action="BorrarGrupo" asp-controller="GrupoDetalles" method="post" class="w-100">
+        <input type="hidden" name="IdGrupo" value="@Model.Id" />
+        <button type="submit" class="btn btn-danger w-100" onclick="return confirm('¿Estás seguro de borrar el grupo?');">Borrar Grupo</button>
+    </form>
+}
 <h2>Profesor</h2>
 @if (!string.IsNullOrEmpty(Model.Profesor))
 {

@@ -222,6 +222,7 @@ namespace CelexWebApp.Models.ModelGrupos
                         {
                             grupo = new GrupoDetallesModel()
                             {
+                                Id = id,
                                 Profesor = nombre_profesor,
                                 Nombre = reader["nombre_curso"].ToString(),
                                 Nivel = reader["id_nivel"].ToString(),

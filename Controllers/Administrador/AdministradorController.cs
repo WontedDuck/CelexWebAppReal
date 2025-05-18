@@ -37,7 +37,6 @@ namespace CelexWebApp.Controllers.Administrador
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                // Consulta para obtener las notificaciones
                 string query2 = "SELECT id_mensaje, contenido, fecha_registro, leido FROM Mensajes WHERE id_destinatario = @Id_destinatario ORDER BY leido ASC, fecha_registro DESC";
                 using (SqlCommand command = new SqlCommand(query2, connection))
                 {
@@ -144,7 +143,6 @@ namespace CelexWebApp.Controllers.Administrador
         public async Task<IActionResult> AgregarProfesor(int numeroEmpleado, string nombreProfesor, string telefonoProfesor, string idAzure)
         {
             int idAzureInt = 0;
-            //Buscar que el profesor no exista en la base de datos
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
@@ -160,7 +158,6 @@ namespace CelexWebApp.Controllers.Administrador
                     }
                 }
             }
-            //Encontrar el id_registrado del profesor en la base de datos con su id_azure
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
@@ -175,7 +172,6 @@ namespace CelexWebApp.Controllers.Administrador
                     }
                 }
             }
-            // Lógica para agregar un profesor
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
@@ -189,7 +185,6 @@ namespace CelexWebApp.Controllers.Administrador
                     command.ExecuteNonQuery();
                 }
             }
-            //Actualizar el rol del profesor en la base de datos
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
@@ -200,7 +195,6 @@ namespace CelexWebApp.Controllers.Administrador
                     command.ExecuteNonQuery();
                 }
             }
-            // Enviar notificación al profesor
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
@@ -213,7 +207,6 @@ namespace CelexWebApp.Controllers.Administrador
                     await command.ExecuteNonQueryAsync();
                 }
             }
-            // Enviar mensaje de que salio skibidibien
             TempData["MensajeEstadoAgregar"] = $"El profesor {nombreProfesor} se a agregado exitosamente";
             return RedirectToAction("Index");
         }
@@ -333,14 +326,6 @@ namespace CelexWebApp.Controllers.Administrador
                     command.ExecuteNonQuery();
                 }
             }
-            return RedirectToAction("Index");
-        }
-
-
-        [HttpPost]
-        public IActionResult GenerarHistorial(int alumnoSeleccionado)
-        {
-            // Lógica para generar el historial del alumno seleccionado
             return RedirectToAction("Index");
         }
     }

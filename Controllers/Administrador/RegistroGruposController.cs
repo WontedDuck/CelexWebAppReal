@@ -88,6 +88,7 @@ namespace CelexWebApp.Controllers
                 {
                     avanceAlumnos.Add(new AvanceAlumnoViewModel
                     {
+                        Id = alumno.Id,
                         AlumnoNombre = $"{alumno.Nombre} {alumno.ApellidoPa} {alumno.ApellidoMa}",
                         GrupoNombre = curso.Nombre,
                         MaestroNombre = curso.Profesor,
@@ -174,7 +175,7 @@ namespace CelexWebApp.Controllers
             {
                 await connection.OpenAsync();
                 string query = @"
-                SELECT A.nombre_alumno, A.apellido_paterno, A.apellido_materno
+                SELECT A.id_estudiantes, A.nombre_alumno, A.apellido_paterno, A.apellido_materno
                 FROM Alumnos A
                 INNER JOIN Avance_Alumnos AA ON A.id_estudiantes = AA.id_estudiantes
                 WHERE AA.id_cursos = @Id_Curso;";
@@ -188,6 +189,7 @@ namespace CelexWebApp.Controllers
                         {
                             alumnos.Add(new AlumnoModel
                             {
+                                Id = Convert.ToInt32(reader["id_estudiantes"]),
                                 Nombre = reader["nombre_alumno"].ToString(),
                                 ApellidoPa = reader["apellido_paterno"].ToString(),
                                 ApellidoMa = reader["apellido_materno"].ToString()
@@ -279,10 +281,17 @@ namespace CelexWebApp.Controllers
 
             return View("Graficas");
         }
+        [HttpPost]
+        public async Task<IActionResult> GenerarHistorial(int Id)
+        {
+
+            return RedirectToAction("Index");
+        }
     }
 
     public class AvanceAlumnoViewModel
     {
+        public int Id { get; set; }
         public string AlumnoNombre { get; set; }
         public string GrupoNombre { get; set; }
         public string MaestroNombre { get; set; }

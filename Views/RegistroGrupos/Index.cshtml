@@ -37,12 +37,14 @@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
+            <th>Id</th>
             <th>Alumno</th>
             <th>Grupo</th>
             <th>Maestro</th>
             <th>Nivel</th>
             <th>Tipo de Curso</th>
             <th>Fecha de Creación</th>
+            <th>Generar Historial</th>
         </tr>
     </thead>
     <tbody id="tabla-avance">
@@ -132,12 +134,19 @@
                     if (data.length > 0) {
                         $.each(data, function(i, item) {
                             rows += "<tr>" +
+                                "<td>" + item.Id + "</td>" +
                                 "<td>" + item.alumnoNombre + "</td>" +
                                 "<td>" + item.grupoNombre + "</td>" +
                                 "<td>" + item.maestroNombre + "</td>" +
                                 "<td>" + item.nivel + "</td>" +
                                 "<td>" + item.tipoCurso + "</td>" +
                                 "<td>" + formatDate(item.fechaCreacion) + "</td>" +
+                                "<td>" +
+                                    "<form method='post' action='/RegistroGrupos/GenerarHistorial' style='display:inline;'>" +
+                                    "<input type='hidden' name='idAlumno' value='" + item.Id + "' />" +
+                                    "<button type='submit' class='btn btn-sm btn-info'>Historial</button>" +
+                                    "</form>" +
+                                    "</td>"
                                 "</tr>";
                         });
                     } else {

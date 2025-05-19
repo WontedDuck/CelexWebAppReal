@@ -8,6 +8,7 @@ namespace CelexWebApp.Models.AlumnoMMV
         public string ApellidoPa { get; set; }
         public string ApellidoMa { get; set; }
         public decimal Asistencia { get; set; }
+        public string Matricula { get; set; }
 
     }
 }

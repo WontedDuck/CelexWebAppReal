@@ -6,6 +6,7 @@
 
 <!-- Filtros -->
 <button class="btn btn-primary" onclick="irAGraficas()">Ver Gráfica</button>
+<a asp-controller="RegistroGrupos" asp-action="GenerarHistorialVista" class="btn btn-secondary">Generar Historial</a>
 <div class="row mb-4">
     <div class="col-md-3">
         <label>Grupo:</label>
@@ -45,6 +46,7 @@
             <th>Tipo de Curso</th>
             <th>Fecha de Creación</th>
             <th>Generar Historial</th>
+            <th>Actividad</th>
         </tr>
     </thead>
     <tbody id="tabla-avance">
@@ -134,19 +136,13 @@
                     if (data.length > 0) {
                         $.each(data, function(i, item) {
                             rows += "<tr>" +
-                                "<td>" + item.Id + "</td>" +
+                                "<td>" + item.id + "</td>" +
                                 "<td>" + item.alumnoNombre + "</td>" +
                                 "<td>" + item.grupoNombre + "</td>" +
                                 "<td>" + item.maestroNombre + "</td>" +
                                 "<td>" + item.nivel + "</td>" +
                                 "<td>" + item.tipoCurso + "</td>" +
                                 "<td>" + formatDate(item.fechaCreacion) + "</td>" +
-                                "<td>" +
-                                    "<form method='post' action='/RegistroGrupos/GenerarHistorial' style='display:inline;'>" +
-                                    "<input type='hidden' name='idAlumno' value='" + item.Id + "' />" +
-                                    "<button type='submit' class='btn btn-sm btn-info'>Historial</button>" +
-                                    "</form>" +
-                                    "</td>"
                                 "</tr>";
                         });
                     } else {

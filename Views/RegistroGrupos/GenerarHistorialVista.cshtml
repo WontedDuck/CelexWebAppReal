@@ -1,0 +1,45 @@
+﻿@model List<CelexWebApp.Models.AlumnoMMV.AlumnoModel>
+
+@{
+    ViewData["Title"] = "Generar Historial";
+}
+
+<h2>Generar Historial de Alumno</h2>
+
+<form method="get" asp-action="GenerarHistorialVista">
+    <div class="input-group mb-3">
+        <input type="text" name="busquedaId" class="form-control" placeholder="Buscar por ID de alumno..." />
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </div>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th># Alumno</th>
+                <th>Nombre</th>
+                <th>Matrícula</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var alumno in Model)
+            {
+                <tr>
+                    <td>@alumno.Id</td>
+                    <td>@alumno.Nombre</td>
+                    <td>@alumno.Matricula</td>
+                    <td>
+                        <a asp-action="GenerarHistorial" asp-route-idAlumno="@alumno.Id" class="btn btn-sm btn-success">Exportar PDF</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (Context.Request.Query.ContainsKey("busquedaId"))
+{
+    <p>No se encontraron resultados para esa búsqueda.</p>
+}

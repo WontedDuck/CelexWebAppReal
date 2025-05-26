@@ -5,7 +5,7 @@
 
 <h1>@ViewData["Title"]</h1>
 <div class="admin-container">
-    
+
     <!-- Enviar notificaciones -->
     <div class="notifications">
         <h2>Enviar Notificaciones</h2>
@@ -54,7 +54,7 @@
                                     <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
                                     <button type="submit" class="btn btn-success btn-sm">✓</button>
                                 </form>
-                                <form method="post" asp-action="BorrarNotificacion" asp-controller="Administrador" style="display:inline;" >
+                                <form method="post" asp-action="BorrarNotificacion" asp-controller="Administrador" style="display:inline;">
                                     <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
                                     <button type="submit" class="btn btn-danger btn-sm">✖</button>
                                 </form>
@@ -73,7 +73,6 @@
             }
         </ul>
     </div>
-
 
     <!-- Agregar profesor -->
     <div class="add-professor">
@@ -115,12 +114,10 @@
             </div>
         }
         <form id="crearGrupoForm" method="post" asp-action="CrearGrupo" asp-controller="Administrador">
-            <!-- Campo para el nombre del grupo -->
             <div class="form-group">
                 <label for="nombreGrupo">Nombre del Grupo:</label>
                 <input id="nombreGrupo" name="nombreGrupo" class="form-control" oninput="mostrarNivel()" />
             </div>
-            <!-- Lista desplegable para el nivel -->
             <div class="form-group" id="nivelGrupoContainer" style="display: none;">
                 <label for="nivelGrupo">Nivel:</label>
                 <select id="nivelGrupo" name="nivelGrupo" class="form-control" onchange="mostrarTipoCurso()">
@@ -144,8 +141,6 @@
                     <option value="FCE">FCE</option>
                 </select>
             </div>
-
-            <!-- Lista desplegable para el tipo de curso -->
             <div class="form-group" id="tipoCursoContainer" style="display: none;">
                 <label for="tipoCurso">Tipo de Curso:</label>
                 <select id="tipoCurso" name="tipoCurso" class="form-control" onchange="mostrarCamposAdicionales()">
@@ -155,45 +150,83 @@
                     <option value="Intensivo">Intensivo</option>
                 </select>
             </div>
-
-            <!-- Campo para seleccionar la fecha de inicio -->
             <div class="form-group" id="fechaInicioContainer" style="display: none;">
                 <label for="fechaInicio">Fecha de Inicio:</label>
                 <input id="fechaInicio" name="fechaInicio" type="date" class="form-control" />
             </div>
-
-            <!-- Campo para seleccionar la fecha de fin -->
             <div class="form-group" id="fechaFinContainer" style="display: none;">
                 <label for="fechaFin">Fecha de Fin:</label>
                 <input id="fechaFin" name="fechaFin" type="date" class="form-control" />
             </div>
-
-            <!-- Campo para ingresar la cantidad de estudiantes -->
             <div class="form-group" id="cantidadEstudiantesContainer" style="display: none;">
                 <label for="cantidadEstudiantes">Cantidad de Estudiantes:</label>
                 <input id="cantidadEstudiantes" name="cantidadEstudiantes" type="number" class="form-control" min="1" />
             </div>
-
             <button type="submit" class="btn btn-primary">Crear</button>
         </form>
-
     </div>
+
+    <!-- Historial de Alumno -->
+    <div class="student-history">
+        <h2>Generar Historial de Alumno</h2>
+        @if (TempData["MensajeEstadoHistorial"] != null)
+        {
+            <div class="alert alert-info" role="alert">
+                @TempData["MensajeEstadoHistorial"]
+            </div>
+        }
+        <form method="get" asp-action="GenerarHistorialVista" asp-controller="Administrador">
+            <div class="input-group mb-3">
+                <input type="text" name="busquedaId" class="form-control" placeholder="Buscar por ID de alumno..." />
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </div>
+        </form>
+        @if (ViewData["Alumnos"] != null)
+        {
+            var alumnos = ViewData["Alumnos"] as List<CelexWebApp.Models.AlumnoMMV.AlumnoModel>;
+            if (alumnos != null && alumnos.Any())
+            {
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th># Alumno</th>
+                            <th>Nombre</th>
+                            <th>Matrícula</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var alumno in alumnos)
+                        {
+                            <tr>
+                                <td>@alumno.Id</td>
+                                <td>@alumno.Nombre</td>
+                                <td>@alumno.Matricula</td>
+                                <td>
+                                    <a asp-action="GenerarHistorial" asp-controller="Administrador" asp-route-idAlumno="@alumno.Id" class="btn btn-sm btn-success">Exportar PDF</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else if (Context.Request.Query.ContainsKey("busquedaId"))
+            {
+                <p>No se encontraron resultados para esa búsqueda.</p>
+            }
+        }
+    </div>
+
 </div>
+
 @section Scripts {
     <script>
-
-        // Función para marcar una notificación como leída
         function marcarLeida(button) {
             const li = button.closest('.notification-item');
-            li.style.textDecoration = "line-through"; // Marca la notificación como leída visualmente
-            button.disabled = true; // Desactiva el botón de "Marcar como Leída"
+            li.style.textDecoration = "line-through";
+            button.disabled = true;
         }
-        // Función para borrar una notificación
-        function borrarNotificacion(button) {
-            const li = button.closest('.notification-item');
-            li.remove(); // Elimina la notificación de la lista
-        }
-        // Mostrar la lista de niveles si el nombre del grupo no está vacío
+
         function mostrarNivel() {
             const nombreGrupo = document.getElementById("nombreGrupo").value;
             const nivelGrupoContainer = document.getElementById("nivelGrupoContainer");
@@ -208,7 +241,6 @@
             }
         }
 
-        // Mostrar la lista de tipos de curso si se selecciona un nivel
         function mostrarTipoCurso() {
             const nivelGrupo = document.getElementById("nivelGrupo").value;
             const tipoCursoContainer = document.getElementById("tipoCursoContainer");
@@ -221,7 +253,7 @@
                 document.getElementById("cantidadEstudiantesContainer").style.display = "none";
             }
         }
-        // Mostrar los campos adicionales (fecha de inicio, fecha de fin, cantidad de estudiantes) si se selecciona un tipo de curso
+
         function mostrarCamposAdicionales() {
             const tipoCurso = document.getElementById("tipoCurso").value;
             const fechaInicioContainer = document.getElementById("fechaInicioContainer");
@@ -237,7 +269,8 @@
                 cantidadEstudiantesContainer.style.display = "none";
             }
         }
-                        document.getElementById("crearGrupoForm").addEventListener("submit", function (e) {
+
+        document.getElementById("crearGrupoForm").addEventListener("submit", function (e) {
             const fechaInicio = document.getElementById("fechaInicio").value;
             const fechaFin = document.getElementById("fechaFin").value;
             const cantidadEstudiantes = document.getElementById("cantidadEstudiantes").value;
@@ -254,9 +287,9 @@
                 return;
             }
         });
-
-    </script>    
+    </script>
 }
+
 <style>
     .alert {
         padding: 15px;
@@ -270,13 +303,14 @@
         background-color: #d9edf7;
         border-color: #bce8f1;
     }
+
     .admin-container {
         display: grid;
         grid-template-areas:
             "notifications received-notifications"
             "add-professor add-professor"
             "create-group create-group"
-            "history history";
+            "student-history student-history";
         grid-gap: 20px;
         margin-top: 20px;
     }
@@ -309,8 +343,8 @@
         background-color: #f9f9f9;
     }
 
-    .history {
-        grid-area: history;
+    .student-history {
+        grid-area: student-history;
         border: 1px solid #ccc;
         padding: 15px;
         background-color: #f9f9f9;
@@ -325,15 +359,8 @@
     }
 
     .btn {
-        display: block;
-        width: 100%;
-    }
-
-    .received-notifications {
-        grid-area: received-notifications;
-        border: 1px solid #ccc;
-        padding: 15px;
-        background-color: #f9f9f9;
+        font-size: 0.8em;
+        padding: 5px 10px;
     }
 
     .notification-item {
@@ -352,11 +379,6 @@
         gap: 10px;
     }
 
-    .btn {
-        font-size: 0.8em;
-        padding: 5px 10px;
-    }
-
     .no-leido {
         background-color: #fff3cd;
     }
@@ -366,4 +388,22 @@
         text-decoration: line-through;
     }
 
+    .table {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+        .table th, .table td {
+            padding: 10px;
+            text-align: left;
+        }
+
+    .input-group {
+        display: flex;
+        gap: 10px;
+    }
+
+        .input-group .form-control {
+            flex: 1;
+        }
 </style>

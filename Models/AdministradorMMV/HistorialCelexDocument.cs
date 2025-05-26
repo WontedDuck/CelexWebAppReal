@@ -8,7 +8,7 @@ namespace CelexWebApp.Models.AdministradorMMV
 {
     public class HistorialCelexDocument : IDocument
     {
-        public decimal calificaciontotaltotal { get; set; } 
+        public decimal calificaciontotaltotal { get; set; }
         public decimal asistenciaTotal { get; set; }
         public DateTime Fecha { get; set; }
         public List<HistorialAvanceAlumno> Historial { get; set; }
@@ -28,7 +28,7 @@ namespace CelexWebApp.Models.AdministradorMMV
 
                     column.Item().Text($"CELEX/CECYT13/H0109-2024").Bold();
 
-                    column.Item().Text("A QUIEN CORRESPONDA:");
+                    column.Item().Text("A QUIEN CORRESPONDA:").Bold().FontSize(14);
 
                     column.Item().Text(text =>
                     {
@@ -67,10 +67,11 @@ namespace CelexWebApp.Models.AdministradorMMV
                             table.Cell().Text($"{item.NivelMCER}");
                             table.Cell().Text($"{item.NombreCurso}");
                             table.Cell().Text($"{item.Periodo}");
-                            table.Cell().Text($"{item.Asistencia}"); 
-                            table.Cell().Text($"{item.CalificacionTotal}");
+                            table.Cell().Text($"{item.Asistencia}");
+                            table.Cell().Text($"{item.CalificacionTotal:F2}");
                         }
                     });
+
                     column.Item().Text($"\nTotal de horas de asistencia: {asistenciaTotal}").Bold();
                     column.Item().Text($"Promedio general de calificación: {calificaciontotaltotal:F1}").Bold();
 
@@ -80,9 +81,16 @@ namespace CelexWebApp.Models.AdministradorMMV
 
                     column.Item().Text("\nATENTAMENTE\n“LA TÉCNICA AL SERVICIO DE LA PATRIA”").AlignCenter();
 
-                    column.Item().Text("\nMTRO. MIGUEL ANGEL CRUZ RODRÍGUEZ\nSUBDIRECCIÓN ACADÉMICA").AlignLeft();
-                    column.Item().Text("ING. FERNANDO MARTÍNEZ SÁNCHEZ\nSUBDIRECCIÓN DE SERVICIOS EDUCATIVOS E INTEGRACIÓN SOCIAL").AlignLeft();
-                    column.Item().Text("MTRA. PATRICIA BALTAZAR TRUJILLO\nDIRECTORA").AlignLeft();
+                    column.Item().Text("\n\n\n").AlignCenter();
+
+                    column.Item().Text("______________________________").AlignCenter();
+                    column.Item().Text("MTRO. MIGUEL ANGEL CRUZ RODRÍGUEZ\nSUBDIRECCIÓN ACADÉMICA").AlignCenter();
+
+                    column.Item().Text("\n______________________________").AlignCenter(); 
+                    column.Item().Text("ING. FERNANDO MARTÍNEZ SÁNCHEZ\nSUBDIRECCIÓN DE SERVICIOS EDUCATIVOS E INTEGRACIÓN SOCIAL").AlignCenter();
+
+                    column.Item().Text("\n______________________________").AlignCenter(); 
+                    column.Item().Text("MTRA. PATRICIA BALTAZAR TRUJILLO\nDIRECTORA").AlignCenter();
                 });
 
                 page.Footer().AlignCenter().Text("Programa registrado ante la DFLE: DFLE-CELEXCECYT13IACT06-17").FontSize(10);

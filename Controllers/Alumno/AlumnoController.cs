@@ -172,7 +172,7 @@ namespace CelexWebApp.Controllers.Alumno
                     {
                         if (reader.Read())
                         {
-                            contenido = $"{reader["nombre_alumno"]}: {contenido}";
+                            contenido = $"El alumno {reader["nombre_alumno"]}: {contenido}";
                         }
                     }
                 }

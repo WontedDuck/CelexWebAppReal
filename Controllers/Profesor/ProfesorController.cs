@@ -147,7 +147,7 @@ namespace CelexWebApp.Controllers.Profesor
                         {
                             command2.Parameters.AddWithValue("@Id_remitente", int.Parse(HttpContext.Session.GetString("id_registrado")));
                             command2.Parameters.AddWithValue("@Id_destinatario", idDestinatario);
-                            command2.Parameters.AddWithValue("@Contenido", $"Mensaje de Administrador: {mensaje}");
+                            command2.Parameters.AddWithValue("@Contenido", $"Mensaje de Profesor: {mensaje}");
                             await command2.ExecuteNonQueryAsync();
                         }
                     }

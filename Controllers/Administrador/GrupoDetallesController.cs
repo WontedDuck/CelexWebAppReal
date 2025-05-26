@@ -318,6 +318,8 @@ namespace CelexWebApp.Controllers.Administrador
         [HttpPost]
         public async Task<IActionResult> GuardarGrupo(int IdGrupo, string Nombre, string Nivel, string TipoCurso, DateTime FechaInicio, DateTime FechaFin, int Capacidad, int Ocupados, string accion)
         {
+            int[] id_borrar = new int[Capacidad];
+            int i = 0, e = 0;
             if (accion == "modificar")
             {
                 if (Capacidad < Ocupados)
@@ -365,9 +367,11 @@ namespace CelexWebApp.Controllers.Administrador
                                 int id_cursos = reader.GetInt16(2);
                                 if (reader.IsDBNull(3) || reader.IsDBNull(4) || reader.IsDBNull(5) || reader.IsDBNull(6))
                                 {
-                                    TempData["error"] = "Alumnos sin algun valor (asistencia, calificacion; continua, media o final) fueron eliminados";
+                                    TempData["error"] = "Alumnos sin algun valor (asistencia, calificacion; continua, media o final) no se registraron en historial";
                                     continue;
                                 }
+                                id_borrar[i] = id_estudiantes;
+                                i++;
                                 InfoAlumnos.Add(new HistorialAvanceAlumno
                                 {
                                     IdEstudiante = reader.GetInt16(0),
@@ -381,6 +385,7 @@ namespace CelexWebApp.Controllers.Administrador
                             }
                         }
                     }
+                    e = Ocupados - (i + 1);
                     foreach (var dato in InfoAlumnos)
                     {
                         string insertQuery = "INSERT INTO Historial_Avance_Alumnos (id_estudiantes, id_profesor, id_cursos, asistencia, calcontinua, calexmedia, caliexfinal) VALUES (@Id_estudiantes, @Id_profesor, @Id_cursos, @Asistencia, @Calcontinua, @Calexmedia, @Caliexfinal)";
@@ -396,15 +401,21 @@ namespace CelexWebApp.Controllers.Administrador
                             await insertCmd.ExecuteNonQueryAsync();
                         }
                     }
-                    string query4 = "DELETE FROM Avance_Alumnos WHERE id_cursos = @Id_cursos";
-                    using (SqlCommand command = new SqlCommand(query4, connection))
-                    {
-                        command.Parameters.AddWithValue("@Id_cursos", IdGrupo);
-                        await command.ExecuteNonQueryAsync();
+
+                    while (0 <= i)
+                    { 
+                        string query4 = "DELETE FROM Avance_Alumnos WHERE id_estudiantes = @Id_estudiantes";
+                        using (SqlCommand command = new SqlCommand(query4, connection))
+                        {
+                            command.Parameters.AddWithValue("@Id_estudiantes", id_borrar[i]);
+                            await command.ExecuteNonQueryAsync();
+                        }
+                        i--;
                     }
-                    string query5 = "UPDATE Curso SET ocupados = 0 WHERE id_cursos = @Id_cursos";
+                    string query5 = "UPDATE Curso SET ocupados = @Ocupados WHERE id_cursos = @Id_cursos";
                     using (SqlCommand command = new SqlCommand(query5, connection))
                     {
+                        command.Parameters.AddWithValue("@Ocupados", e);
                         command.Parameters.AddWithValue("@Id_cursos", IdGrupo);
                         await command.ExecuteNonQueryAsync();
                     }

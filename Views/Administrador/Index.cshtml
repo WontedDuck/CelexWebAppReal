@@ -2,230 +2,336 @@
 @{
     ViewData["Title"] = "Panel de Administrador";
 }
+<link href="~/css/panel_admin.css" rel="stylesheet" />
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1;"></canvas>
 
-<h1>@ViewData["Title"]</h1>
-<div class="admin-container">
+<div class="admin-wrapper">
+    <h1 class="main-title" style="opacity: 0; transform: translateY(50px);">@ViewData["Title"]</h1>
 
-    <!-- Enviar notificaciones -->
-    <div class="notifications">
-        <h2>Enviar Notificaciones</h2>
-        @if (TempData["MensajeEstado"] != null)
-        {
-            <div class="alert alert-info" role="alert">
-                @TempData["MensajeEstado"]
-            </div>
-        }
-        <form method="post" asp-action="EnviarNotificacion" asp-controller="Administrador">
-            <div class="form-group">
-                <label for="mensaje">Mensaje:</label>
-                <textarea id="mensaje" name="mensaje" class="form-control" rows="4"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="destinatarios">Destinatarios:</label>
-                <select id="destinatarios" name="destinatarios" class="form-control">
-                    <option value="Todos">Todos</option>
-                    <option value="Alumnos">Alumnos</option>
-                    <option value="Profesores">Profesores</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Enviar</button>
-        </form>
-    </div>
-
-    <!-- Notificaciones recibidas -->
-    <div class="received-notifications">
-        <h2>Notificaciones Recibidas</h2>
-        <ul class="list-group">
-            @if (ViewData["Notificaciones"] != null)
+    <!-- Primera fila: Enviar Notificaciones y Notificaciones Recibidas -->
+    <div class="row-container">
+        <div class="notifications glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h2>Enviar Notificaciones</h2>
+            @if (TempData["MensajeEstado"] != null)
             {
-                var notificaciones = ViewData["Notificaciones"] as List<NotificacionesModel>;
-                if (notificaciones != null && notificaciones.Count > 0)
+                <div class="alert alert-info" role="alert">
+                    @TempData["MensajeEstado"]
+                </div>
+            }
+            <form method="post" asp-action="EnviarNotificacion" asp-controller="Administrador">
+                <div class="form-group">
+                    <label for="mensaje">Mensaje:</label>
+                    <textarea id="mensaje" name="mensaje" class="form-control" rows="4" placeholder="Escribe tu mensaje aquí..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="destinatarios">Destinatarios:</label>
+                    <select id="destinatarios" name="destinatarios" class="form-control">
+                        <option value="Todos">Todos</option>
+                        <option value="Alumnos">Alumnos</option>
+                        <option value="Profesores">Profesores</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-wide">Enviar</button>
+            </form>
+        </div>
+
+        <div class="received-notifications glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h2>Notificaciones Recibidas</h2>
+            <ul class="list-group">
+                @if (ViewData["Notificaciones"] != null)
                 {
-                    foreach (var notificacion in notificaciones)
+                    var notificaciones = ViewData["Notificaciones"] as List<NotificacionesModel>;
+                    if (notificaciones != null && notificaciones.Count > 0)
                     {
-                        var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
-                        <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")">
-                            <div>
-                                <strong>@notificacion.Contenido</strong><br />
-                                <small>@notificacion.Fecha_Registro.ToString("g")</small>
-                            </div>
-                            <div class="notification-buttons">
-                                <form method="post" asp-action="MarcarComoLeida" asp-controller="Administrador" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
-                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                    <button type="submit" class="btn btn-success btn-sm">✓</button>
-                                </form>
-                                <form method="post" asp-action="BorrarNotificacion" asp-controller="Administrador" style="display:inline;">
-                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                    <button type="submit" class="btn btn-danger btn-sm">✖</button>
-                                </form>
-                            </div>
-                        </li>
+                        foreach (var notificacion in notificaciones)
+                        {
+                            var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
+                            <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")">
+                                <div class="notification-content">
+                                    <strong>@notificacion.Contenido</strong><br />
+                                    <small>@notificacion.Fecha_Registro.ToString("g")</small>
+                                </div>
+                                <div class="notification-buttons">
+                                    <form method="post" asp-action="MarcarComoLeida" asp-controller="Administrador" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
+                                        <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                        <button type="submit" class="btn btn-icon btn-check">✓</button>
+                                    </form>
+                                    <form method="post" asp-action="BorrarNotificacion" asp-controller="Administrador" style="display:inline;">
+                                        <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                        <button type="submit" class="btn btn-icon btn-delete">✖</button>
+                                    </form>
+                                </div>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item">No hay notificaciones.</li>
                     }
                 }
                 else
                 {
                     <li class="list-group-item">No hay notificaciones.</li>
                 }
-            }
-            else
+            </ul>
+        </div>
+    </div>
+
+    <!-- Segunda fila: Agregar Profesor y Crear Grupo -->
+    <div class="row-container">
+        <div class="add-professor glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h2>Agregar Profesor</h2>
+            @if (TempData["MensajeEstadoAgregar"] != null)
             {
-                <li class="list-group-item">No hay notificaciones.</li>
+                <div class="alert alert-info" role="alert">
+                    @TempData["MensajeEstadoAgregar"]
+                </div>
             }
-        </ul>
-    </div>
+            <form method="post" asp-action="AgregarProfesor" asp-controller="Administrador">
+                <div class="form-group">
+                    <label for="numeroEmpleado">Número de Empleado:</label>
+                    <input id="numeroEmpleado" name="numeroEmpleado" class="form-control" placeholder="Ingresa el número de empleado..." />
+                </div>
+                <div class="form-group">
+                    <label for="nombreProfesor">Nombre:</label>
+                    <input id="nombreProfesor" name="nombreProfesor" class="form-control" placeholder="Nombre del profesor..." />
+                </div>
+                <div class="form-group">
+                    <label for="telefonoProfesor">Teléfono:</label>
+                    <input id="telefonoProfesor" name="telefonoProfesor" class="form-control" placeholder="Teléfono del profesor..." />
+                </div>
+                <div class="form-group">
+                    <label for="idAzure">Número de Cuenta:</label>
+                    <input id="idAzure" name="idAzure" class="form-control" placeholder="Número de cuenta Azure..." />
+                </div>
+                <button type="submit" class="btn btn-primary btn-wide">Agregar</button>
+            </form>
+        </div>
 
-    <!-- Agregar profesor -->
-    <div class="add-professor">
-        <h2>Agregar Profesor</h2>
-        @if (TempData["MensajeEstadoAgregar"] != null)
-        {
-            <div class="alert alert-info" role="alert">
-                @TempData["MensajeEstadoAgregar"]
-            </div>
-        }
-        <form method="post" asp-action="AgregarProfesor" asp-controller="Administrador">
-            <div class="form-group">
-                <label for="numeroEmpleado">Numero de Empleado:</label>
-                <input id="numeroEmpleado" name="numeroEmpleado" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label for="nombreProfesor">Nombre:</label>
-                <input id="nombreProfesor" name="nombreProfesor" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label for="telefonoProfesor">Teléfono:</label>
-                <input id="telefonoProfesor" name="telefonoProfesor" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label for="idAzure">Numero de Cuenta:</label>
-                <input id="idAzure" name="idAzure" class="form-control" />
-            </div>
-            <button type="submit" class="btn btn-primary">Agregar</button>
-        </form>
-    </div>
-
-    <!-- Crear grupo -->
-    <div class="create-group">
-        <h2>Crear Grupo</h2>
-        @if (TempData["MensajeEstadoCrearGrupo"] != null)
-        {
-            <div class="alert alert-info" role="alert">
-                @TempData["MensajeEstadoCrearGrupo"]
-            </div>
-        }
-        <form id="crearGrupoForm" method="post" asp-action="CrearGrupo" asp-controller="Administrador">
-            <div class="form-group">
-                <label for="nombreGrupo">Nombre del Grupo:</label>
-                <input id="nombreGrupo" name="nombreGrupo" class="form-control" oninput="mostrarNivel()" />
-            </div>
-            <div class="form-group" id="nivelGrupoContainer" style="display: none;">
-                <label for="nivelGrupo">Nivel:</label>
-                <select id="nivelGrupo" name="nivelGrupo" class="form-control" onchange="mostrarTipoCurso()">
-                    <option value="">Seleccione un nivel</option>
-                    <option value="Introductorio">Introductorio</option>
-                    <option value="Basico1">Basico 1</option>
-                    <option value="Basico2">Basico 2</option>
-                    <option value="Basico3">Basico 3</option>
-                    <option value="Basico4">Basico 4</option>
-                    <option value="Basico5">Basico 5</option>
-                    <option value="Intermedio1">Intermedio 1</option>
-                    <option value="Intermedio2">Intermedio 2</option>
-                    <option value="Intermedio3">Intermedio 3</option>
-                    <option value="Intermedio4">Intermedio 4</option>
-                    <option value="Intermedio5">Intermedio 5</option>
-                    <option value="Avanzado1">Avanzado 1</option>
-                    <option value="Avanzado2">Avanzado 2</option>
-                    <option value="Avanzado3">Avanzado 3</option>
-                    <option value="Avanzado4">Avanzado 4</option>
-                    <option value="Avanzado5">Avanzado 5</option>
-                    <option value="FCE">FCE</option>
-                </select>
-            </div>
-            <div class="form-group" id="tipoCursoContainer" style="display: none;">
-                <label for="tipoCurso">Tipo de Curso:</label>
-                <select id="tipoCurso" name="tipoCurso" class="form-control" onchange="mostrarCamposAdicionales()">
-                    <option value="">Seleccione un tipo de curso</option>
-                    <option value="Semanal">Semanal</option>
-                    <option value="Sabatino">Sabatino</option>
-                    <option value="Intensivo">Intensivo</option>
-                </select>
-            </div>
-            <div class="form-group" id="fechaInicioContainer" style="display: none;">
-                <label for="fechaInicio">Fecha de Inicio:</label>
-                <input id="fechaInicio" name="fechaInicio" type="date" class="form-control" />
-            </div>
-            <div class="form-group" id="fechaFinContainer" style="display: none;">
-                <label for="fechaFin">Fecha de Fin:</label>
-                <input id="fechaFin" name="fechaFin" type="date" class="form-control" />
-            </div>
-            <div class="form-group" id="cantidadEstudiantesContainer" style="display: none;">
-                <label for="cantidadEstudiantes">Cantidad de Estudiantes:</label>
-                <input id="cantidadEstudiantes" name="cantidadEstudiantes" type="number" class="form-control" min="1" />
-            </div>
-            <button type="submit" class="btn btn-primary">Crear</button>
-        </form>
-    </div>
-
-    <!-- Historial de Alumno -->
-    <div class="student-history">
-        <h2>Generar Historial de Alumno</h2>
-        @if (TempData["MensajeEstadoHistorial"] != null)
-        {
-            <div class="alert alert-info" role="alert">
-                @TempData["MensajeEstadoHistorial"]
-            </div>
-        }
-        <form method="get" asp-action="GenerarHistorialVista" asp-controller="Administrador">
-            <div class="input-group mb-3">
-                <input type="text" name="busquedaId" class="form-control" placeholder="Buscar por ID de alumno..." />
-                <button type="submit" class="btn btn-primary">Buscar</button>
-            </div>
-        </form>
-        <form method="post" asp-action="GenerarHistorialProfesor" asp-controller="Administrador">
-            <div class="input-group mb-3">
-                <button type="submit" class="btn btn-primary">Buscar Profesor</button>
-            </div>
-        </form>
-        @if (ViewData["Alumnos"] != null)
-        {
-            var alumnos = ViewData["Alumnos"] as List<CelexWebApp.Models.AlumnoMMV.AlumnoModel>;
-            if (alumnos != null && alumnos.Any())
+        <div class="create-group glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h2>Crear Grupo</h2>
+            @if (TempData["MensajeEstadoCrearGrupo"] != null)
             {
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th># Alumno</th>
-                            <th>Nombre</th>
-                            <th>Matrícula</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var alumno in alumnos)
-                        {
-                            <tr>
-                                <td>@alumno.Id</td>
-                                <td>@alumno.Nombre</td>
-                                <td>@alumno.Matricula</td>
-                                <td>
-                                    <a asp-action="GenerarHistorial" asp-controller="Administrador" asp-route-idAlumno="@alumno.Id" class="btn btn-sm btn-success">Exportar PDF</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                <div class="alert alert-info" role="alert">
+                    @TempData["MensajeEstadoCrearGrupo"]
+                </div>
             }
-            else if (Context.Request.Query.ContainsKey("busquedaId"))
-            {
-                <p>No se encontraron resultados para esa búsqueda.</p>
-            }
-        }
+            <form id="crearGrupoForm" method="post" asp-action="CrearGrupo" asp-controller="Administrador">
+                <div class="form-group">
+                    <label for="nombreGrupo">Nombre del Grupo:</label>
+                    <input id="nombreGrupo" name="nombreGrupo" class="form-control" oninput="mostrarNivel()" placeholder="Nombre del grupo..." />
+                </div>
+                <div class="form-group" id="nivelGrupoContainer" style="display: none;">
+                    <label for="nivelGrupo">Nivel:</label>
+                    <select id="nivelGrupo" name="nivelGrupo" class="form-control" onchange="mostrarTipoCurso()">
+                        <option value="">Seleccione un nivel</option>
+                        <option value="Introductorio">Introductorio</option>
+                        <option value="Basico1">Básico 1</option>
+                        <option value="Basico2">Básico 2</option>
+                        <option value="Basico3">Básico 3</option>
+                        <option value="Basico4">Básico 4</option>
+                        <option value="Basico5">Básico 5</option>
+                        <option value="Intermedio1">Intermedio 1</option>
+                        <option value="Intermedio2">Intermedio 2</option>
+                        <option value="Intermedio3">Intermedio 3</option>
+                        <option value="Intermedio4">Intermedio 4</option>
+                        <option value="Intermedio5">Intermedio 5</option>
+                        <option value="Avanzado1">Avanzado 1</option>
+                        <option value="Avanzado2">Avanzado 2</option>
+                        <option value="Avanzado3">Avanzado 3</option>
+                        <option value="Avanzado4">Avanzado 4</option>
+                        <option value="Avanzado5">Avanzado 5</option>
+                        <option value="FCE">FCE</option>
+                    </select>
+                </div>
+                <div class="form-group" id="tipoCursoContainer" style="display: none;">
+                    <label for="tipoCurso">Tipo de Curso:</label>
+                    <select id="tipoCurso" name="tipoCurso" class="form-control" onchange="mostrarCamposAdicionales()">
+                        <option value="">Seleccione un tipo de curso</option>
+                        <option value="Semanal">Semanal</option>
+                        <option value="Sabatino">Sabatino</option>
+                        <option value="Intensivo">Intensivo</option>
+                    </select>
+                </div>
+                <div class="form-group" id="fechaInicioContainer" style="display: none;">
+                    <label for="fechaInicio">Fecha de Inicio:</label>
+                    <input id="fechaInicio" name="fechaInicio" type="date" class="form-control" placeholder="Selecciona la fecha de inicio..." />
+                </div>
+                <div class="form-group" id="fechaFinContainer" style="display: none;">
+                    <label for="fechaFin">Fecha de Fin:</label>
+                    <input id="fechaFin" name="fechaFin" type="date" class="form-control" placeholder="Selecciona la fecha de fin..." />
+                </div>
+                <div class="form-group" id="cantidadEstudiantesContainer" style="display: none;">
+                    <label for="cantidadEstudiantes">Cantidad de Estudiantes:</label>
+                    <input id="cantidadEstudiantes" name="cantidadEstudiantes" type="number" class="form-control" min="1" placeholder="Número de estudiantes..." />
+                </div>
+                <button type="submit" class="btn btn-primary btn-wide">Crear</button>
+            </form>
+        </div>
     </div>
 
+    <!-- Tercera fila: Generar Historial de Alumno -->
+    <div class="row-container">
+        <div class="student-history glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h2>Generar Historial de Alumno</h2>
+            @if (TempData["MensajeEstadoHistorial"] != null)
+            {
+                <div class="alert alert-info" role="alert">
+                    @TempData["MensajeEstadoHistorial"]
+                </div>
+            }
+            <form method="get" asp-action="GenerarHistorialVista" asp-controller="Administrador">
+                <div class="input-group mb-3">
+                    <input type="text" name="busquedaId" class="form-control" placeholder="Buscar por ID de alumno..." />
+                    <button type="submit" class="btn btn-primary btn-narrow">Buscar</button>
+                </div>
+            </form>
+            @if (ViewData["Alumnos"] != null)
+            {
+                var alumnos = ViewData["Alumnos"] as List<CelexWebApp.Models.AlumnoMMV.AlumnoModel>;
+                if (alumnos != null && alumnos.Any())
+                {
+                    <div class="table-container">
+                        <div class="modern-table">
+                            <div class="table-header">
+                                <span class="header-item"># Alumno</span>
+                                <span class="header-item">Nombre</span>
+                                <span class="header-item">Matrícula</span>
+                                <span class="header-item">Acción</span>
+                            </div>
+                            <div class="table-body">
+                                @foreach (var alumno in alumnos)
+                                {
+                                    <div class="table-row">
+                                        <span class="row-item" data-label="# Alumno">@alumno.Id</span>
+                                        <span class="row-item" data-label="Nombre">@alumno.Nombre</span>
+                                        <span class="row-item" data-label="Matrícula">@alumno.Matricula</span>
+                                        <span class="row-item" data-label="Acción">
+                                            <a asp-action="GenerarHistorial" asp-controller="Administrador" asp-route-idAlumno="@alumno.Id" class="btn btn-sm btn-success btn-fit">Exportar PDF</a>
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (Context.Request.Query.ContainsKey("busquedaId"))
+                {
+                    <p>No se encontraron resultados para esa búsqueda.</p>
+                }
+            }
+        </div>
+    </div>
 </div>
+
+<canvas id="waveParticleCanvas" style="position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;"></canvas>
 
 @section Scripts {
     <script>
+        // Efecto de partículas flotantes
+        const particleCanvas = document.getElementById("particleCanvas");
+        const particleCtx = particleCanvas.getContext("2d");
+
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+
+        window.addEventListener("resize", () => {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+        });
+
+        const particlesArray = [];
+        const numberOfParticles = 150;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * particleCanvas.width;
+                this.y = Math.random() * particleCanvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 0.7 - 0.35;
+                this.speedY = Math.random() * 0.7 - 0.35;
+                this.opacity = Math.random() * 0.7 + 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > particleCanvas.width) this.x = 0;
+                if (this.x < 0) this.x = particleCanvas.width;
+                if (this.y > particleCanvas.height) this.y = 0;
+                if (this.y < 0) this.y = particleCanvas.height;
+            }
+            draw() {
+                particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                particleCtx.beginPath();
+                particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                particleCtx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+        // Efecto geométrico sutil
+        const geometricCanvas = document.getElementById("geometricCanvas");
+        const geometricCtx = geometricCanvas.getContext("2d");
+
+        geometricCanvas.width = window.innerWidth;
+        geometricCanvas.height = window.innerHeight;
+
+        function drawGeometricPattern() {
+            geometricCtx.clearRect(0, 0, geometricCanvas.width, geometricCanvas.height);
+            geometricCtx.strokeStyle = `rgba(255, 255, 255, 0.05)`;
+            geometricCtx.lineWidth = 0.5;
+
+            for (let i = 0; i < 10; i++) {
+                geometricCtx.beginPath();
+                geometricCtx.moveTo(Math.random() * geometricCanvas.width, 0);
+                geometricCtx.lineTo(Math.random() * geometricCanvas.width, geometricCanvas.height);
+                geometricCtx.stroke();
+            }
+            requestAnimationFrame(drawGeometricPattern);
+        }
+
+        drawGeometricPattern();
+
+        // Animaciones de entrada escalonadas
+        document.addEventListener("DOMContentLoaded", function () {
+            const mainTitle = document.querySelector(".main-title");
+            const sections = document.querySelectorAll(".glass-panel");
+
+            mainTitle.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+            mainTitle.style.opacity = "0";
+            mainTitle.style.transform = "translateY(-50px)";
+            setTimeout(() => {
+                mainTitle.style.opacity = "1";
+                mainTitle.style.transform = "translateY(0)";
+            }, 100);
+
+            sections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+                    section.style.opacity = "1";
+                    section.style.transform = "translateY(0)";
+                }, 300 + index * 200);
+            });
+        });
+
         function marcarLeida(button) {
             const li = button.closest('.notification-item');
             li.style.textDecoration = "line-through";
@@ -294,121 +400,3 @@
         });
     </script>
 }
-
-<style>
-    .alert {
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid transparent;
-        border-radius: 4px;
-    }
-
-    .alert-info {
-        color: #31708f;
-        background-color: #d9edf7;
-        border-color: #bce8f1;
-    }
-
-    .admin-container {
-        display: grid;
-        grid-template-areas:
-            "notifications received-notifications"
-            "add-professor add-professor"
-            "create-group create-group"
-            "student-history student-history";
-        grid-gap: 20px;
-        margin-top: 20px;
-    }
-
-    .notifications {
-        grid-area: notifications;
-        border: 1px solid #ccc;
-        padding: 15px;
-        background-color: #f9f9f9;
-    }
-
-    .received-notifications {
-        grid-area: received-notifications;
-        border: 1px solid #ccc;
-        padding: 15px;
-        background-color: #f9f9f9;
-    }
-
-    .add-professor {
-        grid-area: add-professor;
-        border: 1px solid #ccc;
-        padding: 15px;
-        background-color: #f9f9f9;
-    }
-
-    .create-group {
-        grid-area: create-group;
-        border: 1px solid #ccc;
-        padding: 15px;
-        background-color: #f9f9f9;
-    }
-
-    .student-history {
-        grid-area: student-history;
-        border: 1px solid #ccc;
-        padding: 15px;
-        background-color: #f9f9f9;
-    }
-
-    h2 {
-        margin-top: 0;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .btn {
-        font-size: 0.8em;
-        padding: 5px 10px;
-    }
-
-    .notification-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        background-color: #fff;
-    }
-
-    .notification-buttons {
-        display: flex;
-        gap: 10px;
-    }
-
-    .no-leido {
-        background-color: #fff3cd;
-    }
-
-    .leido {
-        background-color: #e2e3e5;
-        text-decoration: line-through;
-    }
-
-    .table {
-        width: 100%;
-        margin-top: 15px;
-    }
-
-        .table th, .table td {
-            padding: 10px;
-            text-align: left;
-        }
-
-    .input-group {
-        display: flex;
-        gap: 10px;
-    }
-
-        .input-group .form-control {
-            flex: 1;
-        }
-</style>

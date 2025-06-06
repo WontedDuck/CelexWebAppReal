@@ -2,8 +2,161 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-
-    <label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label>
-    <br />
-    <label>Espera mietras un administrador acepta tu solicitud como profesor</label>
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<link href="~/css/espera.css" rel="stylesheet" />
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
+
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border-radius: 15px; padding: 10px 20px; max-width: 900px; margin: 0 auto 20px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);">
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">CelexWebApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #FFFFFF;">Privacy</a>
+                </li>
+                @{
+                    var idRol = Context.Session.GetString("id_rol");
+                }
+                @if (idRol == "3")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Grupos" asp-action="Index" style="color: #FFFFFF;">Ver Grupos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="RegistroGrupos" asp-action="Index" style="color: #FFFFFF;">Ver Registros de Grupos</a>
+                    </li>
+                }
+                @if (idRol == "2")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Libros" asp-action="Index" style="color: #FFFFFF;">Ver Libros</a>
+                    </li>
+                }
+            </ul>
+            <partial name="_LoginPartial" />
+        </div>
+    </div>
+</nav>
+
+<div class="admin-wrapper">
+    <div class="row-container">
+        <div class="waiting-message glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h2>Esperando Aprobación</h2>
+            <div class="message-content">
+                <label id="idAzureLabel">Número de Cuenta: @ViewData["id_azure"]</label>
+                <br />
+                <label>Espera mientras un administrador acepta tu solicitud como profesor</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>© @DateTime.Now.Year - CelexWebApp</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Efecto de partículas flotantes
+    const particleCanvas = document.getElementById("particleCanvas");
+    const particleCtx = particleCanvas.getContext("2d");
+
+    particleCanvas.width = window.innerWidth;
+    particleCanvas.height = window.innerHeight;
+
+    window.addEventListener("resize", () => {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+    });
+
+    const particlesArray = [];
+    const numberOfParticles = 150;
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * particleCanvas.width;
+            this.y = Math.random() * particleCanvas.height;
+            this.size = Math.random() * 3 + 1;
+            this.speedX = Math.random() * 0.7 - 0.35;
+            this.speedY = Math.random() * 0.7 - 0.35;
+            this.opacity = Math.random() * 0.7 + 0.2;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x > particleCanvas.width) this.x = 0;
+            if (this.x < 0) this.x = particleCanvas.width;
+            if (this.y > particleCanvas.height) this.y = 0;
+            if (this.y < 0) this.y = particleCanvas.height;
+        }
+        draw() {
+            particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+            particleCtx.beginPath();
+            particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            particleCtx.fill();
+        }
+    }
+
+    function initParticles() {
+        for (let i = 0; i < numberOfParticles; i++) {
+            particlesArray.push(new Particle());
+        }
+    }
+
+    function animateParticles() {
+        particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        for (let i = 0; i < particlesArray.length; i++) {
+            particlesArray[i].update();
+            particlesArray[i].draw();
+        }
+        requestAnimationFrame(animateParticles);
+    }
+
+    initParticles();
+    animateParticles();
+
+    // Efecto geométrico sutil
+    const geometricCanvas = document.getElementById("geometricCanvas");
+    const geometricCtx = geometricCanvas.getContext("2d");
+
+    geometricCanvas.width = window.innerWidth;
+    geometricCanvas.height = window.innerHeight;
+
+    function drawGeometricPattern() {
+        geometricCtx.clearRect(0, 0, geometricCanvas.width, geometricCanvas.height);
+        geometricCtx.strokeStyle = `rgba(255, 255, 255, 0.05)`;
+        geometricCtx.lineWidth = 0.5;
+
+        for (let i = 0; i < 10; i++) {
+            geometricCtx.beginPath();
+            geometricCtx.moveTo(Math.random() * geometricCanvas.width, 0);
+            geometricCtx.lineTo(Math.random() * geometricCanvas.width, geometricCanvas.height);
+            geometricCtx.stroke();
+        }
+        requestAnimationFrame(drawGeometricPattern);
+    }
+
+    drawGeometricPattern();
+
+    // Animaciones de entrada escalonadas
+    document.addEventListener("DOMContentLoaded", function () {
+        const sections = document.querySelectorAll(".glass-panel");
+
+        sections.forEach((section, index) => {
+            setTimeout(() => {
+                section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+                section.style.opacity = "1";
+                section.style.transform = "translateY(0)";
+            }, 300 + index * 200);
+        });
+    });
+</script>

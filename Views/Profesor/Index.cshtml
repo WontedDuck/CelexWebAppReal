@@ -3,170 +3,226 @@
 @{
     ViewData["Title"] = "Panel del Profesor";
 }
+<link href="~/css/profesor.css" rel="stylesheet" />
+<!-- Fondo animado con partículas y efectos geométricos -->
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
 
-<h1>Bienvenido @ViewData["Nombre"]</h1>
+<!-- Contenedor principal -->
+<div class="admin-wrapper">
+    <div class="row-container">
+        <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h1>Bienvenido @ViewData["Nombre"]</h1>
 
-<!-- Notificaciones recibidas -->
-    <div class="received-notifications">
-        <h2>Notificaciones Recibidas</h2>
-        <ul class="list-group">
-            @if (ViewData["Notificaciones"] != null)
-            {
-                var notificaciones = ViewData["Notificaciones"] as List<CelexWebApp.Models.NotificacionesMMV.NotificacionesModel>;
-                if (notificaciones != null && notificaciones.Count > 0)
-                {
-                    foreach (var notificacion in notificaciones)
+            <!-- Contenedor de secciones horizontales -->
+            <div class="section-row">
+                <!-- Notificaciones Recibidas -->
+                <div class="glass-section" style="opacity: 0; transform: translateY(50px);">
+                    <h2>Notificaciones Recibidas</h2>
+                    <ul class="list-group">
+                        @if (ViewData["Notificaciones"] != null)
+                        {
+                            var notificaciones = ViewData["Notificaciones"] as List<CelexWebApp.Models.NotificacionesMMV.NotificacionesModel>;
+                            if (notificaciones != null && notificaciones.Count > 0)
+                            {
+                                foreach (var notificacion in notificaciones)
+                                {
+                                    var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
+                                    <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")" style="overflow: hidden;">
+                                        <div class="notification-content" style="flex-grow: 1; padding-right: 10px;">
+                                            <strong>@notificacion.Contenido</strong><br />
+                                            <small>@notificacion.Fecha_Registro.ToString("g")</small>
+                                        </div>
+                                        <div class="notification-buttons" style="min-width: 80px; display: flex; gap: 5px; align-items: center;">
+                                            <form method="post" asp-action="MarcarComoLeida" asp-controller="Profesor" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
+                                                <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                                <button type="submit" class="btn btn-white btn-sm">✓</button>
+                                            </form>
+                                            <form method="post" asp-action="BorrarNotificacion" asp-controller="Profesor" style="display:inline;">
+                                                <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
+                                                <button type="submit" class="btn btn-white btn-sm">✖</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item">No hay notificaciones.</li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item">No hay notificaciones.</li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Ver Mis Grupos -->
+                <div class="glass-section" style="opacity: 0; transform: translateY(50px);">
+                    <h2>Mis Grupos</h2>
+                    @if (Model.Grupos != null && Model.Grupos.Count > 0)
                     {
-                        var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
-                        <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")">
-                            <div>
-                                <strong>@notificacion.Contenido</strong><br />
-                                <small>@notificacion.Fecha_Registro.ToString("g")</small>
-                            </div>
-                            <div class="notification-buttons">
-                                <form method="post" asp-action="MarcarComoLeida" asp-controller="Profesor" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
-                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                    <button type="submit" class="btn btn-success btn-sm">✓</button>
-                                </form>
-                                <form method="post" asp-action="BorrarNotificacion" asp-controller="Profesor" style="display:inline;">
-                                    <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                    <button type="submit" class="btn btn-danger btn-sm">✖</button>
-                                </form>
-                            </div>
-                        </li>
+                        <ul class="list-group">
+                            @foreach (var grupo in Model.Grupos)
+                            {
+                                <li class="list-group-item" style="overflow: hidden;">
+                                    <div class="group-content" style="flex-grow: 1; padding-right: 10px;">
+                                        <strong>@grupo.Nombre</strong> - @grupo.Nivel
+                                    </div>
+                                    <a class="btn btn-primary btn-sm" asp-controller="GrupoDetalles" asp-action="Index" asp-route-id="@grupo.Id">Detalles</a>
+                                </li>
+                            }
+                        </ul>
                     }
-                }
-                else
-                {
-                    <li class="list-group-item">No hay notificaciones.</li>
-                }
-            }
-            else
-            {
-                <li class="list-group-item">No hay notificaciones.</li>
-            }
-        </ul>
+                    else
+                    {
+                        <p>No tienes grupos asignados.</p>
+                    }
+                </div>
+
+                <!-- Enviar Mensajes -->
+                <div class="glass-section" style="opacity: 0; transform: translateY(50px);">
+                    <h2>Enviar Mensajes</h2>
+                    <form method="post" asp-action="EnviarMensaje" asp-controller="Profesor" style="display: flex; flex-direction: column; align-items: center;">
+                        <div class="form-group">
+                            <label for="destinatarios">Destinatarios:</label>
+                            <select id="destinatarios" name="destinatarios" class="form-control custom-select" style="max-width: 90%;">
+                                <option value="Alumnos">Alumnos</option>
+                                <option value="Administradores">Administradores</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mensaje">Mensaje:</label>
+                            <textarea id="mensaje" name="mensaje" class="form-control" rows="3" style="max-height: 100px; max-width: 90%;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 90%;">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-<!-- Ver Mis Grupos -->
-<div class="professor-groups">
-    <h2>Mis Grupos</h2>
-    @if (Model.Grupos != null && Model.Grupos.Count > 0)
-    {
-        <ul class="list-group">
-            @foreach (var grupo in Model.Grupos)
-            {
-                <li class="list-group-item">
-                    <strong>@grupo.Nombre</strong> - @grupo.Nivel
-                    <a class="btn btn-primary btn-sm" asp-controller="GrupoDetalles" asp-action="Index" asp-route-id="@grupo.Id">Detalles</a>
-                </li>
+<!-- Pie de página -->
+<footer class="footer">
+    <p>© @DateTime.Now.Year - CelexWebApp</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Inicialización de partículas
+    const particleCanvas = document.getElementById("particleCanvas");
+    const particleCtx = particleCanvas.getContext("2d");
+
+    if (particleCanvas && particleCtx) {
+        console.log("Inicializando partículas...");
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+
+        window.addEventListener("resize", () => {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+        });
+
+        const particlesArray = [];
+        const numberOfParticles = 150;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * particleCanvas.width;
+                this.y = Math.random() * particleCanvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 0.7 - 0.35;
+                this.speedY = Math.random() * 0.7 - 0.35;
+                this.opacity = Math.random() * 0.7 + 0.2;
             }
-        </ul>
-    }
-    else
-    {
-        <p>No tienes grupos asignados.</p>
-    }
-</div>
-
-<!-- Enviar Mensajes -->
-<div class="send-messages">
-    <h2>Enviar Mensajes</h2>
-    <form method="post" asp-action="EnviarMensaje" asp-controller="Profesor">
-        <div class="form-group">
-            <label for="destinatarios">Destinatarios:</label>
-            <select id="destinatarios" name="destinatarios" class="form-control">
-                <option value="Alumnos">Alumnos</option>
-                <option value="Administradores">Administradores</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="mensaje">Mensaje:</label>
-            <textarea id="mensaje" name="mensaje" class="form-control" rows="4"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Enviar</button>
-    </form>
-</div>
-
-@section Scripts {
-    <script>
-
-        // Función para marcar una notificación como leída
-        function marcarLeida(button) {
-            const li = button.closest('.notification-item');
-            li.style.textDecoration = "line-through"; // Marca la notificación como leída visualmente
-            button.disabled = true; // Desactiva el botón de "Marcar como Leída"
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > particleCanvas.width) this.x = 0;
+                if (this.x < 0) this.x = particleCanvas.width;
+                if (this.y > particleCanvas.height) this.y = 0;
+                if (this.y < 0) this.y = particleCanvas.height;
+            }
+            draw() {
+                particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                particleCtx.beginPath();
+                particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                particleCtx.fill();
+            }
         }
-        // Función para borrar una notificación
-        function borrarNotificacion(button) {
-            const li = button.closest('.notification-item');
-            li.remove(); // Elimina la notificación de la lista
+
+        function initParticles() {
+            console.log("Creando partículas...");
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
         }
-    </script>
 
-    }
+        function animateParticles() {
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
 
-<style>
-    .received-notifications {
-        margin-bottom: 20px;
-        padding: 15px;
-        border: 1px solid #ccc;
-        background-color: #f9f9f9;
-    }
-
-    .notification-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        background-color: #fff;
+        initParticles();
+        animateParticles();
+    } else {
+        console.error("No se pudo inicializar el canvas de partículas.");
     }
 
-    .notification-buttons {
-        display: flex;
-        gap: 10px;
+    // Inicialización de efectos geométricos
+    const geometricCanvas = document.getElementById("geometricCanvas");
+    const geometricCtx = geometricCanvas.getContext("2d");
+
+    if (geometricCanvas && geometricCtx) {
+        console.log("Inicializando efectos geométricos...");
+        geometricCanvas.width = window.innerWidth;
+        geometricCanvas.height = window.innerHeight;
+
+        window.addEventListener("resize", () => {
+            geometricCanvas.width = window.innerWidth;
+            geometricCanvas.height = window.innerHeight;
+        });
+
+        function drawGeometricPattern() {
+            geometricCtx.clearRect(0, 0, geometricCanvas.width, geometricCanvas.height);
+            geometricCtx.strokeStyle = `rgba(255, 255, 255, 0.05)`;
+            geometricCtx.lineWidth = 0.5;
+
+            for (let i = 0; i < 10; i++) {
+                geometricCtx.beginPath();
+                geometricCtx.moveTo(Math.random() * geometricCanvas.width, 0);
+                geometricCtx.lineTo(Math.random() * geometricCanvas.width, geometricCanvas.height);
+                geometricCtx.stroke();
+            }
+            requestAnimationFrame(drawGeometricPattern);
+        }
+
+        drawGeometricPattern();
+    } else {
+        console.error("No se pudo inicializar el canvas de efectos geométricos.");
     }
 
-    .no-leido {
-        background-color: #fff3cd;
-    }
+    // Animaciones de entrada escalonadas
+    const sections = document.querySelectorAll(".glass-panel, .glass-section");
 
-    .leido {
-        background-color: #e2e3e5;
-        text-decoration: line-through;
-    }
-    .professor-groups {
-        margin-bottom: 20px;
-        padding: 15px;
-        border: 1px solid #ccc;
-        background-color: #f9f9f9;
-    }
+    sections.forEach((section, index) => {
+        setTimeout(() => {
+            section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+        }, 300 + index * 200);
+    });
 
-    .list-group-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    // Función para marcar una notificación como leída
+    function marcarLeida(button) {
+        const li = button.closest('.notification-item');
+        li.style.textDecoration = "line-through"; // Marca la notificación como leída visualmente
+        button.disabled = true; // Desactiva el botón de "Marcar como Leída"
     }
-    .btn {
-        font-size: 0.8em;
-        padding: 5px 10px;
-        margin-left: 10px;
-    }
-    .send-messages {
-        margin-bottom: 20px;
-        padding: 15px;
-        border: 1px solid #ccc;
-        background-color: #f9f9f9;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    h2 {
-        margin-top: 0;
-    }
-</style>
+</script>

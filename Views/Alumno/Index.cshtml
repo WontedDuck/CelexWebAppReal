@@ -2,34 +2,33 @@
 @{
     ViewData["Title"] = "Panel del Alumno";
     var Alumno = Model.Alumnos.FirstOrDefault();
-
 }
+<link href="~/css/panel-alumno.css" rel="stylesheet" />
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -3;"></canvas>
 
-<div class="container mt-4">
-    <!-- Información del alumno y grupo -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0">Información del Alumno y Grupo</h2>
-                </div>
-                <div class="card-body">
-                    <h3 class="text-primary">Bienvenido, <strong>@Alumno?.alumno.Nombre @Alumno?.alumno.ApellidoMa @Alumno?.alumno.ApellidoPa</strong></h3>
-                    <hr />
-                    <p><strong>Grupo:</strong> <span class="text-secondary">@Model.Nombre</span></p>
-                    <p><strong>Nivel:</strong> <span class="text-secondary">@Model.Nivel</span></p>
-                    <p><strong>Tipo de Curso:</strong> <span class="text-secondary">@Model.TipoCurso</span></p>
-                    <p><strong>Fecha de Inicio:</strong> <span class="text-secondary">@Model.FechaInicio.ToString("dd/MM/yyyy")</span></p>
-                    <p><strong>Fecha de Fin:</strong> <span class="text-secondary">@Model.FechaFin.ToString("dd/MM/yyyy")</span></p>
-                    <p><strong>Profesor:</strong> <span class="text-secondary">@Model.Profesor</span></p>
-                </div>
-            </div>
+<div class="student-wrapper">
+    <h1 class="main-title" style="opacity: 0; transform: translateY(50px);">@ViewData["Title"]</h1>
+
+    <!-- Información del Alumno y Grupo -->
+    <div class="row-container">
+        <div class="student-info glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h2>Información del Alumno y Grupo</h2>
+            <h3 class="text-primary">Bienvenido, <strong>@Alumno?.alumno.Nombre @Alumno?.alumno.ApellidoMa @Alumno?.alumno.ApellidoPa</strong></h3>
+            <hr />
+            <p><strong>Grupo:</strong> <span class="text-secondary">@Model.Nombre</span></p>
+            <p><strong>Nivel:</strong> <span class="text-secondary">@Model.Nivel</span></p>
+            <p><strong>Tipo de Curso:</strong> <span class="text-secondary">@Model.TipoCurso</span></p>
+            <p><strong>Fecha de Inicio:</strong> <span class="text-secondary">@Model.FechaInicio.ToString("dd/MM/yyyy")</span></p>
+            <p><strong>Fecha de Fin:</strong> <span class="text-secondary">@Model.FechaFin.ToString("dd/MM/yyyy")</span></p>
+            <p><strong>Profesor:</strong> <span class="text-secondary">@Model.Profesor</span></p>
         </div>
     </div>
 
-    <!-- Notificaciones recibidas -->
-    <div class="row">
-        <div class="col-md-6">
+    <!-- Notificaciones Recibidas y Calificaciones -->
+    <div class="row-container">
+        <!-- Notificaciones Recibidas -->
+        <div class="notifications glass-panel" style="opacity: 0; transform: translateY(50px);">
             <h2>Notificaciones Recibidas</h2>
             <ul class="list-group">
                 @if (ViewData["Notificaciones"] != null)
@@ -40,19 +39,19 @@
                         foreach (var notificacion in notificaciones)
                         {
                             var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
-                            <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido") list-group-item">
-                                <div>
+                            <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")">
+                                <div class="notification-content">
                                     <strong>@notificacion.Contenido</strong><br />
                                     <small>@notificacion.Fecha_Registro.ToString("g")</small>
                                 </div>
-                                <div class="notification-buttons mt-2">
-                                    <form method="post" asp-action="MarcarComoLeida" asp-controller="Profesor" style="display:inline;">
+                                <div class="notification-buttons">
+                                    <form method="post" asp-action="MarcarComoLeida" asp-controller="Profesor" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
                                         <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                        <button type="submit" class="btn btn-success btn-sm">✓</button>
+                                        <button type="submit" class="btn btn-icon btn-check">✓</button>
                                     </form>
                                     <form method="post" asp-action="BorrarNotificacion" asp-controller="Profesor" style="display:inline;">
                                         <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                        <button type="submit" class="btn btn-danger btn-sm">✖</button>
+                                        <button type="submit" class="btn btn-icon btn-delete">✖</button>
                                     </form>
                                 </div>
                             </li>
@@ -71,66 +70,318 @@
         </div>
 
         <!-- Calificaciones -->
-        <div class="col-md-6">
+        <div class="grades glass-panel" style="opacity: 0; transform: translateY(50px);">
             <h2>Calificaciones</h2>
-            <div>
+            <div class="grades-info">
                 <p><strong>Calificación Continua:</strong> @Alumno?.CalContinua</p>
                 <p><strong>Examen Medio:</strong> @Alumno?.CalExMedia</p>
                 <p><strong>Examen Final:</strong> @Alumno?.CaliExFinal</p>
             </div>
-            <div>
+            <div class="grades-chart">
                 <h3>Gráfica de Calificaciones</h3>
-                <canvas id="graficaCalificaciones" style="max-width: 300px; max-height: 300px;"></canvas>
+                <canvas id="graficaCalificaciones" style="max-width: 300px; max-height: 300px; margin: 0 auto;"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Opciones de notificaciones -->
-    <div class="row mt-4">
-        <div class="col-md-12">
+    <!-- Opciones de Notificaciones -->
+    <div class="row-container">
+        <div class="notification-options glass-panel" style="opacity: 0; transform: translateY(50px);">
             <h2>Opciones de Notificaciones</h2>
-            <div class="d-flex justify-content-between">
-                <!-- Opción para enviar mensaje al administrador -->
-                <form method="post" asp-action="EnviarMensajeAdministrador" asp-controller="Alumno">
-                    <input type="hidden" name="contenido" value="Solicito mi historial." />
-                    <button type="submit" class="btn btn-info">Solicitar Historial al Administrador</button>
-                </form>
+            <div class="options-container">
+                <!-- Sub-sección para Solicitar Historial -->
+                <div class="history-request-section">
+                    <canvas id="buttonParticleCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></canvas>
+                    <span class="request-text">Solicitar Historial al Administrador</span>
+                    <form method="post" asp-action="EnviarMensajeAdministrador" asp-controller="Alumno" class="history-form">
+                        <input type="hidden" name="contenido" value="Solicito mi historial." />
+                        <button type="submit" class="history-button"></button>
+                    </form>
+                </div>
 
                 <!-- Opción para enviar mensaje al profesor -->
-                <form method="post" asp-action="EnviarMensajeProfesor" asp-controller="Profesor">
-                    <div class="form-group">
-                        <label for="contenido">Escribir mensaje al Profesor:</label>
-                        <textarea id="contenido" name="contenido" class="form-control" rows="2" placeholder="Escribe tu mensaje aquí..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-2">Enviar Mensaje al Profesor</button>
-                </form>
+                <div class="option-item">
+                    <form method="post" asp-action="EnviarMensajeProfesor" asp-controller="Profesor">
+                        <div class="form-group">
+                            <label for="contenido">Escribir mensaje al Profesor:</label>
+                            <textarea id="contenido" name="contenido" class="form-control" rows="2" placeholder="Escribe tu mensaje aquí..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-wide mt-2">Enviar Mensaje al Profesor</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<canvas id="waveParticleCanvas" style="position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;"></canvas>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Efecto de partículas flotantes de fondo
+        const particleCanvas = document.getElementById("particleCanvas");
+        const particleCtx = particleCanvas.getContext("2d");
+
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+
+        window.addEventListener("resize", () => {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+        });
+
+        const backgroundParticlesArray = [];
+        const numberOfBackgroundParticles = 200;
+
+        class BackgroundParticle {
+            constructor() {
+                this.x = Math.random() * particleCanvas.width;
+                this.y = Math.random() * particleCanvas.height;
+                this.size = Math.random() * 5 + 2;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.opacity = Math.random() * 0.5 + 0.3;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > particleCanvas.width) this.x = 0;
+                if (this.x < 0) this.x = particleCanvas.width;
+                if (this.y > particleCanvas.height) this.y = 0;
+                if (this.y < 0) this.y = particleCanvas.height;
+            }
+            draw() {
+                particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                particleCtx.beginPath();
+                particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                particleCtx.fill();
+            }
+        }
+
+        function initBackgroundParticles() {
+            for (let i = 0; i < numberOfBackgroundParticles; i++) {
+                backgroundParticlesArray.push(new BackgroundParticle());
+            }
+        }
+
+        function animateBackgroundParticles() {
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+            for (let i = 0; i < backgroundParticlesArray.length; i++) {
+                backgroundParticlesArray[i].update();
+                backgroundParticlesArray[i].draw();
+            }
+            requestAnimationFrame(animateBackgroundParticles);
+        }
+
+        initBackgroundParticles();
+        animateBackgroundParticles();
+
+        // Efecto geométrico sutil
+        const geometricCanvas = document.getElementById("geometricCanvas");
+        const geometricCtx = geometricCanvas.getContext("2d");
+
+        geometricCanvas.width = window.innerWidth;
+        geometricCanvas.height = window.innerHeight;
+
+        function drawGeometricPattern() {
+            geometricCtx.clearRect(0, 0, geometricCanvas.width, geometricCanvas.height);
+            geometricCtx.strokeStyle = `rgba(255, 255, 255, 0.05)`;
+            geometricCtx.lineWidth = 0.5;
+
+            for (let i = 0; i < 10; i++) {
+                geometricCtx.beginPath();
+                geometricCtx.moveTo(Math.random() * geometricCanvas.width, 0);
+                geometricCtx.lineTo(Math.random() * geometricCanvas.width, geometricCanvas.height);
+                geometricCtx.stroke();
+            }
+            requestAnimationFrame(drawGeometricPattern);
+        }
+
+        drawGeometricPattern();
+
+        // Animaciones de entrada escalonadas
+        document.addEventListener("DOMContentLoaded", function () {
+            const mainTitle = document.querySelector(".main-title");
+            const sections = document.querySelectorAll(".glass-panel");
+
+            mainTitle.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+            mainTitle.style.opacity = "0";
+            mainTitle.style.transform = "translateY(-50px)";
+            setTimeout(() => {
+                mainTitle.style.opacity = "1";
+                mainTitle.style.transform = "translateY(0)";
+            }, 100);
+
+            sections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+                    section.style.opacity = "0";
+                    section.style.transform = "translateY(50px)";
+                    setTimeout(() => {
+                        section.style.opacity = "1";
+                        section.style.transform = "translateY(0)";
+                    }, 50);
+                }, 300 + index * 200);
+            });
+        });
+
+        // Chart.js para la gráfica de calificaciones
         const ctx = document.getElementById('graficaCalificaciones').getContext('2d');
         const data = {
             labels: ['Calificación Continua', 'Examen Medio', 'Examen Final'],
             datasets: [{
                 label: 'Calificaciones',
                 data: [
-        @Alumno?.CalContinua,
-        @Alumno?.CalExMedia,
-        @Alumno?.CaliExFinal
+        @Alumno?.CalContinua ?? 0,
+        @Alumno?.CalExMedia ?? 0,
+        @Alumno?.CaliExFinal ?? 0
                 ],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                backgroundColor: [
+                    'rgba(163, 191, 250, 0.6)',
+                    'rgba(167, 139, 250, 0.6)',
+                    'rgba(255, 105, 135, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(163, 191, 250, 1)',
+                    'rgba(167, 139, 250, 1)',
+                    'rgba(255, 105, 135, 1)'
+                ],
+                borderWidth: 1
             }]
         };
 
         const config = {
             type: 'pie',
             data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#FFFFFF', // Letras blancas
+                            font: {
+                                family: 'Open Sans', // Misma tipografía general
+                                size: 14
+                            },
+                            padding: 20,
+                            boxWidth: 20,
+                            boxHeight: 20,
+                            textDecoration: 'none', // Asegurar que no haya tachado
+                            generateLabels: (chart) => {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => ({
+                                    text: label,
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    strokeStyle: data.datasets[0].borderColor[i],
+                                    lineWidth: 1,
+                                    hidden: false, // Nunca ocultar etiquetas
+                                    index: i
+                                }));
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                        titleFont: {
+                            family: 'Open Sans',
+                            size: 14
+                        },
+                        bodyFont: {
+                            family: 'Open Sans',
+                            size: 12
+                        },
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        boxWidth: 10,
+                        boxHeight: 10
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
         };
 
         new Chart(ctx, config);
+
+        function marcarLeida(button) {
+            const li = button.closest('.notification-item');
+            li.style.textDecoration = "line-through";
+            button.disabled = true;
+        }
+
+        // Efecto de partículas en el botón de historial
+        const buttonParticleCanvas = document.getElementById("buttonParticleCanvas");
+        const buttonParticleCtx = buttonParticleCanvas.getContext("2d");
+        const historySection = document.querySelector(".history-request-section");
+
+        let buttonParticlesArray = [];
+        const baseParticleCount = 15;
+
+        class ButtonParticle {
+            constructor() {
+                this.x = Math.random() * buttonParticleCanvas.width;
+                this.y = Math.random() * buttonParticleCanvas.height;
+                this.size = Math.random() * 10 + 5;
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.speedY = (Math.random() - 0.5) * 2;
+                this.opacity = Math.random() * 0.4 + 0.3;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > buttonParticleCanvas.width) this.x = 0;
+                if (this.x < 0) this.x = buttonParticleCanvas.width;
+                if (this.y > buttonParticleCanvas.height) this.y = 0;
+                if (this.y < 0) this.y = buttonParticleCanvas.height;
+            }
+            draw() {
+                buttonParticleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                buttonParticleCtx.beginPath();
+                buttonParticleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                buttonParticleCtx.fill();
+            }
+        }
+
+        function initButtonParticles() {
+            buttonParticlesArray = [];
+            for (let i = 0; i < baseParticleCount; i++) {
+                buttonParticlesArray.push(new ButtonParticle());
+            }
+        }
+
+        function animateButtonParticles() {
+            const rect = historySection.getBoundingClientRect();
+            buttonParticleCanvas.width = rect.width;
+            buttonParticleCanvas.height = rect.height;
+            buttonParticleCanvas.style.width = `${rect.width}px`;
+            buttonParticleCanvas.style.height = `${rect.height}px`;
+            buttonParticleCtx.clearRect(0, 0, buttonParticleCanvas.width, buttonParticleCanvas.height);
+
+            for (let i = 0; i < buttonParticlesArray.length; i++) {
+                buttonParticlesArray[i].update();
+                buttonParticlesArray[i].draw();
+            }
+            requestAnimationFrame(animateButtonParticles);
+        }
+
+        initButtonParticles();
+        animateButtonParticles();
+
+        window.addEventListener("resize", () => {
+            const rect = historySection.getBoundingClientRect();
+            buttonParticleCanvas.width = rect.width;
+            buttonParticleCanvas.height = rect.height;
+            buttonParticleCanvas.style.width = `${rect.width}px`;
+            buttonParticleCanvas.style.height = `${rect.height}px`;
+            initButtonParticles();
+        });
     </script>
 }

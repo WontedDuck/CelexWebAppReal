@@ -3,165 +3,350 @@
 @{
     ViewData["Title"] = "Detalles del Grupo";
 }
-@{
-    var idRol = Context.Session.GetString("id_rol");
-}
+<link href="~/css/grupo_deta/inde.css" rel="stylesheet" />
+<!-- Fondo animado con partículas y efectos geométricos -->
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
 
-@if (TempData["informacion"] != null)
-{
-    <div class="alert alert-info">
-        @TempData["informacion"]
-    </div>
-}
-
-<h1>Detalles del Grupo</h1>
-
-<!-- FORMULARIO: Modificar Información -->
-<form asp-action="GuardarGrupo" asp-controller="GrupoDetalles" method="post" class="mb-4">
-    <input type="hidden" name="IdGrupo" value="@Model.Id" />
-
-    <div class="card shadow-sm">
-        <div class="card-body row align-items-end">
-            <div class="col-md-9">
-                @if (TempData["mensaje"] != null)
-                {
-                    <div class="alert alert-info">@TempData["mensaje"]</div>
+<!-- Menú de navegación -->
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border-radius: 15px; padding: 10px 20px; max-width: 900px; margin: 0 auto 20px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);">
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">CelexWebApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #FFFFFF;">Privacy</a>
+                </li>
+                @{
+                    var idRol = Context.Session.GetString("id_rol");
                 }
-                @if (TempData["error"] != null)
+                @if (idRol == "3")
                 {
-                    <div class="alert alert-danger">@TempData["error"]</div>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Grupos" asp-action="Index" style="color: #FFFFFF;">Ver Grupos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="RegistroGrupos" asp-action="Index" style="color: #FFFFFF;">Ver Registros de Grupos</a>
+                    </li>
                 }
-                <div class="mb-2">
-                    <label class="form-label"><strong>Nombre del Grupo:</strong></label>
-                    <input type="text" name="Nombre" class="form-control" value="@Model.Nombre" required />
-                </div>
-                <div class="mb-2">
-                    <label class="form-label"><strong>Nivel:</strong></label>
-                    <input type="text" name="Nivel" class="form-control" value="@Model.Nivel" required />
-                </div>
-                <div class="mb-2">
-                    <label class="form-label"><strong>Tipo de Curso:</strong></label>
-                    <input type="text" name="TipoCurso" class="form-control" value="@Model.TipoCurso" required />
-                </div>
-                <div class="mb-2">
-                    <label class="form-label"><strong>Fecha de Inicio:</strong></label>
-                    <input type="date" name="FechaInicio" class="form-control" value="@Model.FechaInicio.ToString("yyyy-MM-dd")" required />
-                </div>
-                <div class="mb-2">
-                    <label class="form-label"><strong>Fecha de Fin:</strong></label>
-                    <input type="date" name="FechaFin" class="form-control" value="@Model.FechaFin.ToString("yyyy-MM-dd")" required />
-                </div>
-                <div class="mb-2">
-                    <label class="form-label"><strong>Capacidad:</strong></label>
-                    <input type="number" name="Capacidad" class="form-control" value="@Model.Capacidad" min="1" required />
-                </div>
-                <div class="mb-2">
-                    <label class="form-label"><strong>Ocupados:</strong></label>
-                    <input type="number" id="OcupadosDisplay" class="form-control" value="@Model.Ocupados" min="0" readonly />
-                    <input type="hidden" name="Ocupados" id="Ocupados" value="@Model.Ocupados" />
-                </div>
-            </div>
-            @if (idRol == "3")
-            {
-                <div class="col-md-3 d-flex flex-column align-items-end gap-2">
-                    <button type="submit" name="accion" value="modificar" class="btn btn-primary w-100 mb-2" onclick="return confirm('¿Estás seguro de modificar el curso?');">
-                        Modificar Información
-                    </button>
-                    <button type="submit" name="accion" value="terminar" class="btn btn-success w-100" onclick="return confirm('¿Estás seguro de terminar el ciclo?');">
-                        Terminar Ciclo
-                    </button>
-                </div>
-            }
+                @if (idRol == "2")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Libros" asp-action="Index" style="color: #FFFFFF;">Ver Libros</a>
+                    </li>
+                }
+            </ul>
+            <partial name="_LoginPartial" />
         </div>
     </div>
-</form>
+</nav>
 
-<!-- FORMULARIO: Borrar Grupo -->
-@if (idRol == "3")
-{
-    <form asp-action="BorrarGrupo" asp-controller="GrupoDetalles" method="post" class="w-100">
-        <input type="hidden" name="IdGrupo" value="@Model.Id" />
-        <button type="submit" class="btn btn-danger w-100" onclick="return confirm('¿Estás seguro de borrar el grupo?');">Borrar Grupo</button>
-    </form>
-}
-<h2>Profesor</h2>
-@if (!string.IsNullOrEmpty(Model.Profesor))
-{
-    <p>@Model.Profesor</p>
-}
-else if (TempData["informacion"]?.ToString() == "Grupo Vacio")
-{
-    <a class="btn btn-warning" asp-controller="GrupoDetalles" asp-action="BuscarProfesor">Agregar Profesor</a>
-}
-else
-{
-    <p>No hay profesor asignado.</p>
-}
+<!-- Contenedor principal -->
+<div class="admin-wrapper">
+    <div class="row-container">
+        <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h1>Detalles del Grupo</h1>
 
+            <!-- Sección: Información del Grupo -->
+            <div class="glass-section" style="margin-bottom: 25px;">
+                <h2>Información del Grupo</h2>
+                @if (TempData["informacion"] != null && TempData["informacion"].ToString() != "Grupo Vacio")
+                {
+                    <div class="alert alert-info glass-alert" style="margin-bottom: 15px;">@TempData["informacion"]</div>
+                }
 
-<h2>Alumnos</h2>
-@if (TempData["informacion"]?.ToString() == "Grupo Vacio")
-{
-    <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
-}
-else
-{
-    <ul class="list-group" id="lista-alumnos">
-        @foreach (var alumno in Model.Alumnos)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    @alumno.alumno.Nombre @alumno.alumno.ApellidoPa @alumno.alumno.ApellidoMa
-                </div>
+                <!-- FORMULARIO: Modificar Información -->
+                <form asp-action="GuardarGrupo" asp-controller="GrupoDetalles" method="post" style="margin-bottom: 20px;">
+                    <input type="hidden" name="IdGrupo" value="@Model.Id" />
 
-                <div class="d-flex align-items-center">
-                    @if (idRol == "3")
+                    <div class="glass-card">
+                        <div class="card-body">
+                            @if (TempData["mensaje"] != null)
+                            {
+                                <div class="alert alert-info glass-alert" style="margin-bottom: 15px;">@TempData["mensaje"]</div>
+                            }
+                            @if (TempData["error"] != null)
+                            {
+                                <div class="alert alert-danger glass-alert" style="margin-bottom: 15px;">@TempData["error"]</div>
+                            }
+                            <div class="row">
+                                <div class="col-md-6 col-12" style="margin-bottom: 15px;">
+                                    <div class="form-group">
+                                        <label class="form-label"><strong>Nombre del Grupo:</strong></label>
+                                        <input type="text" name="Nombre" class="form-control" value="@Model.Nombre" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><strong>Nivel:</strong></label>
+                                        <input type="text" name="Nivel" class="form-control" value="@Model.Nivel" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><strong>Tipo de Curso:</strong></label>
+                                        <input type="text" name="TipoCurso" class="form-control" value="@Model.TipoCurso" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><strong>Capacidad:</strong></label>
+                                        <input type="number" name="Capacidad" class="form-control" value="@Model.Capacidad" min="1" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-12" style="margin-bottom: 15px;">
+                                    <div class="form-group">
+                                        <label class="form-label"><strong>Fecha de Inicio:</strong></label>
+                                        <input type="date" name="FechaInicio" class="form-control" value="@Model.FechaInicio.ToString("yyyy-MM-dd")" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><strong>Fecha de Fin:</strong></label>
+                                        <input type="date" name="FechaFin" class="form-control" value="@Model.FechaFin.ToString("yyyy-MM-dd")" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><strong>Ocupados:</strong></label>
+                                        <input type="number" id="OcupadosDisplay" class="form-control" value="@Model.Ocupados" min="0" readonly />
+                                        <input type="hidden" name="Ocupados" id="Ocupados" value="@Model.Ocupados" />
+                                    </div>
+                                </div>
+                            </div>
+                            @if (idRol == "3")
+                            {
+                                <div class="button-group" style="margin-top: 15px; justify-content: center; gap: 10px;">
+                                    <button type="submit" name="accion" value="modificar" class="btn btn-primary" onclick="return confirm('¿Estás seguro de modificar el curso?');">
+                                        Modificar Información
+                                    </button>
+                                    <button type="submit" name="accion" value="terminar" class="btn btn-success" onclick="return confirm('¿Estás seguro de terminar el ciclo?');">
+                                        Terminar Ciclo
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </form>
+
+                <!-- FORMULARIO: Borrar Grupo -->
+                @if (idRol == "3")
+                {
+                    <form asp-action="BorrarGrupo" asp-controller="GrupoDetalles" method="post" style="margin-top: 15px;">
+                        <input type="hidden" name="IdGrupo" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger w-100" onclick="return confirm('¿Estás seguro de borrar el grupo?');">Borrar Grupo</button>
+                    </form>
+                }
+            </div>
+
+            <!-- Sección: Profesor -->
+            <div class="glass-section" style="margin-bottom: 25px;">
+                <h2>Profesor</h2>
+                <div style="margin-top: 10px;">
+                    @if (!string.IsNullOrEmpty(Model.Profesor))
                     {
-                        <a class="btn btn-danger btn-sm me-2"
-                           asp-controller="GrupoDetalles"
-                           asp-action="BajaAlumno"
-                           asp-route-id="@alumno.alumno.Id">
-                            Dar de Baja
-                        </a>
+                        <p>@Model.Profesor</p>
                     }
-
-                    @if (idRol == "2")
+                    else if (TempData["informacion"]?.ToString() == "Grupo Vacio")
                     {
-                        <a class="btn btn-success btn-sm me-2"
-                           asp-controller="GrupoDetalles"
-                           asp-action="Calificaciones"
-                           asp-route-id="@alumno.alumno.Id">
-                            Ver Calificaciones
-                        </a>
+                        <a class="btn btn-warning" asp-controller="GrupoDetalles" asp-action="BuscarProfesor">Agregar Profesor</a>
+                    }
+                    else
+                    {
+                        <p>No hay profesor asignado.</p>
+                    }
+                </div>
+            </div>
 
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary rounded-pill me-2">Asistencia: @(alumno.alumno.Asistencia)</span>
+            <!-- Sección: Alumnos -->
+            <div class="glass-section">
+                <h2>Alumnos</h2>
+                @if (TempData["informacion"]?.ToString() == "Grupo Vacio")
+                {
+                    <div style="margin-top: 10px;">
+                        <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-container" style="margin-top: 15px;">
+                        <table class="table glass-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre Completo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var alumno in Model.Alumnos)
+                                {
+                                    <tr class="glass-row">
+                                        <td>@alumno.alumno.Nombre @alumno.alumno.ApellidoPa @alumno.alumno.ApellidoMa</td>
+                                        <td>
+                                            <div class="action-buttons" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                                @if (idRol == "3")
+                                                {
+                                                    <a class="btn btn-danger btn-sm"
+                                                       asp-controller="GrupoDetalles"
+                                                       asp-action="BajaAlumno"
+                                                       asp-route-id="@alumno.alumno.Id">
+                                                        Dar de Baja
+                                                    </a>
+                                                }
 
-                            <form method="post" class="d-inline me-1"
-                                  asp-controller="GrupoDetalles"
-                                  asp-action="AgregarAsistencia"
-                                  asp-route-id="@alumno.alumno.Id">
-                                <button type="submit" class="btn btn-primary btn-sm">+</button>
-                            </form>
-
-                            <form method="post" class="d-inline"
-                                  asp-controller="GrupoDetalles"
-                                  asp-action="QuitarAsistencia"
-                                  asp-route-id="@alumno.alumno.Id">
-                                <button type="submit" class="btn btn-secondary btn-sm @((alumno.alumno.Asistencia) <= 0 ? "disabled" : "")">-</button>
-                            </form>
+                                                @if (idRol == "2")
+                                                {
+                                                    <a class="btn btn-success btn-sm"
+                                                       asp-controller="GrupoDetalles"
+                                                       asp-action="Calificaciones"
+                                                       asp-route-id="@alumno.alumno.Id">
+                                                        Ver Calificaciones
+                                                    </a>
+                                                    <span class="badge bg-primary rounded-pill">Asistencia: @(alumno.alumno.Asistencia)</span>
+                                                    <form method="post" class="d-inline"
+                                                          asp-controller="GrupoDetalles"
+                                                          asp-action="AgregarAsistencia"
+                                                          asp-route-id="@alumno.alumno.Id">
+                                                        <button type="submit" class="btn btn-primary btn-sm">+</button>
+                                                    </form>
+                                                    <form method="post" class="d-inline"
+                                                          asp-controller="GrupoDetalles"
+                                                          asp-action="QuitarAsistencia"
+                                                          asp-route-id="@alumno.alumno.Id">
+                                                        <button type="submit" class="btn btn-secondary btn-sm @((alumno.alumno.Asistencia) <= 0 ? "disabled" : "")">-</button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (Model.Ocupados < Model.Capacidad)
+                    {
+                        <div style="margin-top: 15px;">
+                            @if (idRol == "3")
+                            {
+                                <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
+                            }
                         </div>
                     }
-                </div>
-            </li>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pie de página -->
+<footer class="footer">
+    <p>© @DateTime.Now.Year - CelexWebApp</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Inicialización de partículas
+    const particleCanvas = document.getElementById("particleCanvas");
+    const particleCtx = particleCanvas.getContext("2d");
+
+    if (particleCanvas && particleCtx) {
+        console.log("Inicializando partículas...");
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+
+        window.addEventListener("resize", () => {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+        });
+
+        const particlesArray = [];
+        const numberOfParticles = 150;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * particleCanvas.width;
+                this.y = Math.random() * particleCanvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 0.7 - 0.35;
+                this.speedY = Math.random() * 0.7 - 0.35;
+                this.opacity = Math.random() * 0.7 + 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > particleCanvas.width) this.x = 0;
+                if (this.x < 0) this.x = particleCanvas.width;
+                if (this.y > particleCanvas.height) this.y = 0;
+                if (this.y < 0) this.y = particleCanvas.height;
+            }
+            draw() {
+                particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                particleCtx.beginPath();
+                particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                particleCtx.fill();
+            }
         }
-    </ul>
-    @if (Model.Ocupados < Model.Capacidad)
-    {
-        <br />
-        @if (idRol == "3")
-        {
-            <a class="btn btn-success" asp-controller="GrupoDetalles" asp-action="BuscarAlumnos">Agregar Alumno</a>
-        }                
-    }    
-}
+
+        function initParticles() {
+            console.log("Creando partículas...");
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    } else {
+        console.error("No se pudo inicializar el canvas de partículas.");
+    }
+
+    // Inicialización de efectos geométricos
+    const geometricCanvas = document.getElementById("geometricCanvas");
+    const geometricCtx = geometricCanvas.getContext("2d");
+
+    if (geometricCanvas && geometricCtx) {
+        console.log("Inicializando efectos geométricos...");
+        geometricCanvas.width = window.innerWidth;
+        geometricCanvas.height = window.innerHeight;
+
+        window.addEventListener("resize", () => {
+            geometricCanvas.width = window.innerWidth;
+            geometricCanvas.height = window.innerHeight;
+        });
+
+        function drawGeometricPattern() {
+            geometricCtx.clearRect(0, 0, geometricCanvas.width, geometricCanvas.height);
+            geometricCtx.strokeStyle = `rgba(255, 255, 255, 0.05)`;
+            geometricCtx.lineWidth = 0.5;
+
+            for (let i = 0; i < 10; i++) {
+                geometricCtx.beginPath();
+                geometricCtx.moveTo(Math.random() * geometricCanvas.width, 0);
+                geometricCtx.lineTo(Math.random() * geometricCanvas.width, geometricCanvas.height);
+                geometricCtx.stroke();
+            }
+            requestAnimationFrame(drawGeometricPattern);
+        }
+
+        drawGeometricPattern();
+    } else {
+        console.error("No se pudo inicializar el canvas de efectos geométricos.");
+    }
+
+    // Animaciones de entrada escalonadas
+    const sections = document.querySelectorAll(".glass-panel, .glass-section");
+
+    sections.forEach((section, index) => {
+        setTimeout(() => {
+            section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+        }, 300 + index * 200);
+    });
+</script>

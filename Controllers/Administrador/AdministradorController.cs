@@ -2,10 +2,13 @@
 using CelexWebApp.Models.AdministradorMMV;
 using CelexWebApp.Models.AlumnoMMV;
 using CelexWebApp.Models.NotificacionesMMV;
+using CelexWebApp.Models.ProfesorMMV;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.Graph;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
@@ -277,6 +280,11 @@ namespace CelexWebApp.Controllers.Administrador
                     TempData["MensajeEstadoCrearGrupo"] = "La fecha de inicio debe ser anterior a la fecha de fin.";
                     return RedirectToAction("Index");
                 }
+                if (cantidadEstudiantes >= 50)
+                {
+                    TempData["MensajeEstadoCrearGrupo"] = "El grupo tiene demaciados estudiantes";
+                    return RedirectToAction("Index");
+                }
                 using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
                 {
                     await connection.OpenAsync();
@@ -485,6 +493,85 @@ namespace CelexWebApp.Controllers.Administrador
 
             var pdfBytes = documento.GeneratePdf();
             return File(pdfBytes, "application/pdf", "Historial_Celex.pdf");
+        }
+        public async Task<IActionResult> GenerarHistorialProfesor()
+        {
+            List<ProfesorModel> profesores = new List<ProfesorModel>();
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT * FROM Profesores";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            ProfesorModel profesor = new ProfesorModel
+                            {
+                                Id = reader.GetInt16(0),
+                                Numero_Empleado = Convert.ToInt32(reader.GetDecimal(2)),
+                                Nombre = reader.GetString(3),
+                                Telefono = reader.GetString(4),
+                            };
+                            profesores.Add(profesor);
+                        }
+                    }
+                }
+            }
+            return View("HistorialProfesor", profesores);
+        }
+        public async Task<IActionResult> HistorialProfesor(int id)
+        {
+            List<int> ids = new List<int>();
+            TipoGrupoModel tipoGrupoModel = new TipoGrupoModel();
+            List<GrupoDetallesModel> grupos = new List<GrupoDetallesModel>();
+            using(SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT DISTINCT id_cursos FROM Historial_Avance_Alumnos WHERE id_profesor = @Id_profesor";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id_profesor", id);
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            ids.Add(reader.GetInt16(0));
+                        }
+                    }
+                }
+                foreach (var curso in ids)
+                {
+                    string query2 = "SELECT * FROM Curso WHERE id_cursos = @Id_curso";
+                    using (SqlCommand command = new SqlCommand(query2, connection))
+                    {
+                        command.Parameters.AddWithValue("@Id_curso", curso);
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                var cursoModel = new GrupoDetallesModel
+                                {
+                                    Id = reader.GetInt16(0),
+                                    Nivel = tipoGrupoModel.Niveles((reader.GetByte(1)).ToString()),
+                                    TipoCurso = tipoGrupoModel.Tipo((reader.GetByte(2)).ToString()),
+                                    FechaInicio = reader.GetDateTime(3),
+                                    FechaFin = reader.GetDateTime(4),
+                                    Ocupados = Convert.ToInt32(reader.GetDecimal(6)),
+                                    Nombre = reader.GetString(7)
+                                };
+                                grupos.Add(cursoModel);
+                            }
+                        }
+                    }
+                }
+            }
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+            var documento = new HistorialProfesorDocument(grupos);
+            var pdfBytes = documento.GeneratePdf();
+            return File(pdfBytes, "application/pdf", "Historial_Profesor.pdf");
+
         }
     }
 }

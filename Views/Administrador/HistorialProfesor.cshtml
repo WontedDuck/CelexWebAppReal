@@ -1,0 +1,36 @@
+﻿@model List<CelexWebApp.Models.ProfesorMMV.ProfesorModel>
+
+@{
+    ViewData["Title"] = "Historial de Maestros";
+}
+
+<h2>Historial de Maestros</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Número de Empleado</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var profesor in Model)
+        {
+            <tr>
+                <td>@profesor.Id</td>
+                <td>@profesor.Nombre</td>
+                <td>@profesor.Numero_Empleado</td>
+                <td>@profesor.Telefono</td>
+                <td>
+                    <form asp-action="HistorialProfesor" asp-controller="Administrador" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@profesor.Id" />
+                        <button type="submit" class="btn btn-primary btn-sm">Ver Historial</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

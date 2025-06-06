@@ -181,6 +181,11 @@
                 <button type="submit" class="btn btn-primary">Buscar</button>
             </div>
         </form>
+        <form method="post" asp-action="GenerarHistorialProfesor" asp-controller="Administrador">
+            <div class="input-group mb-3">
+                <button type="submit" class="btn btn-primary">Buscar Profesor</button>
+            </div>
+        </form>
         @if (ViewData["Alumnos"] != null)
         {
             var alumnos = ViewData["Alumnos"] as List<CelexWebApp.Models.AlumnoMMV.AlumnoModel>;

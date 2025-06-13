@@ -3,92 +3,205 @@
 @{
     ViewData["Title"] = "Calificaciones del Alumno";
 }
+<link href="~/css/grupo_deta/calificaciones.css" rel="stylesheet" />
+<!-- Fondo animado con partículas y efectos geométricos -->
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
+<!-- Contenedor principal -->
+<div class="admin-wrapper">
+    <div class="row-container">
+        <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
+            <h2>Calificaciones del Alumno</h2>
+            <div class="row">
+                <!-- Foto de perfil -->
+                <div class="col-md-3 col-12">
+                    <div class="profile-picture" style="width: 150px; height: 150px; border: 1px solid rgba(255, 255, 255, 0.4); text-align: center; line-height: 150px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border-radius: 15px; color: #FFFFFF; margin: 0 auto;">
+                        Foto de Perfil
+                    </div>
+                </div>
+                <form asp-action="ActualizarInformacion" asp-controller="GrupoDetalles" method="post" class="col-md-9 col-12">
+                    <!-- ID del alumno (HIDDEN obligatorio para que se envíe) -->
+                    <input asp-for="alumno.Id" type="hidden" />
 
-<div class="container">
-    <div class="row">
-        <!-- Foto de perfil -->
-        <div class="col-md-3">
-            <div class="profile-picture" style="width: 150px; height: 150px; border: 1px solid #ccc; text-align: center; line-height: 150px;">
-                Foto de Perfil
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input asp-for="alumno.Nombre" class="form-control" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido Paterno:</label>
+                        <input asp-for="alumno.ApellidoPa" class="form-control" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido Materno:</label>
+                        <input asp-for="alumno.ApellidoMa" class="form-control" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label>Calificación Continua:</label>
+                        <input asp-for="CalContinua" class="form-control" type="number" max="10" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Calificación Examen Medio:</label>
+                        <input asp-for="CalExMedia" class="form-control" type="number" max="10" min="0"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Calificación Examen Final:</label>
+                        <input asp-for="CaliExFinal" class="form-control" type="number" max="10" min="0"/>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Actualizar Información</button>
+                </form>
+            </div>
+
+            <!-- Gráfica de pastel -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h3>Comparación de Calificaciones</h3>
+                    <div class="chart-container">
+                        <canvas id="graficaCalificaciones" style="max-width: 400px; max-height: 400px;"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
-        <form asp-action="ActualizarInformacion" asp-controller="GrupoDetalles" method="post">
-            <!-- ID del alumno (HIDDEN obligatorio para que se envíe) -->
-            <input asp-for="alumno.Id" type="hidden" />
-
-            <div class="form-group">
-                <label>Nombre:</label>
-                <input asp-for="alumno.Nombre" class="form-control" readonly />
-            </div>
-            <div class="form-group">
-                <label>Apellido Paterno:</label>
-                <input asp-for="alumno.ApellidoPa" class="form-control" readonly />
-            </div>
-            <div class="form-group">
-                <label>Apellido Materno:</label>
-                <input asp-for="alumno.ApellidoMa" class="form-control" readonly />
-            </div>
-            <div class="form-group">
-                <label>Calificación Continua:</label>
-                <input asp-for="CalContinua" class="form-control" type="number" max="10" />
-            </div>
-            <div class="form-group">
-                <label>Calificación Examen Medio:</label>
-                <input asp-for="CalExMedia" class="form-control" type="number" max="10" />
-            </div>
-            <div class="form-group">
-                <label>Calificación Examen Final:</label>
-                <input asp-for="CaliExFinal" class="form-control" type="number" max="10" />
-            </div>
-
-            <button type="submit" class="btn btn-primary">Actualizar Información</button>
-        </form>
     </div>
 </div>
 
-    <!-- Gráfica de pastel -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <h3>Comparación de Calificaciones</h3>
-            <div style="display: flex; justify-content: center;">
-                <canvas id="graficaCalificaciones" style="max-width: 400px; max-height: 400px;"></canvas>
-            </div>
-        </div>
-    </div>
+<!-- Pie de página -->
+<footer class="footer">
+    <p>© @DateTime.Now.Year - CelexWebApp</p>
+</footer>
 
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Inicialización de partículas
+    const particleCanvas = document.getElementById("particleCanvas");
+    const particleCtx = particleCanvas.getContext("2d");
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const ctx = document.getElementById('graficaCalificaciones').getContext('2d');
-        const data = {
-            labels: ['Calificación Continua', 'Examen Medio', 'Examen Final', 'Faltante para 30'],
-            datasets: [{
-                label: 'Calificaciones',
-                data: [
-                    @Model.CalContinua,
-                    @Model.CalExMedia,
-                    @Model.CaliExFinal,
-                     Math.max(0, 30 - (
-                    @Model.CalContinua +
-                    @Model.CalExMedia +
-                    @Model.CaliExFinal
-                    ))
-                ],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#CCCCCC'],
-            }]
-        };
+    if (particleCanvas && particleCtx) {
+        console.log("Inicializando partículas...");
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
 
-        const config = {
-            type: 'pie',
-            data: data,
-        };
+        window.addEventListener("resize", () => {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+        });
 
-        new Chart(ctx, config);
+        const particlesArray = [];
+        const numberOfParticles = 150;
 
-        function subirInformacion() {
-            alert('Infomacion Actualizada con exito.');
+        class Particle {
+            constructor() {
+                this.x = Math.random() * particleCanvas.width;
+                this.y = Math.random() * particleCanvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 0.7 - 0.35;
+                this.speedY = Math.random() * 0.7 - 0.35;
+                this.opacity = Math.random() * 0.7 + 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > particleCanvas.width) this.x = 0;
+                if (this.x < 0) this.x = particleCanvas.width;
+                if (this.y > particleCanvas.height) this.y = 0;
+                if (this.y < 0) this.y = particleCanvas.height;
+            }
+            draw() {
+                particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                particleCtx.beginPath();
+                particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                particleCtx.fill();
+            }
         }
-    </script>
-}
+
+        function initParticles() {
+            console.log("Creando partículas...");
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    } else {
+        console.error("No se pudo inicializar el canvas de partículas.");
+    }
+
+    // Inicialización de efectos geométricos
+    const geometricCanvas = document.getElementById("geometricCanvas");
+    const geometricCtx = geometricCanvas.getContext("2d");
+
+    if (geometricCanvas && geometricCtx) {
+        console.log("Inicializando efectos geométricos...");
+        geometricCanvas.width = window.innerWidth;
+        geometricCanvas.height = window.innerHeight;
+
+        window.addEventListener("resize", () => {
+            geometricCanvas.width = window.innerWidth;
+            geometricCanvas.height = window.innerHeight;
+        });
+
+        function drawGeometricPattern() {
+            geometricCtx.clearRect(0, 0, geometricCanvas.width, geometricCanvas.height);
+            geometricCtx.strokeStyle = `rgba(255, 255, 255, 0.05)`;
+            geometricCtx.lineWidth = 0.5;
+
+            for (let i = 0; i < 10; i++) {
+                geometricCtx.beginPath();
+                geometricCtx.moveTo(Math.random() * geometricCanvas.width, 0);
+                geometricCtx.lineTo(Math.random() * geometricCanvas.width, geometricCanvas.height);
+                geometricCtx.stroke();
+            }
+            requestAnimationFrame(drawGeometricPattern);
+        }
+
+        drawGeometricPattern();
+    } else {
+        console.error("No se pudo inicializar el canvas de efectos geométricos.");
+    }
+
+    // Animaciones de entrada escalonadas
+    const sections = document.querySelectorAll(".glass-panel");
+
+    sections.forEach((section, index) => {
+        setTimeout(() => {
+            section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+        }, 300 + index * 200);
+    });
+
+    // Gráfica de pastel
+    const ctx = document.getElementById('graficaCalificaciones').getContext('2d');
+    const totalCalificaciones = (@Model.CalContinua + @Model.CalExMedia + @Model.CaliExFinal);
+    const faltante = Math.max(0, 30 - totalCalificaciones);
+    const data = {
+        labels: ['Calificación Continua', 'Examen Medio', 'Examen Final', 'Faltante para 30'],
+        datasets: [{
+            label: 'Calificaciones',
+            data: [@Model.CalContinua, @Model.CalExMedia, @Model.CaliExFinal, faltante],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#CCCCCC'],
+        }]
+    };
+
+    const config = {
+        type: 'pie',
+        data: data,
+    };
+
+    new Chart(ctx, config);
+
+    function subirInformacion() {
+        alert('Información Actualizada con éxito.');
+    }
+</script>

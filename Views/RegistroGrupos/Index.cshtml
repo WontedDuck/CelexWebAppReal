@@ -1,66 +1,77 @@
 ﻿@{
     ViewData["Title"] = "Avance de Alumnos";
 }
+<link href="~/css/registro_grup/indx.css" rel="stylesheet" />
+<!-- Fondo animado con partículas y efectos geométricos -->
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
 
-<h1>@ViewData["Title"]</h1>
+<div class="admin-wrapper">
+    <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
+        <h1>@ViewData["Title"]</h1>
 
-<!-- Filtros -->
-<button class="btn btn-primary" onclick="irAGraficas()">Ver Gráfica</button>
-<div class="row mb-4">
-    <div class="col-md-3">
-        <label>Grupo:</label>
-        <select id="grupo" class="form-control"></select>
-    </div>
-    <div class="col-md-3">
-        <label>Maestro:</label>
-        <select id="maestro" class="form-control"></select>
-    </div>
-    <div class="col-md-3">
-        <label>Nivel:</label>
-        <select id="nivel" class="form-control"></select>
-    </div>
-    <div class="col-md-3">
-        <label>Tipo de Curso:</label>
-        <select id="tipoCurso" class="form-control"></select>
-    </div>
-    <div class="col-md-3">
-        <label>Rango de fechas - Desde:</label>
-        <input type="date" id="fechaInicio" class="form-control" onchange="validarFechas()">
-    </div>
-    <div class="col-md-3">
-        <label>Rango de fechas - Hasta:</label>
-        <input type="date" id="fechaFin" class="form-control" onchange="validarFechas()">
+        <!-- Filtros -->
+        <div class="button-container">
+            <button class="btn btn-primary" onclick="irAGraficas()">Ver Gráfica</button>
+        </div>
+        <div class="row-container">
+            <div class="col-md-2 form-group">
+                <label>Grupo:</label>
+                <select id="grupo" class="form-control"></select>
+            </div>
+            <div class="col-md-2 form-group">
+                <label>Maestro:</label>
+                <select id="maestro" class="form-control"></select>
+            </div>
+            <div class="col-md-2 form-group">
+                <label>Nivel:</label>
+                <select id="nivel" class="form-control"></select>
+            </div>
+            <div class="col-md-2 form-group">
+                <label>Tipo de Curso:</label>
+                <select id="tipoCurso" class="form-control"></select>
+            </div>
+            <div class="col-md-2 form-group date-group">
+                <label>Rango de fechas - Desde:</label>
+                <input type="date" id="fechaInicio" class="form-control" onchange="validarFechas()">
+            </div>
+            <div class="col-md-2 form-group date-group">
+                <label>Rango de fechas - Hasta:</label>
+                <input type="date" id="fechaFin" class="form-control" onchange="validarFechas()">
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-container">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Alumno</th>
+                        <th>Grupo</th>
+                        <th>Maestro</th>
+                        <th>Nivel</th>
+                        <th>Tipo de Curso</th>
+                        <th>Fecha de Creación</th>
+                        <th>Generar Historial</th>
+                        <th>Actividad</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-avance">
+                    <tr>
+                        <td colspan="9" class="text-center">Seleccione filtros para ver datos.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-
-<!-- Tabla -->
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Alumno</th>
-            <th>Grupo</th>
-            <th>Maestro</th>
-            <th>Nivel</th>
-            <th>Tipo de Curso</th>
-            <th>Fecha de Creación</th>
-            <th>Generar Historial</th>
-            <th>Actividad</th>
-        </tr>
-    </thead>
-    <tbody id="tabla-avance">
-        <tr>
-            <td colspan="7" class="text-center">Seleccione filtros para ver datos.</td>
-        </tr>
-    </tbody>
-</table>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-
-                function validarFechas() {
+        function validarFechas() {
             var fechaDesde = $("#fechaInicio").val();
             var fechaHasta = $("#fechaFin").val();
 
@@ -78,19 +89,19 @@
             });
         });
 
-                                function cargarFiltros() {
+        function cargarFiltros() {
             $.get("/RegistroGrupos/ObtenerFiltros", function (data) {
                 console.log("Datos recibidos:", data);
                 cargarOpciones("#grupo", data.grupos);
                 cargarOpciones("#maestro", data.maestros);
-                cargarOpciones("#nivel", data.niveles);  
-                cargarOpciones("#tipoCurso", data.tiposCurso);  
+                cargarOpciones("#nivel", data.niveles);
+                cargarOpciones("#tipoCurso", data.tiposCurso);
             }).fail(function(jqXHR, textStatus, errorThrown) {
                 console.error("Error en la solicitud AJAX:", textStatus, errorThrown);
             });
         }
 
-                        function cargarOpciones(selector, opciones) {
+        function cargarOpciones(selector, opciones) {
             $(selector).empty();
             $(selector).append('<option value="">Todos</option>');
 
@@ -103,7 +114,8 @@
                 });
             }
         }
-                        function buscarAvance() {
+
+        function buscarAvance() {
             var grupo = $("#grupo").val();
             var maestro = $("#maestro").val();
             var nivel = $("#nivel").val();
@@ -111,13 +123,13 @@
             var fechaDesde = $("#fechaInicio").val();
             var fechaHasta = $("#fechaFin").val();
 
-                if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
-            alert("La fecha 'Desde' no puede ser mayor que la fecha 'Hasta'");
-            $("#fechaFin").val("");
-            return;
-        }
+            if (fechaDesde && fechaHasta && new Date(fechaDesde) > new Date(fechaHasta)) {
+                alert("La fecha 'Desde' no puede ser mayor que la fecha 'Hasta'");
+                $("#fechaFin").val("");
+                return;
+            }
 
-            $("#tabla-avance").html('<tr><td colspan="6" class="text-center">Cargando...</td></tr>');
+            $("#tabla-avance").html('<tr><td colspan="9" class="text-center">Cargando...</td></tr>');
 
             $.ajax({
                 url: "/RegistroGrupos/BuscarAvance",
@@ -142,25 +154,29 @@
                                 "<td>" + item.nivel + "</td>" +
                                 "<td>" + item.tipoCurso + "</td>" +
                                 "<td>" + formatDate(item.fechaCreacion) + "</td>" +
+                                "<td><a href='/RegistroGrupos/GenerarHistorial?idAlumno=" + item.id + "' class='btn btn-success btn-sm'>Generar</a></td>" +
+                                "<td><a href='/RegistroGrupos/Actividad?id=" + item.id + "' class='btn btn-info btn-sm'>Ver</a></td>" +
                                 "</tr>";
                         });
                     } else {
-                        rows = "<tr><td colspan='6' class='text-center'>No se encontraron resultados con los filtros aplicados.</td></tr>";
-                            }
+                        rows = "<tr><td colspan='9' class='text-center'>No se encontraron resultados con los filtros aplicados.</td></tr>";
+                    }
                     $("#tabla-avance").html(rows);
                 },
                 error: function(xhr, status, error) {
                     console.error("Error al buscar avance:", error);
-                    $("#tabla-avance").html("<tr><td colspan='6' class='text-center text-danger'>Error al cargar los datos. Intente nuevamente.</td></tr>");
+                    $("#tabla-avance").html("<tr><td colspan='9' class='text-center text-danger'>Error al cargar los datos. Intente nuevamente.</td></tr>");
                 }
             });
         }
+
         function formatDate(dateStr) {
             if (!dateStr) return '';
             var date = new Date(dateStr);
             return date.toLocaleDateString('es-MX');
         }
-                function irAGraficas() {
+
+        function irAGraficas() {
             const grupo = $("#grupo").val() || '';
             const maestro = $("#maestro").val() || '';
             const nivel = $("#nivel").val() || '';
@@ -171,6 +187,76 @@
             const url = `/RegistroGrupos/Graficas?grupo=${grupo}&maestro=${maestro}&nivel=${nivel}&tipoCurso=${tipoCurso}&fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}`;
             window.location.href = url;
         }
+    </script>
+    <script>
+        // Animación de desplazamiento para partículas
+        const particleCanvas = document.getElementById("particleCanvas");
+        const particleCtx = particleCanvas.getContext("2d");
 
+        if (particleCanvas && particleCtx) {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+
+            window.addEventListener("resize", () => {
+                particleCanvas.width = window.innerWidth;
+                particleCanvas.height = window.innerHeight;
+            });
+
+            const particlesArray = [];
+            const numberOfParticles = 150;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * particleCanvas.width;
+                    this.y = Math.random() * particleCanvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 0.7 - 0.35;
+                    this.speedY = Math.random() * 0.7 - 0.35;
+                    this.opacity = Math.random() * 0.7 + 0.2;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x > particleCanvas.width) this.x = 0;
+                    if (this.x < 0) this.x = particleCanvas.width;
+                    if (this.y > particleCanvas.height) this.y = 0;
+                    if (this.y < 0) this.y = particleCanvas.height;
+                }
+                draw() {
+                    particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    particleCtx.beginPath();
+                    particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    particleCtx.fill();
+                }
+            }
+
+            function initParticles() {
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particlesArray.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                    particlesArray[i].draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            initParticles();
+            animateParticles();
+        }
+
+        // Animaciones de entrada
+        const sections = document.querySelectorAll(".glass-panel, h1, .button-container, .row-container, .table-container");
+        sections.forEach((section, index) => {
+            setTimeout(() => {
+                section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+                section.style.opacity = "1";
+                section.style.transform = "translateY(0)";
+            }, 300 + index * 200);
+        });
     </script>
 }

@@ -41,7 +41,7 @@ public class HistorialProfesorDocument : IDocument
                 });
                 table.Header(header =>
                 {
-                    header.Cell().Element(CellStyle).Text("ID").Bold();
+                    header.Cell().Element(CellStyle).Text("ID Grupo").Bold();
                     header.Cell().Element(CellStyle).Text("Nombre").Bold();
                     header.Cell().Element(CellStyle).Text("Ocupados").Bold();
                     header.Cell().Element(CellStyle).Text("Inicio").Bold();

@@ -3,60 +3,73 @@
 @{
     ViewData["Title"] = "Registro";
 }
+<link href="~/css/registro.css" rel="stylesheet" />
+<!-- Fondo animado con partículas y efectos geométricos -->
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
 
-<h1>@ViewData["Title"]</h1>
+<div class="admin-wrapper">
+    <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
+        <h1>@ViewData["Title"]</h1>
+        <h2>Bienvenido usuario nuevo, realiza un registro para poder acceder a las funciones completas que tenemos disponibles para ti</h2>
 
-<h2>Bienvenido usuario nuevo, realiza un registro para poder acceder a las funciones completas que tenemos disponibles para ti</h2>
+        <form method="post" asp-action="Registro" asp-controller="Registro" class="form-container">
+            <div class="form-group">
+                <label for="RolSeleccionado">Seleccione su rol:</label>
+                <select asp-for="RolSeleccionado" class="form-control" id="RolSeleccionado"
+                        asp-items="Model.Roles">
+                    <option value="">Seleccione...</option>
+                </select>
+                <span asp-validation-for="RolSeleccionado" class="text-danger"></span>
+            </div>
 
-<form method="post" asp-action="Registro" asp-controller="Registro">
-    <div class="form-group">
-        <label for="rol">Seleccione su rol:</label>
-        <select asp-for="RolSeleccionado" class="form-control" id="RolSeleccionado"
-                asp-items="Model.Roles">
-            <option value="">Seleccione...</option>
-        </select>
-        <span asp-validation-for="RolSeleccionado" class="text-danger"></span>
+            <div class="role-form" data-role="Alumno" style="display:none;">
+                <h3>Registro de Alumno</h3>
+                <div class="form-group">
+                    <label asp-for="Alumno.Nombre" class="control-label"></label>
+                    <input asp-for="Alumno.Nombre" class="form-control" />
+                    <span asp-validation-for="Alumno.Nombre" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Alumno.ApellidoPaterno" class="control-label"></label>
+                    <input asp-for="Alumno.ApellidoPaterno" class="form-control" />
+                    <span asp-validation-for="Alumno.ApellidoPaterno" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Alumno.ApellidoMaterno" class="control-label"></label>
+                    <input asp-for="Alumno.ApellidoMaterno" class="form-control" />
+                    <span asp-validation-for="Alumno.ApellidoMaterno" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Alumno.Telefono" class="control-label"></label>
+                    <input asp-for="Alumno.Telefono" class="form-control" />
+                    <span asp-validation-for="Alumno.Telefono" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Alumno.Matricula" class="control-label"></label>
+                    <input asp-for="Alumno.Matricula" class="form-control" />
+                    <span asp-validation-for="Alumno.Matricula" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Registro" class="btn btn-primary" />
+            </div>
+        </form>
+
+        <div class="azure-container" style="margin-top: 20px; text-align: right;">
+            <label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label>
+            <form asp-controller="Registro" asp-action="EnviarID" method="post" style="display: inline; margin-left: 20px;">
+                <button id="BtnAzureLabel" type="submit" class="btn btn-primary">Enviar ID</button>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div class="role-form" data-role="Alumno" style="display:none;">
-        <h3>Registro de Alumno</h3>
-        <div class="form-group">
-            <label asp-for="Alumno.Nombre" class="control-label"></label>
-            <input asp-for="Alumno.Nombre" class="form-control" />
-            <span asp-validation-for="Alumno.Nombre" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Alumno.ApellidoPaterno" class="control-label"></label>
-            <input asp-for="Alumno.ApellidoPaterno" class="form-control" />
-            <span asp-validation-for="Alumno.ApellidoPaterno" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Alumno.ApellidoMaterno" class="control-label"></label>
-            <input asp-for="Alumno.ApellidoMaterno" class="form-control" />
-            <span asp-validation-for="Alumno.ApellidoMaterno" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Alumno.Telefono" class="control-label"></label>
-            <input asp-for="Alumno.Telefono" class="form-control" />
-            <span asp-validation-for="Alumno.Telefono" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Alumno.Matricula" class="control-label"></label>
-            <input asp-for="Alumno.Matricula" class="form-control" />
-            <span asp-validation-for="Alumno.Matricula" class="text-danger"></span>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <input type="submit" value="Registro" class="btn btn-primary" />
-    </div>
-</form>
-
-<label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label>
-<br />
-<form asp-controller="Registro" asp-action="EnviarID" method="post">
-    <button id="BtnAzureLabel" type="submit" class="btn btn-primary">Enviar ID</button>
-</form>
+<!-- Pie de página -->
+<footer class="footer">
+    <p>© @DateTime.Now.Year - CelexWebApp</p>
+</footer>
 
 @section Scripts {
     @{
@@ -75,34 +88,75 @@
                 }
             });
         });
+
+        // Animación de desplazamiento para partículas
+        const particleCanvas = document.getElementById("particleCanvas");
+        const particleCtx = particleCanvas.getContext("2d");
+
+        if (particleCanvas && particleCtx) {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+
+            window.addEventListener("resize", () => {
+                particleCanvas.width = window.innerWidth;
+                particleCanvas.height = window.innerHeight;
+            });
+
+            const particlesArray = [];
+            const numberOfParticles = 150;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * particleCanvas.width;
+                    this.y = Math.random() * particleCanvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 0.7 - 0.35;
+                    this.speedY = Math.random() * 0.7 - 0.35;
+                    this.opacity = Math.random() * 0.7 + 0.2;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x > particleCanvas.width) this.x = 0;
+                    if (this.x < 0) this.x = particleCanvas.width;
+                    if (this.y > particleCanvas.height) this.y = 0;
+                    if (this.y < 0) this.y = particleCanvas.height;
+                }
+                draw() {
+                    particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    particleCtx.beginPath();
+                    particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    particleCtx.fill();
+                }
+            }
+
+            function initParticles() {
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particlesArray.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                    particlesArray[i].draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            initParticles();
+            animateParticles();
+        }
+
+        // Animaciones de entrada
+        const sections = document.querySelectorAll(".glass-panel, h1, h2, .form-container, .azure-container, #idAzureLabel, #BtnAzureLabel");
+        sections.forEach((section, index) => {
+            setTimeout(() => {
+                section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+                section.style.opacity = "1";
+                section.style.transform = "translateY(0)";
+            }, 300 + index * 200);
+        });
     </script>
 }
-
-<style>
-    #idAzureLabel {
-        position: fixed;
-        bottom: 100px;
-        right: 200px;
-        background-color: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 0.9em;
-    }
-
-    #BtnAzureLabel {
-        position: fixed;
-        bottom: 100px;
-        right: 10px;
-        background-color: black;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 0.9em;
-        transition: transform 0.3s ease;
-    }
-
-        #BtnAzureLabel:hover {
-            transform: scale(1.2);
-        }
-</style>

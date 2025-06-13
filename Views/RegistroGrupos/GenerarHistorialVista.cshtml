@@ -3,43 +3,129 @@
 @{
     ViewData["Title"] = "Generar Historial";
 }
+<link href="~/css/registro_grup/genera_histrial_vi.css" rel="stylesheet" />
+<!-- Fondo animado con partículas y efectos geométricos -->
+<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
+<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
 
-<h2>Generar Historial de Alumno</h2>
+<div class="admin-wrapper">
+    <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
+        <h2>Generar Historial de Alumno</h2>
 
-<form method="get" asp-action="GenerarHistorialVista">
-    <div class="input-group mb-3">
-        <input type="text" name="busquedaId" class="form-control" placeholder="Buscar por ID de alumno..." />
-        <button type="submit" class="btn btn-primary">Buscar</button>
+        <form method="get" asp-action="GenerarHistorialVista" class="form-container">
+            <div class="input-group mb-3">
+                <input type="text" name="busquedaId" class="form-control" placeholder="Buscar por ID de alumno..." />
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </div>
+        </form>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-container">
+                <div class="modern-table">
+                    <div class="table-header">
+                        <div class="header-item" data-label="# Alumno"># Alumno</div>
+                        <div class="header-item" data-label="Nombre">Nombre</div>
+                        <div class="header-item" data-label="Matrícula">Matrícula</div>
+                        <div class="header-item" data-label="Acciones">Acción</div>
+                    </div>
+                    <div class="table-body">
+                        @foreach (var alumno in Model)
+                        {
+                            <div class="table-row">
+                                <div class="row-item" data-label="# Alumno">@alumno.Id</div>
+                                <div class="row-item" data-label="Nombre">@alumno.Nombre</div>
+                                <div class="row-item" data-label="Matrícula">@alumno.Matricula</div>
+                                <div class="row-item" data-label="Acciones">
+                                    <a asp-action="GenerarHistorial" asp-route-idAlumno="@alumno.Id" class="btn btn-full btn-success">Exportar PDF</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        else if (Context.Request.Query.ContainsKey("busquedaId"))
+        {
+            <p style="opacity: 0; transform: translateY(50px);">No se encontraron resultados para esa búsqueda.</p>
+        }
     </div>
-</form>
+</div>
 
-@if (Model != null && Model.Any())
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th># Alumno</th>
-                <th>Nombre</th>
-                <th>Matrícula</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var alumno in Model)
-            {
-                <tr>
-                    <td>@alumno.Id</td>
-                    <td>@alumno.Nombre</td>
-                    <td>@alumno.Matricula</td>
-                    <td>
-                        <a asp-action="GenerarHistorial" asp-route-idAlumno="@alumno.Id" class="btn btn-sm btn-success">Exportar PDF</a>
-                    </td>
-                </tr>
+<!-- Pie de página -->
+<footer class="footer">
+    <p>© @DateTime.Now.Year - CelexWebApp</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Animación de desplazamiento para partículas
+    const particleCanvas = document.getElementById("particleCanvas");
+    const particleCtx = particleCanvas.getContext("2d");
+
+    if (particleCanvas && particleCtx) {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+
+        window.addEventListener("resize", () => {
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+        });
+
+        const particlesArray = [];
+        const numberOfParticles = 150;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * particleCanvas.width;
+                this.y = Math.random() * particleCanvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 0.7 - 0.35;
+                this.speedY = Math.random() * 0.7 - 0.35;
+                this.opacity = Math.random() * 0.7 + 0.2;
             }
-        </tbody>
-    </table>
-}
-else if (Context.Request.Query.ContainsKey("busquedaId"))
-{
-    <p>No se encontraron resultados para esa búsqueda.</p>
-}
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > particleCanvas.width) this.x = 0;
+                if (this.x < 0) this.x = particleCanvas.width;
+                if (this.y > particleCanvas.height) this.y = 0;
+                if (this.y < 0) this.y = particleCanvas.height;
+            }
+            draw() {
+                particleCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                particleCtx.beginPath();
+                particleCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                particleCtx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    }
+
+    // Animaciones de entrada
+    const sections = document.querySelectorAll(".glass-panel, h2, .form-container, .table-container, p");
+    sections.forEach((section, index) => {
+        setTimeout(() => {
+            section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
+            section.style.opacity = "1";
+            section.style.transform = "translateY(0)";
+        }, 300 + index * 200);
+    });
+</script>

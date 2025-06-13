@@ -9,6 +9,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Graph;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
+using Microsoft.Kiota.Abstractions;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -385,9 +386,12 @@ namespace CelexWebApp.Controllers.Administrador
                             }
                         }
                     }
-                    e = Ocupados - (i + 1);
+                    e = Ocupados - i;
+                    int ocupads = 0;
+                    bool registrocurso = false, registrohistorialcurso = false;
                     foreach (var dato in InfoAlumnos)
                     {
+                        registrocurso = true;
                         string insertQuery = "INSERT INTO Historial_Avance_Alumnos (id_estudiantes, id_profesor, id_cursos, asistencia, calcontinua, calexmedia, caliexfinal) VALUES (@Id_estudiantes, @Id_profesor, @Id_cursos, @Asistencia, @Calcontinua, @Calexmedia, @Caliexfinal)";
                         using (SqlCommand insertCmd = new SqlCommand(insertQuery, connection))
                         {
@@ -401,9 +405,56 @@ namespace CelexWebApp.Controllers.Administrador
                             await insertCmd.ExecuteNonQueryAsync();
                         }
                     }
+                    if(registrocurso)
+                    {
+                        string selectquery = "SELECT * FROM Historial_Curso WHERE id_curso_origen = @Id_curso_origen AND id_nivel = @Id_nivel AND id_tipo_curso = @Id_tipo_curso AND fecha_inicio >= @Fecha_inicio_minima AND fecha_fin <= @Fecha_fin_maxima;";
 
+                        using (SqlCommand select = new SqlCommand(selectquery, connection))
+                        {
+                            select.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
+                            select.Parameters.AddWithValue("@Id_nivel", Nivel);
+                            select.Parameters.AddWithValue("@Id_tipo_curso", TipoCurso);
+                            select.Parameters.AddWithValue("@Fecha_inicio_minima", FechaInicio);
+                            select.Parameters.AddWithValue("@Fecha_fin_maxima", FechaFin); 
+                            using (SqlDataReader reader = await select.ExecuteReaderAsync())
+                                if(reader.Read())
+                                {
+                                    registrohistorialcurso = true;
+                                    ocupads = Convert.ToInt32(reader.GetDecimal(7));
+                                }
+                        }
+                        if(registrohistorialcurso)
+                        {
+                            string updatequery = "UPDATE Historial_Curso SET ocupados = @Ocupados WHERE id_curso_origen = @Id_curso_origen AND id_nivel = @Id_nivel AND id_tipo_curso = @Id_tipo_curso AND fecha_inicio >= @Fecha_inicio_minima AND fecha_fin <= @Fecha_fin_maxima;";
+                            using (SqlCommand updateCmd = new SqlCommand(updatequery, connection))
+                            {
+                                updateCmd.Parameters.AddWithValue("@Ocupados", ocupads + e); 
+                                updateCmd.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
+                                updateCmd.Parameters.AddWithValue("@Id_nivel", Nivel);
+                                updateCmd.Parameters.AddWithValue("@Id_tipo_curso", TipoCurso);
+                                updateCmd.Parameters.AddWithValue("@Fecha_inicio_minima", FechaInicio);
+                                updateCmd.Parameters.AddWithValue("@Fecha_fin_maxima", FechaFin);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string insert3query = "INSERT INTO Historial_Curso (id_curso_origen, id_nivel, id_tipo_curso, fecha_inicio, fecha_fin, capacidad, ocupados, nombre_curso) VALUES (@Id_curso_origen, @Id_nivel, @Id_tipo_curso, @Fecha_inicio, @Fecha_fin, @Capacidad, @Ocupados, @Nombre_curso)";
+                        using (SqlCommand insert3Cmd = new SqlCommand(insert3query, connection))
+                        {
+                            insert3Cmd.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
+                            insert3Cmd.Parameters.AddWithValue("@Id_nivel", Nivel);
+                            insert3Cmd.Parameters.AddWithValue("@Id_tipo_curso", TipoCurso);
+                            insert3Cmd.Parameters.AddWithValue("@Fecha_inicio", FechaInicio);
+                            insert3Cmd.Parameters.AddWithValue("@Fecha_fin", FechaFin);
+                            insert3Cmd.Parameters.AddWithValue("@Capacidad", Capacidad);
+                            insert3Cmd.Parameters.AddWithValue("@Ocupados", e);
+                            insert3Cmd.Parameters.AddWithValue("@Nombre_curso", Nombre);
+                            await insert3Cmd.ExecuteNonQueryAsync();
+                        }
+                    }
                     while (0 <= i)
-                    { 
+                    {
                         string query4 = "DELETE FROM Avance_Alumnos WHERE id_estudiantes = @Id_estudiantes";
                         using (SqlCommand command = new SqlCommand(query4, connection))
                         {

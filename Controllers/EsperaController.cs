@@ -1,8 +1,12 @@
 ﻿using CelexWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Graph;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
+using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace CelexWebApp.Controllers
 {
@@ -28,6 +32,34 @@ namespace CelexWebApp.Controllers
             var user = _graphServiceClient.Me.GetAsync().Result;
             ViewData["id_azure"] = user.Id.ToString();
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegresarMenu()
+        {
+            int id_usuario = 0;
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                using (SqlCommand command1 = new SqlCommand("SELECT id_registrado FROM Registrados WHERE id_azure = @id", connection))
+                {
+                    command1.Parameters.AddWithValue("@id", ViewData["id_azure"]);
+                    using(SqlDataReader reader = command1.ExecuteReader())
+                        if (reader.Read())
+                            id_usuario = reader.GetInt32(0);
+                }
+                using (SqlCommand command2 = new SqlCommand("DELETE Mensajes WHERE id_remitente = @id", connection))
+                {
+                    command2.Parameters.AddWithValue("@id", id_usuario);
+                    await command2.ExecuteNonQueryAsync();
+                }
+                using (SqlCommand command = new SqlCommand("DELETE FROM Registrados WHERE id_azure = @id", connection))
+                {
+                    command.Parameters.AddWithValue("@id", ViewData["id_azure"]);
+                    command.ExecuteNonQuery();
+                }
+            }
+            return RedirectToAction("Index", "Home");
         }
     }
 }

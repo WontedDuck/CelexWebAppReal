@@ -4,56 +4,12 @@
     ViewData["Title"] = "Detalles del Grupo";
 }
 <link href="~/css/grupo_deta/inde.css" rel="stylesheet" />
-<!-- Fondo animado con partículas y efectos geométricos -->
-<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
-<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
-
-<!-- Menú de navegación -->
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border-radius: 15px; padding: 10px 20px; max-width: 900px; margin: 0 auto 20px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);">
-    <div class="container-fluid">
-        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">CelexWebApp</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-            <ul class="navbar-nav flex-grow-1">
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #FFFFFF;">Privacy</a>
-                </li>
-                @{
-                    var idRol = Context.Session.GetString("id_rol");
-                }
-                @if (idRol == "3")
-                {
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Grupos" asp-action="Index" style="color: #FFFFFF;">Ver Grupos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="RegistroGrupos" asp-action="Index" style="color: #FFFFFF;">Ver Registros de Grupos</a>
-                    </li>
-                }
-                @if (idRol == "2")
-                {
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Libros" asp-action="Index" style="color: #FFFFFF;">Ver Libros</a>
-                    </li>
-                }
-            </ul>
-            <partial name="_LoginPartial" />
-        </div>
-    </div>
-</nav>
-
 <!-- Contenedor principal -->
 <div class="admin-wrapper">
     <div class="row-container">
         <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
             <h1>Detalles del Grupo</h1>
-
+            
             <!-- Sección: Información del Grupo -->
             <div class="glass-section" style="margin-bottom: 25px;">
                 <h2>Información del Grupo</h2>
@@ -61,7 +17,9 @@
                 {
                     <div class="alert alert-info glass-alert" style="margin-bottom: 15px;">@TempData["informacion"]</div>
                 }
-
+                @{
+                    var idRol = Context.Session.GetString("id_rol");
+                }
                 <!-- FORMULARIO: Modificar Información -->
                 <form asp-action="GuardarGrupo" asp-controller="GrupoDetalles" method="post" style="margin-bottom: 20px;">
                     <input type="hidden" name="IdGrupo" value="@Model.Id" />

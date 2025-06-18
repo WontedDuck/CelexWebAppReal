@@ -53,8 +53,6 @@
                         <th>Nivel</th>
                         <th>Tipo de Curso</th>
                         <th>Fecha de Creación</th>
-                        <th>Generar Historial</th>
-                        <th>Actividad</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-avance">
@@ -153,9 +151,7 @@
                                 "<td>" + item.maestroNombre + "</td>" +
                                 "<td>" + item.nivel + "</td>" +
                                 "<td>" + item.tipoCurso + "</td>" +
-                                "<td>" + formatDate(item.fechaCreacion) + "</td>" +
-                                "<td><a href='/RegistroGrupos/GenerarHistorial?idAlumno=" + item.id + "' class='btn btn-success btn-sm'>Generar</a></td>" +
-                                "<td><a href='/RegistroGrupos/Actividad?id=" + item.id + "' class='btn btn-info btn-sm'>Ver</a></td>" +
+                                "<td>" + formatDate(item.fechaCreacion) + "</td>" 
                                 "</tr>";
                         });
                     } else {

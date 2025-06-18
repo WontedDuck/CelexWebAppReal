@@ -3,42 +3,81 @@
     var avanceJson = ViewData["AvanceJson"] as string;
 }
 <link href="~/css/registro_grup/grafica.css" rel="stylesheet" />
-<!-- Fondo animado con partículas y efectos geométricos -->
-<canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
-<canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
 
-<div class="admin-wrapper">
-    <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
-        <h2 id="tituloGrafica">Comparación</h2>
+<style>
+    #particleCanvas, #geometricCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -2;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+    }
 
-        <div class="row-container">
-            <div class="form-group">
-                <label for="campo1">Comparar:</label>
-                <select id="campo1" class="form-control">
-                    <option value="TipoCurso">Tipo de Curso</option>
-                    <option value="Nivel">Nivel</option>
-                    <option value="GrupoNombre">Grupo</option>
-                    <option value="MaestroNombre">Maestro</option>
-                    <option value="FechaCreacion">Fecha</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="campo2">Con:</label>
-                <select id="campo2" class="form-control">
-                    <option value="Nivel">Nivel</option>
-                    <option value="TipoCurso">Tipo de Curso</option>
-                    <option value="GrupoNombre">Grupo</option>
-                    <option value="MaestroNombre">Maestro</option>
-                    <option value="FechaCreacion">Fecha</option>
-                </select>
-            </div>
-        </div>
+    #geometricCanvas {
+        z-index: -1;
+    }
 
-        <canvas id="grafica" height="300"></canvas>
+    .grafica-wrapper {
+        width: 100%;
+        max-width: 600px;
+        margin: 40px auto 0 auto;
+        background: var(--glass-bg, rgba(255,255,255,0.1));
+        border-radius: 15px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        padding: 30px 20px;
+        text-align: center;
+    }
 
-        <div class="button-container">
-            <a asp-controller="RegistroGrupos" asp-action="Index" class="btn btn-secondary mt-4">Volver</a>
-        </div>
+    .grafica-container {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        background: transparent;
+    }
+
+        .grafica-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 300px !important;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
+        }
+</style>
+
+<canvas id="particleCanvas"></canvas>
+<canvas id="geometricCanvas"></canvas>
+
+<div class="grafica-wrapper">
+    <h2 id="tituloGrafica">Comparación</h2>
+
+    <div style="margin-bottom: 20px;">
+        <label for="campo1">Comparar:</label>
+        <select id="campo1" class="form-control" style="display:inline-block; width:auto;">
+            <option value="TipoCurso">Tipo de Curso</option>
+            <option value="Nivel">Nivel</option>
+            <option value="GrupoNombre">Grupo</option>
+            <option value="MaestroNombre">Maestro</option>
+            <option value="FechaCreacion">Fecha</option>
+        </select>
+        <label for="campo2" style="margin-left:10px;">Con:</label>
+        <select id="campo2" class="form-control" style="display:inline-block; width:auto;">
+            <option value="Nivel">Nivel</option>
+            <option value="TipoCurso">Tipo de Curso</option>
+            <option value="GrupoNombre">Grupo</option>
+            <option value="MaestroNombre">Maestro</option>
+            <option value="FechaCreacion">Fecha</option>
+        </select>
+    </div>
+
+    <div class="grafica-container">
+        <canvas id="graficaCalificaciones"></canvas>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+        <a asp-controller="RegistroGrupos" asp-action="Index" class="btn btn-secondary mt-4">Volver</a>
     </div>
 </div>
 
@@ -48,7 +87,7 @@
         const avanceData = @Html.Raw(avanceJson);
         let chart;
 
-        const ctx = document.getElementById('grafica').getContext('2d');
+        const ctx = document.getElementById('graficaCalificaciones').getContext('2d');
 
         document.getElementById("campo1").addEventListener("change", generarGrafica);
         document.getElementById("campo2").addEventListener("change", generarGrafica);
@@ -164,15 +203,5 @@
             initParticles();
             animateParticles();
         }
-
-        // Animaciones de entrada
-        const sections = document.querySelectorAll(".glass-panel, h2, .row-container, canvas, .btn");
-        sections.forEach((section, index) => {
-            setTimeout(() => {
-                section.style.transition = "opacity 1.5s ease-out, transform 1.5s ease-out";
-                section.style.opacity = "1";
-                section.style.transform = "translateY(0)";
-            }, 300 + index * 200);
-        });
     </script>
 }

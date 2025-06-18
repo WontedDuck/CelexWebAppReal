@@ -521,7 +521,7 @@ namespace CelexWebApp.Controllers.Administrador
             }
             return View("HistorialProfesor", profesores);
         }
-        public async Task<IActionResult> HistorialProfesor(int id)
+        public async Task<IActionResult> HistorialProfesor(int id, string nombre)
         {
             List<int> ids = new List<int>();
             TipoGrupoModel tipoGrupoModel = new TipoGrupoModel();
@@ -543,23 +543,24 @@ namespace CelexWebApp.Controllers.Administrador
                 }
                 foreach (var curso in ids)
                 {
-                    string query2 = "SELECT * FROM Curso WHERE id_cursos = @Id_curso";
+                    string query2 = "SELECT * FROM Historial_Curso WHERE id_curso_origen = @Id_curso AND id_profesor = @Id_profesor";
                     using (SqlCommand command = new SqlCommand(query2, connection))
                     {
                         command.Parameters.AddWithValue("@Id_curso", curso);
+                        command.Parameters.AddWithValue("@Id_profesor", id);
                         using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
                             if (await reader.ReadAsync())
                             {
                                 var cursoModel = new GrupoDetallesModel
                                 {
-                                    Id = reader.GetInt16(0),
-                                    Nivel = tipoGrupoModel.Niveles((reader.GetByte(1)).ToString()),
-                                    TipoCurso = tipoGrupoModel.Tipo((reader.GetByte(2)).ToString()),
-                                    FechaInicio = reader.GetDateTime(3),
-                                    FechaFin = reader.GetDateTime(4),
-                                    Ocupados = Convert.ToInt32(reader.GetDecimal(6)),
-                                    Nombre = reader.GetString(7)
+                                    Id = reader.GetInt16(1),
+                                    Nivel = tipoGrupoModel.Niveles(reader.GetByte(2).ToString()),
+                                    TipoCurso = tipoGrupoModel.Tipo(reader.GetByte(3).ToString()),
+                                    FechaInicio = reader.GetDateTime(4),
+                                    FechaFin = reader.GetDateTime(5),
+                                    Ocupados = Convert.ToInt32(reader.GetDecimal(7)),
+                                    Nombre = reader.GetString(8)
                                 };
                                 grupos.Add(cursoModel);
                             }
@@ -570,7 +571,7 @@ namespace CelexWebApp.Controllers.Administrador
             QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
             var documento = new HistorialProfesorDocument(grupos);
             var pdfBytes = documento.GeneratePdf();
-            return File(pdfBytes, "application/pdf", "Historial_Profesor.pdf");
+            return File(pdfBytes, "application/pdf", $"Historial_Profesor_{nombre}.pdf");
 
         }
     }

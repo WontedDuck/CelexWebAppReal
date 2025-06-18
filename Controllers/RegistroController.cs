@@ -176,5 +176,12 @@ namespace CelexWebApp.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
+        [HttpPost]
+        public IActionResult AlumnoExterno(RegistroViewModel model)
+        {
+            model.Alumno.Matricula = "EXTERNO";
+            return View("Index", model);
+        }
+
     }
 }

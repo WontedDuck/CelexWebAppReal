@@ -43,8 +43,8 @@ namespace CelexWebApp.Controllers
                 await connection.OpenAsync();
                 using (SqlCommand command1 = new SqlCommand("SELECT id_registrado FROM Registrados WHERE id_azure = @id", connection))
                 {
-                    command1.Parameters.AddWithValue("@id", ViewData["id_azure"]);
-                    using(SqlDataReader reader = command1.ExecuteReader())
+                    command1.Parameters.AddWithValue("@id", _graphServiceClient.Me.GetAsync().Result.Id.ToString());
+                    using (SqlDataReader reader = command1.ExecuteReader())
                         if (reader.Read())
                             id_usuario = reader.GetInt32(0);
                 }
@@ -55,7 +55,7 @@ namespace CelexWebApp.Controllers
                 }
                 using (SqlCommand command = new SqlCommand("DELETE FROM Registrados WHERE id_azure = @id", connection))
                 {
-                    command.Parameters.AddWithValue("@id", ViewData["id_azure"]);
+                    command.Parameters.AddWithValue("@id", _graphServiceClient.Me.GetAsync().Result.Id.ToString());
                     command.ExecuteNonQuery();
                 }
             }

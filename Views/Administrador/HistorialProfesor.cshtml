@@ -27,6 +27,7 @@
                 <td>
                     <form asp-action="HistorialProfesor" asp-controller="Administrador" method="post" style="display:inline;">
                         <input type="hidden" name="id" value="@profesor.Id" />
+                        <input type="hidden" name="nombre" value="@profesor.Nombre" />
                         <button type="submit" class="btn btn-primary btn-sm">Ver Historial</button>
                     </form>
                 </td>

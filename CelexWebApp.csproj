@@ -26,4 +26,8 @@
 		<PackageReference Include="QuestPDF" Version="2025.5.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="wwwroot\pdfs\" />
+	</ItemGroup>
+
 </Project>

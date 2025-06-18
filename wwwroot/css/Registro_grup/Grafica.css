@@ -291,3 +291,29 @@ h2 {
     }
 }
 
+.grafica-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 40px auto 0 auto;
+    background: var(--glass-bg, rgba(255,255,255,0.1));
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.grafica-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    background: transparent;
+}
+
+    .grafica-container canvas {
+        display: block;
+        width: 100% !important;
+        height: 300px !important;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 10px;
+    }

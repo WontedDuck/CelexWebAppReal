@@ -439,7 +439,7 @@ namespace CelexWebApp.Controllers.Administrador
                     }
                     else
                     {
-                        string insert3query = "INSERT INTO Historial_Curso (id_curso_origen, id_nivel, id_tipo_curso, fecha_inicio, fecha_fin, capacidad, ocupados, nombre_curso) VALUES (@Id_curso_origen, @Id_nivel, @Id_tipo_curso, @Fecha_inicio, @Fecha_fin, @Capacidad, @Ocupados, @Nombre_curso)";
+                        string insert3query = "INSERT INTO Historial_Curso (id_curso_origen, id_nivel, id_tipo_curso, fecha_inicio, fecha_fin, capacidad, ocupados, nombre_curso, id_profesor) VALUES (@Id_curso_origen, @Id_nivel, @Id_tipo_curso, @Fecha_inicio, @Fecha_fin, @Capacidad, @Ocupados, @Nombre_curso, @Id_profesor)";
                         using (SqlCommand insert3Cmd = new SqlCommand(insert3query, connection))
                         {
                             insert3Cmd.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
@@ -450,6 +450,7 @@ namespace CelexWebApp.Controllers.Administrador
                             insert3Cmd.Parameters.AddWithValue("@Capacidad", Capacidad);
                             insert3Cmd.Parameters.AddWithValue("@Ocupados", e);
                             insert3Cmd.Parameters.AddWithValue("@Nombre_curso", Nombre);
+                            insert3Cmd.Parameters.AddWithValue("@Id_profesor", InfoAlumnos[0].IdProfesor);
                             await insert3Cmd.ExecuteNonQueryAsync();
                         }
                     }

@@ -91,19 +91,26 @@
             <form method="post" asp-action="AgregarProfesor" asp-controller="Administrador">
                 <div class="form-group">
                     <label for="numeroEmpleado">Número de Empleado:</label>
+                    <input id="numeroEmpleado" name="numeroEmpleado" class="form-control"
+                           placeholder="Ingresa el número de empleado..."
+                           required minlength="10" maxlength="10" pattern="\d{10}" inputmode="numeric" />
                     <input id="numeroEmpleado" name="numeroEmpleado" class="form-control" placeholder="Ingresa el número de empleado..." max="10" />
                 </div>
                 <div class="form-group">
                     <label for="nombreProfesor">Nombre:</label>
-                    <input id="nombreProfesor" name="nombreProfesor" class="form-control" placeholder="Nombre del profesor..." />
+                    <input id="nombreProfesor" name="nombreProfesor" class="form-control"
+                           placeholder="Nombre del profesor..." required maxlength="50" />
                 </div>
                 <div class="form-group">
                     <label for="telefonoProfesor">Teléfono:</label>
+                    <input id="telefonoProfesor" name="telefonoProfesor" class="form-control"
+                           placeholder="Teléfono del profesor..." required minlength="10" maxlength="10" pattern="\d{10}" inputmode="numeric" />
                     <input id="telefonoProfesor" name="telefonoProfesor" class="form-control" placeholder="Teléfono del profesor..." max="10" />
                 </div>
                 <div class="form-group">
                     <label for="idAzure">Número de Cuenta:</label>
-                    <input id="idAzure" name="idAzure" class="form-control" placeholder="Número de cuenta Azure..." />
+                    <input id="idAzure" name="idAzure" class="form-control"
+                           placeholder="Número de cuenta Azure..." required maxlength="50" />
                 </div>
                 <button type="submit" class="btn btn-primary btn-wide">Agregar</button>
             </form>
@@ -164,7 +171,7 @@
                 </div>
                 <div class="form-group" id="cantidadEstudiantesContainer" style="display: none;">
                     <label for="cantidadEstudiantes">Cantidad de Estudiantes:</label>
-                    <input id="cantidadEstudiantes" name="cantidadEstudiantes" type="number" class="form-control" min="1" placeholder="Número de estudiantes..." />
+                    <input id="cantidadEstudiantes" name="cantidadEstudiantes" type="number" class="form-control" min="1" max="50" placeholder="Número de estudiantes..." />
                 </div>
                 <button type="submit" class="btn btn-primary btn-wide">Crear</button>
             </form>

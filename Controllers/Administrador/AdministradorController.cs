@@ -124,12 +124,13 @@ namespace CelexWebApp.Controllers.Administrador
                     }
                     foreach (int idDestinatario in ndestinatarios)
                     {
-                        string query2 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
+                        string query2 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido, fecha_registro) VALUES (@Id_remitente, @Id_destinatario, @Contenido, @Fecha_registro)";
                         using (SqlCommand command2 = new SqlCommand(query2, connection))
                         {
                             command2.Parameters.AddWithValue("@Id_remitente", int.Parse(HttpContext.Session.GetString("id_registrado")));
                             command2.Parameters.AddWithValue("@Id_destinatario", idDestinatario);
                             command2.Parameters.AddWithValue("@Contenido", $"Mensaje de Administrador: {mensaje}");
+                            command2.Parameters.AddWithValue("@Fecha_registro", DateTime.Now);
                             await command2.ExecuteNonQueryAsync();
                         }
                     }
@@ -204,12 +205,13 @@ namespace CelexWebApp.Controllers.Administrador
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                string query = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
+                string query = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido, fecha_registro) VALUES (@Id_remitente, @Id_destinatario, @Contenido, @Fecha_registro)";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id_remitente", int.Parse(HttpContext.Session.GetString("id_registrado")));
                     command.Parameters.AddWithValue("@Id_destinatario", idAzureInt);
                     command.Parameters.AddWithValue("@Contenido", $"Hola {nombreProfesor}, has sido agregado como profesor.");
+                    command.Parameters.AddWithValue("@Fecha_registro", DateTime.Now);
                     await command.ExecuteNonQueryAsync();
                 }
             }
@@ -274,6 +276,16 @@ namespace CelexWebApp.Controllers.Administrador
                     default:
                         TempData["MensajeEstadoCrearGrupo"] = "Tipo de Curso no seleccionado";
                         return RedirectToAction("Index");
+                }
+                if (fechaInicio <= DateTime.Now)
+                {
+                    TempData["MensajeEstadoCrearGrupo"] = "La fecha de inicio debe ser mayor a hoy";
+                    return RedirectToAction("Index");
+                }
+                if (fechaInicio <= fechaFin.AddMonths(-2))
+                {
+                    TempData["MensajeEstadoCrearGrupo"] = "La fecha debe ser al menos dos meses antes de la final";
+                    return RedirectToAction("Index");
                 }
                 if (fechaInicio >= fechaFin)
                 {

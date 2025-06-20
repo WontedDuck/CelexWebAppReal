@@ -53,6 +53,11 @@ namespace CelexWebApp.Controllers
                     command2.Parameters.AddWithValue("@id", id_usuario);
                     await command2.ExecuteNonQueryAsync();
                 }
+                using (SqlCommand command3 = new SqlCommand("DELETE Mensajes WHERE id_destinatario = @id", connection))
+                {
+                    command3.Parameters.AddWithValue("@id", id_usuario);
+                    await command3.ExecuteNonQueryAsync();
+                }
                 using (SqlCommand command = new SqlCommand("DELETE FROM Registrados WHERE id_azure = @id", connection))
                 {
                     command.Parameters.AddWithValue("@id", _graphServiceClient.Me.GetAsync().Result.Id.ToString());

@@ -11,8 +11,7 @@
 <div class="admin-wrapper">
     <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
         <h1>@ViewData["Title"]</h1>
-        <h2>Bienvenido usuario nuevo, realiza un registro para poder acceder a las funciones completas que tenemos disponibles para ti</h2>
-
+        <h2>Bienvenido usuario nuevo, realiza un registro para poder acceder a las funciones completas que tenemos disponibles para ti</h2>        
         <form method="post" asp-action="Registro" asp-controller="Registro" class="form-container">
             <div class="form-group">
                 <label for="RolSeleccionado">Seleccione su rol:</label>
@@ -50,18 +49,20 @@
                     <input asp-for="Alumno.Matricula" class="form-control" />
                     <span asp-validation-for="Alumno.Matricula" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <input type="submit" value="Registro" class="btn btn-primary" />
+                </div>
             </div>
 
-            <div class="form-group">
-                <input type="submit" value="Registro" class="btn btn-primary" />
-            </div>
         </form>
 
-        <div class="azure-container" style="margin-top: 20px; text-align: right;">
-            <label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label>
-            <form asp-controller="Registro" asp-action="EnviarID" method="post" style="display: inline; margin-left: 20px;">
-                <button id="BtnAzureLabel" type="submit" class="btn btn-primary">Enviar ID</button>
-            </form>
+        <div class="role-form" data-role="Profesor" style="display:none;">
+            <div class="azure-container" style="margin-top: 20px; text-align: right;">
+                <label id="idAzureLabel">Numero de Cuenta: @ViewData["id_azure"] </label>
+                <form asp-controller="Registro" asp-action="EnviarID" method="post" style="display: inline; margin-left: 20px;">
+                    <button id="BtnAzureLabel" type="submit" class="btn btn-primary">Enviar ID</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -76,7 +77,7 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        document.getElementById("RolSeleccionado").addEventListener("change", function () {
+                document.getElementById("RolSeleccionado").addEventListener("change", function () {
             const selectedRole = this.value;
             document.querySelectorAll(".role-form").forEach(form => {
                 if (form.dataset.role === selectedRole) {
@@ -88,7 +89,14 @@
                 }
             });
         });
-
+                document.addEventListener("DOMContentLoaded", function () {
+            const btn = document.getElementById("BtnAzureLabel");
+            if (btn) {
+                btn.form.addEventListener("submit", function (e) {
+                    document.getElementById("HiddenNumeroCuentaProfesor").value = document.getElementById("NumeroCuentaProfesor").value;
+                });
+            }
+        });
         // Animación de desplazamiento para partículas
         const particleCanvas = document.getElementById("particleCanvas");
         const particleCtx = particleCanvas.getContext("2d");

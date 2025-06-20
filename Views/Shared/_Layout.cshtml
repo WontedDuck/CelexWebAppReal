@@ -61,10 +61,16 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - CelexWebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <div class="container d-flex justify-content-between align-items-center">
+            <span>
+                &copy; 2025 - CelexWebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </span>
+            <form asp-controller="Home" asp-action="BorrarCuenta" method="post" onsubmit="return confirm('¿Estás seguro de que deseas borrar tu cuenta? Este cambio no es reversible.');" style="margin:0;">
+                <button type="submit" class="btn btn-danger btn-sm">Borrar Cuenta</button>
+            </form>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

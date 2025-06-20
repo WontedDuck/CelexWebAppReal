@@ -10,6 +10,12 @@
 
 <!-- Contenedor principal -->
 <div class="admin-wrapper">
+    @if (TempData["Confirmacion"] != null)
+    {
+        <div class="alert-info" role="alert">
+            @TempData["Confirmacion"]
+        </div>
+    }
     <div class="row-container">
         <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
             <h1>Bienvenido @ViewData["Nombre"]</h1>

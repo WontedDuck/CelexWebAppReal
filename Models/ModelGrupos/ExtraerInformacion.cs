@@ -208,6 +208,7 @@ namespace CelexWebApp.Models.ModelGrupos
         }
         public async Task<GrupoDetallesModel> GrupoInfo(int id, string nombre_profesor)
         {
+            TipoGrupoModel tipo = new TipoGrupoModel();
             var grupo = new GrupoDetallesModel();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
@@ -225,8 +226,8 @@ namespace CelexWebApp.Models.ModelGrupos
                                 Id = id,
                                 Profesor = nombre_profesor,
                                 Nombre = reader["nombre_curso"].ToString(),
-                                Nivel = reader["id_nivel"].ToString(),
-                                TipoCurso = reader["id_tipo_curso"].ToString(),
+                                Nivel = tipo.Niveles(reader["id_nivel"].ToString()),
+                                TipoCurso = tipo.Tipo(reader["id_tipo_curso"].ToString()),
                                 FechaInicio = DateTime.Parse(reader["fecha_inicio"].ToString()),
                                 FechaFin = DateTime.Parse(reader["fecha_fin"].ToString()),
                                 Capacidad = int.Parse(reader["capacidad"].ToString()),

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CelexWebApp</title>
+    <title>@ViewData["Title"] - MyCelex</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CelexWebApp.styles.css" asp-append-version="true" />
@@ -17,7 +17,7 @@
         <canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border-radius: 15px; padding: 10px 20px; max-width: 900px; margin: 0 auto 20px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">CelexWebApp</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">MyCelex</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -25,10 +25,10 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" style="color: #FFFFFF;">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #FFFFFF;">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #FFFFFF;">Privacidad</a>
                         </li>
                         @{
                             var idRol = Context.Session.GetString("id_rol");
@@ -63,7 +63,7 @@
     <footer class="border-top footer text-muted">
         <div class="container d-flex justify-content-between align-items-center">
             <span>
-                &copy; 2025 - CelexWebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                &copy; 2025 - MyCelex - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
             </span>
             <form asp-controller="Home" asp-action="BorrarCuenta" method="post" onsubmit="return confirm('¿Estás seguro de que deseas borrar tu cuenta? Este cambio no es reversible.');" style="margin:0;">
                 <button type="submit" class="btn btn-danger btn-sm">Borrar Cuenta</button>

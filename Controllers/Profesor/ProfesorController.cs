@@ -174,7 +174,7 @@ namespace CelexWebApp.Controllers.Profesor
                     command.ExecuteNonQuery();
                 }
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
         public IActionResult BorrarNotificacion(string id_mensaje)
         {
@@ -188,7 +188,7 @@ namespace CelexWebApp.Controllers.Profesor
                     command.ExecuteNonQuery();
                 }
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
     }
 }

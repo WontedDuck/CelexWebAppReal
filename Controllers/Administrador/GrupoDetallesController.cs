@@ -320,12 +320,74 @@ namespace CelexWebApp.Controllers.Administrador
         public async Task<IActionResult> GuardarGrupo(int IdGrupo, string Nombre, string Nivel, string TipoCurso, DateTime FechaInicio, DateTime FechaFin, int Capacidad, int Ocupados, string accion)
         {
             int[] id_borrar = new int[Capacidad];
-            int i = 0, e = 0;
+            int i = 0, e = 0, idnivel = 0, idtipo = 0;
+            switch (Nivel)
+            {
+                case "Introductorio":
+                    idnivel = 1; break;
+                case "Basico1":
+                    idnivel = 2; break;
+                case "Basico2":
+                    idnivel = 3; break;
+                case "Basico3":
+                    idnivel = 4; break;
+                case "Basico4":
+                    idnivel = 5; break;
+                case "Basico5":
+                    idnivel = 6; break;
+                case "Intermedio1":
+                    idnivel = 7; break;
+                case "Intermedio2":
+                    idnivel = 8; break;
+                case "Intermedio3":
+                    idnivel = 9; break;
+                case "Intermedio4":
+                    idnivel = 10; break;
+                case "Intermedio5":
+                    idnivel = 11; break;
+                case "Avanzado1":
+                    idnivel = 12; break;
+                case "Avanzado2":
+                    idnivel = 13; break;
+                case "Avanzado3":
+                    idnivel = 14; break;
+                case "Avanzado4":
+                    idnivel = 15; break;
+                case "Avanzado5":
+                    idnivel = 16; break;
+                case "FCE":
+                    idnivel = 17; break;
+            }
+            switch (TipoCurso)
+            {
+                case "Semanal":
+                    idtipo = 1; break;
+                case "Sabatino":
+                    idtipo = 2; break;
+                case "Intensivo":
+                    idtipo = 3; break;
+            }
             if (accion == "modificar")
             {
                 if (Capacidad < Ocupados)
                 {
                     TempData["mensaje"] = "La capacidad no puede ser menor a los ocupados.";
+                }
+                else if (Capacidad <= 0)
+                {
+                    TempData["mensaje"] = "La capacidad debe ser mayor a 0.";
+                }
+                else if (FechaInicio >= FechaFin)
+                {
+                    TempData["mensaje"] = "La fecha de inicio no puede ser mayor o igual a la fecha de fin.";
+                }
+                else if (string.IsNullOrEmpty(Nombre) || string.IsNullOrEmpty(Nivel) || string.IsNullOrEmpty(TipoCurso))
+                {
+                    TempData["mensaje"] = "Todos los campos son obligatorios.";
+                }
+                else if (FechaInicio <= FechaFin.AddMonths(-2))
+                {
+                    TempData["mensaje"] = "La fecha debe ser al menos dos meses antes de la final";
                 }
                 else
                 {
@@ -336,8 +398,8 @@ namespace CelexWebApp.Controllers.Administrador
                         using (SqlCommand command = new SqlCommand(query, connection))
                         {
                             command.Parameters.AddWithValue("@Nombre", Nombre);
-                            command.Parameters.AddWithValue("@Nivel", Nivel);
-                            command.Parameters.AddWithValue("@TipoCurso", TipoCurso);
+                            command.Parameters.AddWithValue("@Nivel", idnivel);
+                            command.Parameters.AddWithValue("@TipoCurso", idtipo);
                             command.Parameters.AddWithValue("@FechaInicio", FechaInicio);
                             command.Parameters.AddWithValue("@FechaFin", FechaFin);
                             command.Parameters.AddWithValue("@Capacidad", Capacidad);
@@ -346,11 +408,12 @@ namespace CelexWebApp.Controllers.Administrador
                             await command.ExecuteNonQueryAsync();
                         }
                     }
-                    TempData["mensaje"] = "Se ejecutó el bloque MODIFICAR.";                    
+                    TempData["mensaje"] = "Se ejecutó el bloque MODIFICAR.";
                 }
             }
             else if (accion == "terminar")
             {
+                int id_prof = 0;
                 var InfoAlumnos = new List<HistorialAvanceAlumno>();
                 using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
                 {
@@ -364,7 +427,7 @@ namespace CelexWebApp.Controllers.Administrador
                             while (reader.Read())
                             {
                                 int id_estudiantes = reader.GetInt16(0);
-                                int id_prof = reader.GetInt16(1);
+                                id_prof = reader.GetInt16(1);
                                 int id_cursos = reader.GetInt16(2);
                                 if (reader.IsDBNull(3) || reader.IsDBNull(4) || reader.IsDBNull(5) || reader.IsDBNull(6))
                                 {
@@ -388,10 +451,9 @@ namespace CelexWebApp.Controllers.Administrador
                     }
                     e = Ocupados - i;
                     int ocupads = 0;
-                    bool registrocurso = false, registrohistorialcurso = false;
+                    bool registrohistorialcurso = false;
                     foreach (var dato in InfoAlumnos)
                     {
-                        registrocurso = true;
                         string insertQuery = "INSERT INTO Historial_Avance_Alumnos (id_estudiantes, id_profesor, id_cursos, asistencia, calcontinua, calexmedia, caliexfinal) VALUES (@Id_estudiantes, @Id_profesor, @Id_cursos, @Asistencia, @Calcontinua, @Calexmedia, @Caliexfinal)";
                         using (SqlCommand insertCmd = new SqlCommand(insertQuery, connection))
                         {
@@ -405,36 +467,34 @@ namespace CelexWebApp.Controllers.Administrador
                             await insertCmd.ExecuteNonQueryAsync();
                         }
                     }
-                    if(registrocurso)
-                    {
-                        string selectquery = "SELECT * FROM Historial_Curso WHERE id_curso_origen = @Id_curso_origen AND id_nivel = @Id_nivel AND id_tipo_curso = @Id_tipo_curso AND fecha_inicio >= @Fecha_inicio_minima AND fecha_fin <= @Fecha_fin_maxima;";
+                    string selectquery = "SELECT * FROM Historial_Curso WHERE id_curso_origen = @Id_curso_origen AND id_nivel = @Id_nivel AND id_tipo_curso = @Id_tipo_curso AND fecha_inicio >= @Fecha_inicio_minima AND fecha_fin <= @Fecha_fin_maxima;";
 
-                        using (SqlCommand select = new SqlCommand(selectquery, connection))
-                        {
-                            select.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
-                            select.Parameters.AddWithValue("@Id_nivel", Nivel);
-                            select.Parameters.AddWithValue("@Id_tipo_curso", TipoCurso);
-                            select.Parameters.AddWithValue("@Fecha_inicio_minima", FechaInicio);
-                            select.Parameters.AddWithValue("@Fecha_fin_maxima", FechaFin); 
-                            using (SqlDataReader reader = await select.ExecuteReaderAsync())
-                                if(reader.Read())
-                                {
-                                    registrohistorialcurso = true;
-                                    ocupads = Convert.ToInt32(reader.GetDecimal(7));
-                                }
-                        }
-                        if(registrohistorialcurso)
-                        {
-                            string updatequery = "UPDATE Historial_Curso SET ocupados = @Ocupados WHERE id_curso_origen = @Id_curso_origen AND id_nivel = @Id_nivel AND id_tipo_curso = @Id_tipo_curso AND fecha_inicio >= @Fecha_inicio_minima AND fecha_fin <= @Fecha_fin_maxima;";
-                            using (SqlCommand updateCmd = new SqlCommand(updatequery, connection))
+                    using (SqlCommand select = new SqlCommand(selectquery, connection))
+                    {
+                        select.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
+                        select.Parameters.AddWithValue("@Id_nivel", idnivel);
+                        select.Parameters.AddWithValue("@Id_tipo_curso", idtipo);
+                        select.Parameters.AddWithValue("@Fecha_inicio_minima", FechaInicio);
+                        select.Parameters.AddWithValue("@Fecha_fin_maxima", FechaFin);
+                        using (SqlDataReader reader = await select.ExecuteReaderAsync())
+                            if (reader.Read())
                             {
-                                updateCmd.Parameters.AddWithValue("@Ocupados", ocupads + e); 
-                                updateCmd.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
-                                updateCmd.Parameters.AddWithValue("@Id_nivel", Nivel);
-                                updateCmd.Parameters.AddWithValue("@Id_tipo_curso", TipoCurso);
-                                updateCmd.Parameters.AddWithValue("@Fecha_inicio_minima", FechaInicio);
-                                updateCmd.Parameters.AddWithValue("@Fecha_fin_maxima", FechaFin);
+                                registrohistorialcurso = true;
+                                ocupads = Convert.ToInt32(reader.GetDecimal(7));
                             }
+                    }
+                    if (registrohistorialcurso)
+                    {
+                        string updatequery = "UPDATE Historial_Curso SET ocupados = @Ocupados WHERE id_curso_origen = @Id_curso_origen AND id_nivel = @Id_nivel AND id_tipo_curso = @Id_tipo_curso AND fecha_inicio >= @Fecha_inicio_minima AND fecha_fin <= @Fecha_fin_maxima;";
+                        using (SqlCommand updateCmd = new SqlCommand(updatequery, connection))
+                        {
+                            updateCmd.Parameters.AddWithValue("@Ocupados", ocupads + i);
+                            updateCmd.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
+                            updateCmd.Parameters.AddWithValue("@Id_nivel", idnivel);
+                            updateCmd.Parameters.AddWithValue("@Id_tipo_curso", idtipo);
+                            updateCmd.Parameters.AddWithValue("@Fecha_inicio_minima", FechaInicio);
+                            updateCmd.Parameters.AddWithValue("@Fecha_fin_maxima", FechaFin);
+                            await updateCmd.ExecuteNonQueryAsync();
                         }
                     }
                     else
@@ -443,14 +503,14 @@ namespace CelexWebApp.Controllers.Administrador
                         using (SqlCommand insert3Cmd = new SqlCommand(insert3query, connection))
                         {
                             insert3Cmd.Parameters.AddWithValue("@Id_curso_origen", IdGrupo);
-                            insert3Cmd.Parameters.AddWithValue("@Id_nivel", Nivel);
-                            insert3Cmd.Parameters.AddWithValue("@Id_tipo_curso", TipoCurso);
+                            insert3Cmd.Parameters.AddWithValue("@Id_nivel", idnivel);
+                            insert3Cmd.Parameters.AddWithValue("@Id_tipo_curso", idtipo);
                             insert3Cmd.Parameters.AddWithValue("@Fecha_inicio", FechaInicio);
                             insert3Cmd.Parameters.AddWithValue("@Fecha_fin", FechaFin);
                             insert3Cmd.Parameters.AddWithValue("@Capacidad", Capacidad);
-                            insert3Cmd.Parameters.AddWithValue("@Ocupados", e);
+                            insert3Cmd.Parameters.AddWithValue("@Ocupados", i);
                             insert3Cmd.Parameters.AddWithValue("@Nombre_curso", Nombre);
-                            insert3Cmd.Parameters.AddWithValue("@Id_profesor", InfoAlumnos[0].IdProfesor);
+                            insert3Cmd.Parameters.AddWithValue("@Id_profesor", id_prof);
                             await insert3Cmd.ExecuteNonQueryAsync();
                         }
                     }

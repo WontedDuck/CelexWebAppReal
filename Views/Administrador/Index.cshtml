@@ -7,6 +7,9 @@
 <canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1;"></canvas>
 
 <div class="admin-wrapper">
+    <div id="accionConfirmacion" class="alert alert-success" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 10000;">
+        Acción realizada correctamente.
+    </div>
     <h1 class="main-title" style="opacity: 0; transform: translateY(50px);">@ViewData["Title"]</h1>
 
     <!-- Primera fila: Enviar Notificaciones y Notificaciones Recibidas -->
@@ -41,10 +44,10 @@
             <ul class="list-group">
                 @if (ViewData["Notificaciones"] != null)
                 {
-                    var notificaciones = ViewData["Notificaciones"] as List<NotificacionesModel>;
+                    var notificaciones = ViewData["Notificaciones"] as List<CelexWebApp.Models.NotificacionesMMV.NotificacionesModel>;
                     if (notificaciones != null && notificaciones.Count > 0)
                     {
-                        foreach (var notificacion in notificaciones)
+                        @foreach (var notificacion in notificaciones)
                         {
                             var claseLeido = notificacion.Leido ? "list-group-item-secondary" : "list-group-item-warning";
                             <li class="notification-item @(notificacion.Leido ? "leido" : "no-leido")">
@@ -53,14 +56,27 @@
                                     <small>@notificacion.Fecha_Registro.ToString("g")</small>
                                 </div>
                                 <div class="notification-buttons">
-                                    <form method="post" asp-action="MarcarComoLeida" asp-controller="Administrador" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
+                                    <form method="post" asp-action="MarcarComoLeida" asp-controller="Administrador" style="display:inline;">
                                         <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                        <button type="submit" class="btn btn-icon btn-check">✓</button>
+                                        <button type="submit" class="btn btn-white btn-sm">✓</button>
                                     </form>
                                     <form method="post" asp-action="BorrarNotificacion" asp-controller="Administrador" style="display:inline;">
                                         <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
                                         <button type="submit" class="btn btn-icon btn-delete">✖</button>
                                     </form>
+                                    @{
+                                        string contenido = notificacion.Contenido ?? "";
+                                        var matchNumeros = System.Text.RegularExpressions.Regex.Match(contenido, @"^\d+");
+                                        if (matchNumeros.Success)
+                                        {
+                                            <button type="button" class="btn btn-info btn-sm btn-historial" data-numeros="@matchNumeros.Value">historial</button>
+                                        }
+                                        else if (contenido.StartsWith("Nuevo Profesor: "))
+                                        {
+                                            var textoDespues = contenido.Substring("Nuevo Profesor: ".Length).Trim();
+                                            <button type="button" class="btn btn-success btn-sm btn-agregar-profesor" data-idazure="@textoDespues">Agregar</button>
+                                        }
+                                    }
                                 </div>
                             </li>
                         }
@@ -241,6 +257,68 @@
 
 @section Scripts {
     <script>
+                                    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.btn-historial').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const numeros = btn.getAttribute('data-numeros');
+                const input = document.querySelector('.student-history input[name="busquedaId"]');
+                const form = input.closest('form');
+                        input.value = numeros;
+
+        marcarNotificacionLeida(btn);
+
+        // Espera 300 ms antes de enviar el formulario
+        setTimeout(() => {
+            form.submit();
+        }, 300);
+
+            });
+        });
+                document.querySelectorAll('.btn-agregar-profesor').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const idAzure = btn.getAttribute('data-idazure');
+            const inputAzure = document.getElementById('idAzure');
+            const nombreInput = document.getElementById('nombreProfesor');
+            if (inputAzure) inputAzure.value = idAzure;
+            if (nombreInput) nombreInput.focus();
+
+            document.querySelector('.add-professor').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        });
+    });
+
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const inicio = new Date(fechaInicio);
+            const fin = new Date(fechaFin);
+
+            // Validar que la fecha de inicio no sea menor a hoy
+            if (inicio < hoy) {
+                e.preventDefault();
+                alert("La fecha de inicio no puede ser menor a hoy.");
+                fechaInicioInput.focus();
+                return;
+            }
+
+            // Validar que la fecha de fin no sea menor a la fecha de inicio
+            if (fin < inicio) {
+                e.preventDefault();
+                alert("La fecha de fin no puede ser menor a la fecha de inicio.");
+                fechaFinInput.focus();
+                return;
+            }
+
+            // Validar que la fecha de fin no sea mayor a la fecha de inicio + 2 meses
+            const maxFin = new Date(inicio);
+            maxFin.setMonth(maxFin.getMonth() + 2);
+            if (fin > maxFin) {
+                e.preventDefault();
+                alert("La fecha de fin no puede ser mayor a dos meses después de la fecha de inicio.");
+                fechaFinInput.focus();
+                return;
+            }
+        });
+
         // Efecto de partículas flotantes
         const particleCanvas = document.getElementById("particleCanvas");
         const particleCtx = particleCanvas.getContext("2d");
@@ -344,11 +422,15 @@
             });
         });
 
-        function marcarLeida(button) {
-            const li = button.closest('.notification-item');
-            li.style.textDecoration = "line-through";
-            button.disabled = true;
+            function marcarNotificacionLeida(button) {
+            const notificationItem = button.closest('.notification-item');
+        const formLeido = Array.from(notificationItem.querySelectorAll('form'))
+            .find(f => f.action.includes("MarcarComoLeida"));            if (formLeido) {
+                formLeido.submit();
+            }
         }
+
+
 
         function mostrarNivel() {
             const nombreGrupo = document.getElementById("nombreGrupo").value;

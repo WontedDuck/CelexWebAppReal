@@ -55,7 +55,7 @@ namespace CelexWebApp.Controllers.Administrador
                                 TipoCurso = tipocurso,
                                 FechaInicio = Convert.ToDateTime(reader["fecha_inicio"]),
                                 FechaFin = Convert.ToDateTime(reader["fecha_fin"]),
-                                capacidad = Convert.ToInt32(reader["capacidad"])
+                                capacidad = Convert.ToInt32(reader["capacidad"]),
                             });
                         }
                     }

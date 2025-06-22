@@ -64,8 +64,8 @@ namespace CelexWebApp.Controllers.Alumno
                 Nombre = "Grupo no asignado",
                 Nivel = "Nivel no asignado",
                 TipoCurso = "Tipo de Curso no asignado",
-                FechaInicio = DateTime.MinValue,
-                FechaFin = DateTime.MinValue,
+                FechaInicio = DateTime.Now,
+                FechaFin = DateTime.Now,
                 Profesor = "0",
                 Alumnos = new List<AlumnoModelView>(),
             };
@@ -152,6 +152,8 @@ namespace CelexWebApp.Controllers.Alumno
                     reader4.Close();
                 }
             }
+            if(grupoDetalles.Profesor == "0")
+                grupoDetalles.Profesor = "Sin Profesor";
             return View(grupoDetalles);
         }
         public async Task<IActionResult> EnviarMensajeAdministrador(string contenido)

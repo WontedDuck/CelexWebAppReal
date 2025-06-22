@@ -43,10 +43,10 @@
                                     <strong>@notificacion.Contenido</strong><br />
                                     <small>@notificacion.Fecha_Registro.ToString("g")</small>
                                 </div>
-                                <div class="notification-buttons">
-                                    <form method="post" asp-action="MarcarComoLeida" asp-controller="Profesor" style="display:inline;" onsubmit="marcarLeida(this.querySelector('button'))">
+                                <div class="notification-buttons mt-2">
+                                    <form method="post" asp-action="MarcarComoLeida" asp-controller="Profesor" style="display:inline;">
                                         <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
-                                        <button type="submit" class="btn btn-icon btn-check">✓</button>
+                                        <button type="submit" class="btn btn-white btn-sm">✓</button>
                                     </form>
                                     <form method="post" asp-action="BorrarNotificacion" asp-controller="Profesor" style="display:inline;">
                                         <input type="hidden" name="id_mensaje" value="@notificacion.Id_Mensaje" />
@@ -95,17 +95,6 @@
                     <form method="post" asp-action="EnviarMensajeAdministrador" asp-controller="Alumno" class="history-form">
                         <input type="hidden" name="contenido" value="Solicito mi historial." />
                         <button type="submit" class="history-button"></button>
-                    </form>
-                </div>
-
-                <!-- Opción para enviar mensaje al profesor -->
-                <div class="option-item">
-                    <form method="post" asp-action="EnviarMensajeProfesor" asp-controller="Profesor">
-                        <div class="form-group">
-                            <label for="contenido">Escribir mensaje al Profesor:</label>
-                            <textarea id="contenido" name="contenido" class="form-control" rows="2" placeholder="Escribe tu mensaje aquí..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-wide mt-2">Enviar Mensaje al Profesor</button>
                     </form>
                 </div>
             </div>

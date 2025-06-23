@@ -4,12 +4,15 @@
     ViewData["Title"] = "Historial de Maestros";
 }
 
-<link href="~/css/profesor.css" rel="stylesheet" />
+<link href="~/css/grupo_deta/buscar_profesor.css" rel="stylesheet" />
 <!-- Fondo animado con partículas y efectos geométricos -->
 <canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
 <canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
 
 <h2>Historial de Maestros</h2>
+<div class="form-group" style="max-width: 350px; margin-bottom: 15px;">
+    <input type="text" id="buscadorProfesores" class="form-control" placeholder="Buscar profesor..." onkeyup="filtrarProfesores()" />
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -24,7 +27,7 @@
     <tbody>
         @foreach (var profesor in Model)
         {
-            <tr>
+            <tr class="profesor-row">
                 <td>@profesor.Id</td>
                 <td>@profesor.Nombre</td>
                 <td>@profesor.Numero_Empleado</td>
@@ -162,5 +165,28 @@
         li.style.textDecoration = "line-through"; // Marca la notificación como leída visualmente
         button.disabled = true; // Desactiva el botón de "Marcar como Leída"
     }
+        function filtrarProfesores() {
+        var input = document.getElementById("buscadorProfesores");
+        var filtro = input.value.toLowerCase();
+        var filas = document.querySelectorAll(".profesor-row");
+
+        filas.forEach(function(fila) {
+            var id = fila.children[0].textContent.toLowerCase();
+            var nombre = fila.children[1].textContent.toLowerCase();
+            var numEmpleado = fila.children[2].textContent.toLowerCase();
+            var telefono = fila.children[3].textContent.toLowerCase();
+            if (
+                id.includes(filtro) ||
+                nombre.includes(filtro) ||
+                numEmpleado.includes(filtro) ||
+                telefono.includes(filtro)
+            ) {
+                fila.style.display = "";
+            } else {
+                fila.style.display = "none";
+            }
+        });
+    }
+
 </script>
 

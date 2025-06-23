@@ -6,37 +6,44 @@
 <link href="~/css/grupo_deta/buscar_alumno.css" rel="stylesheet" />
 <canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; z-index: -2; width: 100%; height: 100%;"></canvas>
 <canvas id="geometricCanvas" style="position: fixed; top: 0; left: 0; z-index: -1; width: 100%; height: 100%;"></canvas>
-<div class="admin-wrapper">
-    <div class="row-container">
-        <div class="student-search glass-panel" style="opacity: 0; transform: translateY(50px);">
-            <h2>Buscar Alumnos</h2>
-            <div class="table-container">
-                <div class="modern-table">
-                    <div class="table-header">
-                        <span class="header-item">Nombre</span>
-                        <span class="header-item">Apellido Paterno</span>
-                        <span class="header-item">Apellido Materno</span>
-                        <span class="header-item">Acciones</span>
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["Mensaje"]
+    </div>
+}
+<form method="post" asp-controller="GrupoDetalles" asp-action="AgregarAlumnos">
+    <div style="margin-top: 20px; text-align: right;">
+        <button type="submit" class="btn btn-success">Agregar Alumnos</button>
+    </div>
+    <div class="form-group" style="max-width: 350px; margin-bottom: 15px;">
+        <input type="text" id="buscadorAlumnos" class="form-control" placeholder="Buscar alumno..." onkeyup="filtrarAlumnos()" />
+    </div>
+    <div class="table-container">
+        <div class="modern-table">
+            <div class="table-header">
+                <span class="header-item">Seleccionar</span>
+                <span class="header-item">Nombre</span>
+                <span class="header-item">Apellido Paterno</span>
+                <span class="header-item">Apellido Materno</span>
+            </div>
+            <div class="table-body">
+                @foreach (var alumno in Model)
+                {
+                    <div class="table-row">
+                        <span class="row-item" data-label="Seleccionar">
+                            <input type="checkbox" name="alumnosSeleccionados" value="@alumno.Id" style="width: 24px; height: 24px;" />
+                        </span>
+                        <span class="row-item" data-label="Nombre">@alumno.Nombre</span>
+                        <span class="row-item" data-label="Apellido Paterno">@alumno.ApellidoPa</span>
+                        <span class="row-item" data-label="Apellido Materno">@alumno.ApellidoMa</span>
                     </div>
-                    <div class="table-body">
-                        @foreach (var alumno in Model)
-
-                        {
-                            <div class="table-row">
-                                <span class="row-item" data-label="Nombre">@alumno.Nombre</span>
-                                <span class="row-item" data-label="Apellido Paterno">@alumno.ApellidoPa</span>
-                                <span class="row-item" data-label="Apellido Materno">@alumno.ApellidoMa</span>
-                                <span class="row-item" data-label="Acciones">
-                                    <a class="btn btn-sm btn-primary btn-full" asp-controller="GrupoDetalles" asp-action="AgregarAlumno" asp-route-id="@alumno.Id">Agregar</a>
-                                </span>
-                            </div>
-                        }
-                    </div>
-                </div>
+                }
             </div>
         </div>
     </div>
-</div>
+</form>
+
 
 <footer class="footer">
     <p>© @DateTime.Now.Year - CelexWebApp</p>
@@ -137,4 +144,21 @@
             }, 300 + index * 200);
         });
     });
+        function filtrarAlumnos() {
+        var input = document.getElementById("buscadorAlumnos");
+        var filtro = input.value.toLowerCase();
+        var filas = document.querySelectorAll(".table-row");
+
+        filas.forEach(function(fila) {
+            var nombre = fila.querySelector('[data-label="Nombre"]').textContent.toLowerCase();
+            var apPa = fila.querySelector('[data-label="Apellido Paterno"]').textContent.toLowerCase();
+            var apMa = fila.querySelector('[data-label="Apellido Materno"]').textContent.toLowerCase();
+            if (nombre.includes(filtro) || apPa.includes(filtro) || apMa.includes(filtro)) {
+                fila.style.display = "";
+            } else {
+                fila.style.display = "none";
+            }
+        });
+    }
+
 </script>

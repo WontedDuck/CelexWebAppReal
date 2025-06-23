@@ -12,6 +12,9 @@
     <div class="row-container">
         <div class="profesor-list glass-panel" style="opacity: 0; transform: translateY(50px);">
             <h2>Lista de Profesores</h2>
+            <div class="form-group" style="max-width: 350px; margin-bottom: 15px;">
+                <input type="text" id="buscadorProfesores" class="form-control" placeholder="Buscar profesor..." onkeyup="filtrarProfesores()" />
+            </div>
             <div class="table-container">
                 <div class="modern-table">
                     <div class="table-header">
@@ -24,7 +27,7 @@
                     <div class="table-body">
                         @foreach (var profesor in Model)
                         {
-                            <div class="table-row">
+                            <div class="table-row profesor-row">
                                 <span class="row-item" data-label="ID">@profesor.Id</span>
                                 <span class="row-item" data-label="Número de Empleado">@profesor.Numero_Empleado</span>
                                 <span class="row-item" data-label="Nombre">@profesor.Nombre</span>
@@ -141,4 +144,27 @@
             }, 300 + index * 200);
         });
     });
+        function filtrarProfesores() {
+        var input = document.getElementById("buscadorProfesores");
+        var filtro = input.value.toLowerCase();
+        var filas = document.querySelectorAll(".profesor-row");
+
+        filas.forEach(function(fila) {
+            var id = fila.querySelector('[data-label="ID"]').textContent.toLowerCase();
+            var numEmpleado = fila.querySelector('[data-label="Número de Empleado"]').textContent.toLowerCase();
+            var nombre = fila.querySelector('[data-label="Nombre"]').textContent.toLowerCase();
+            var telefono = fila.querySelector('[data-label="Teléfono"]').textContent.toLowerCase();
+            if (
+                id.includes(filtro) ||
+                numEmpleado.includes(filtro) ||
+                nombre.includes(filtro) ||
+                telefono.includes(filtro)
+            ) {
+                fila.style.display = "";
+            } else {
+                fila.style.display = "none";
+            }
+        });
+    }
+
 </script>

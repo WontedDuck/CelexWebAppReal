@@ -166,7 +166,8 @@
                                                     <a class="btn btn-danger btn-sm"
                                                        asp-controller="GrupoDetalles"
                                                        asp-action="BajaAlumno"
-                                                       asp-route-id="@alumno.alumno.Id">
+                                                       asp-route-id="@alumno.alumno.Id"
+                                                       onclick="return confirm('¿Estás seguro de dar de baja al alumno? Esta acción no es reversible.');">
                                                         Dar de Baja
                                                     </a>
                                                 }

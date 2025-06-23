@@ -159,6 +159,7 @@ namespace CelexWebApp.Controllers.Alumno
         public async Task<IActionResult> EnviarMensajeAdministrador(string contenido)
         {
             EnviarMensaje($"{HttpContext.Session.GetString("id")} {contenido}", 3, int.Parse(HttpContext.Session.GetString("id_registrado")));
+            TempData["Mensaje"] = "Mensaje enviado al administrador correctamente.";
             return RedirectToAction("Index");
         }
         public async Task<IActionResult> EnviarMensajeProfesor(string contenido)

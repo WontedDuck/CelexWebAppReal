@@ -20,3 +20,21 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+table td {
+    background-color: rgba(107, 70, 193, 0.2); /* Morado suave con 20% de opacidad */
+    color: #E2E8F0; /* Texto claro para buena legibilidad */
+    padding: 8px; /* Mantengo el padding estándar de Bootstrap */
+    border: 1px solid #4A5568; /* Borde gris oscuro para mantener contraste */
+}
+
+/* Aseguro que los encabezados no se vean afectados */
+table th {
+    background-color: #2D3748; /* Fondo oscuro para encabezados */
+    color: #E2E8F0; /* Texto claro */
+}
+
+/* Hover para celdas (efecto sutil para interactividad) */
+table td:hover {
+    background-color: rgba(107, 70, 193, 0.3); /* Morado un poco más intenso al pasar el ratón */
+}

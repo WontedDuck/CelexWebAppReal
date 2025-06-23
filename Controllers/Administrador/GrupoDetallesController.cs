@@ -63,10 +63,20 @@ namespace CelexWebApp.Controllers.Administrador
             }
             return View(grupo);
         }
-        public async Task<IActionResult> BuscarProfesor()
+        public async Task<IActionResult> BuscarProfesor(string tipoCurso)
         {
+            int idtipo = 0;
+            switch (tipoCurso)
+            {
+                case "Semanal":
+                    idtipo = 1; break;
+                case "Sabatino":
+                    idtipo = 2; break;
+                case "Intensivo":
+                    idtipo = 3; break;
+            }
             ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
-            return View(await extraerInformacion.BusquedaProfesor());
+            return View(await extraerInformacion.BusquedaProfesor(idtipo));
         }
         public async Task<IActionResult> AgregarProfesor(int id, string nombre)
         {

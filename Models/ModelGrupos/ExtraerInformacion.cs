@@ -93,17 +93,17 @@ namespace CelexWebApp.Models.ModelGrupos
             return numero;
         }
 
-        public async Task<List<ProfesorModel>> BusquedaProfesor()
+        public async Task<List<ProfesorModel>> BusquedaProfesor(int tipoCurso)
         {
             var profesores = new List<ProfesorModel>();
 
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-
-                string query = "SELECT * FROM Profesores";
+                string query = "SELECT * FROM Profesores p WHERE NOT EXISTS (SELECT 1 FROM Avance_Alumnos aa JOIN Curso c ON aa.id_cursos = c.id_cursos WHERE aa.id_profesor = p.id_profesor AND c.id_tipo_curso = @Id);";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
+                    command.Parameters.AddWithValue("@Id", tipoCurso);
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())

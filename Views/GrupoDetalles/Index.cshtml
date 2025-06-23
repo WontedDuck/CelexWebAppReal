@@ -126,7 +126,12 @@
                     }
                     else if (TempData["informacion"]?.ToString() == "Grupo Vacio")
                     {
-                        <a class="btn btn-warning" asp-controller="GrupoDetalles" asp-action="BuscarProfesor">Agregar Profesor</a>
+                        <a class="btn btn-warning" 
+                            asp-controller="GrupoDetalles" 
+                            asp-action="BuscarProfesor"
+                            asp-route-tipoCurso="@Model.TipoCurso">
+                            Agregar Profesor
+                        </a>
                     }
                     else
                     {

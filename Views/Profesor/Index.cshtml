@@ -93,10 +93,21 @@
                     <form method="post" asp-action="EnviarMensaje" asp-controller="Profesor" style="display: flex; flex-direction: column; align-items: center;">
                         <div class="form-group">
                             <label for="destinatarios">Destinatarios:</label>
+                            @{
+                                bool sinGrupos = Model.Grupos == null || Model.Grupos.Count == 0;
+                            }
                             <select id="destinatarios" name="destinatarios" class="form-control custom-select" style="max-width: 90%;">
-                                <option value="Alumnos">Alumnos</option>
-                                <option value="Administradores">Administradores</option>
+                                @if (sinGrupos)
+                                {
+                                    <option value="Alumnos" disabled>Alumnos</option>
+                                }
+                                else
+                                {
+                                    <option value="Alumnos">Alumnos</option>
+                                }
+                                <option value="Administradores" selected>Administradores</option>
                             </select>
+
                         </div>
                         <div class="form-group">
                             <label for="mensaje">Mensaje:</label>

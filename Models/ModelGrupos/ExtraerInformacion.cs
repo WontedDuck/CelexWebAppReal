@@ -58,7 +58,7 @@ namespace CelexWebApp.Models.ModelGrupos
                 if (estado == "Informacion")
                 {
                     id_alumno = new int[await NumeroAlumnos(id_curso)];
-                    string query2 = "SELECT id_estudiantes FROM Avance_Alumnos WHERE id_cursos = @id";
+                    string query2 = "SELECT aa.id_estudiantes FROM Avance_Alumnos aa JOIN Alumnos a ON aa.id_estudiantes = a.id_estudiantes WHERE aa.id_cursos = @id ORDER BY a.nombre_alumno ASC, a.apellido_paterno ASC, a.apellido_materno ASC;";
                     using (SqlCommand command = new SqlCommand(query2, connection))
                     {
                         command.Parameters.AddWithValue("@id", id_curso);
@@ -128,7 +128,7 @@ namespace CelexWebApp.Models.ModelGrupos
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                string query = "SELECT id_estudiantes, nombre_alumno, apellido_paterno, apellido_materno FROM Alumnos WHERE id_estudiantes NOT IN (SELECT id_estudiantes FROM Avance_Alumnos);";
+                string query = "SELECT id_estudiantes, nombre_alumno, apellido_paterno, apellido_materno FROM Alumnos WHERE id_estudiantes NOT IN (SELECT id_estudiantes FROM Avance_Alumnos) ORDER BY nombre_alumno ASC, apellido_paterno ASC, apellido_materno ASC;";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
@@ -178,7 +178,10 @@ namespace CelexWebApp.Models.ModelGrupos
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                string query = "SELECT A.id_estudiantes, A.nombre_alumno, A.apellido_paterno, A.apellido_materno, AA.asistencia FROM Alumnos A INNER JOIN Avance_Alumnos AA ON A.id_estudiantes = AA.id_estudiantes WHERE A.id_estudiantes = @id";
+                string query = "SELECT A.id_estudiantes, A.nombre_alumno, A.apellido_paterno, A.apellido_materno, AA.asistencia " +
+                    "FROM Alumnos A INNER JOIN Avance_Alumnos AA " +
+                    "ON A.id_estudiantes = AA.id_estudiantes " +
+                    "WHERE A.id_estudiantes = @id;";
                 for (int i = 0; i < id_alumno.Length; i++)
                 {
                     using (SqlCommand command = new SqlCommand(query, connection))

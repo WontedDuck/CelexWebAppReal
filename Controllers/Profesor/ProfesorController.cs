@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Graph;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace CelexWebApp.Controllers.Profesor
 {
@@ -111,11 +112,13 @@ namespace CelexWebApp.Controllers.Profesor
         [HttpPost]
         public async Task<IActionResult> EnviarMensaje(string destinatarios, string mensaje)
         {
+            int id_profesor = int.Parse(HttpContext.Session.GetString("id"));
             int rol = 0;
             string query = "SELECT id_registrado FROM Registrados WHERE id_rol = @rol";
             switch (destinatarios)
             {
                 case "Alumnos":
+                    query = "SELECT r.id_registrado FROM Registrados r JOIN Alumnos a ON a.id_registrado = r.id_registrado JOIN Avance_Alumnos aa ON a.id_estudiantes = aa.id_estudiantes WHERE aa.id_profesor = @id";
                     rol = 1;
                     break;
                 case "Administradores":
@@ -131,6 +134,8 @@ namespace CelexWebApp.Controllers.Profesor
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@rol", rol);
+                        if(destinatarios == "Alumnos")
+                            command.Parameters.AddWithValue("@id", id_profesor);
 
                         using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
@@ -142,22 +147,23 @@ namespace CelexWebApp.Controllers.Profesor
                     }
                     foreach (int idDestinatario in ndestinatarios)
                     {
-                        string query2 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido) VALUES (@Id_remitente, @Id_destinatario, @Contenido)";
+                        string query2 = "INSERT INTO Mensajes (id_remitente, id_destinatario, contenido, fecha_registro) VALUES (@Id_remitente, @Id_destinatario, @Contenido, @Fecha)";
                         using (SqlCommand command2 = new SqlCommand(query2, connection))
                         {
                             command2.Parameters.AddWithValue("@Id_remitente", int.Parse(HttpContext.Session.GetString("id_registrado")));
                             command2.Parameters.AddWithValue("@Id_destinatario", idDestinatario);
                             command2.Parameters.AddWithValue("@Contenido", $"Mensaje de Profesor: {mensaje}");
+                            command2.Parameters.AddWithValue("@Fecha", DateTime.Now);
                             await command2.ExecuteNonQueryAsync();
                         }
                     }
                 }
-                TempData["MensajeEstado"] = "El mensaje fue enviado correctamente.";
+                TempData["Confirmacion"] = "El mensaje fue enviado correctamente.";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                TempData["MensajeEstado"] = $"Error al enviar el mensaje, enviar de nuevo: {ex.Message}";
+                TempData["Confirmacion"] = $"Error al enviar el mensaje, enviar de nuevo: {ex.Message}";
 
                 return RedirectToAction("Index");
             }

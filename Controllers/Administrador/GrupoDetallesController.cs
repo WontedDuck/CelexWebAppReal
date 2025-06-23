@@ -83,25 +83,59 @@ namespace CelexWebApp.Controllers.Administrador
             ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
             return View(await extraerInformacion.BusquedaAlumno());
         }
-        public async Task<IActionResult> AgregarAlumno(int id)
+        [HttpPost]
+        public async Task<IActionResult> AgregarAlumnos(List<int> alumnosSeleccionados)
         {
+            if (alumnosSeleccionados == null || !alumnosSeleccionados.Any())
+            {
+                TempData["mensaje"] = "No se seleccionaron alumnos.";
+                return RedirectToAction("BuscarAlumnos");
+            }
             int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
             int id_profesor = int.Parse(HttpContext.Session.GetString("id_profesor"));
             string nombre_profesor = HttpContext.Session.GetString("profesor_nombre");
+            int capacidad = 0, ocupados = 0;
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                string query = "INSERT INTO Avance_Alumnos (id_estudiantes, id_cursos, id_profesor) VALUES (@id, @id_curso, @id_profesor)";
+                string query = "SELECT capacidad, COALESCE(ocupados, 0) AS ocupados FROM Curso WHERE id_cursos = @id_curso";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", id);
                     command.Parameters.AddWithValue("@id_curso", id_curso);
-                    command.Parameters.AddWithValue("@id_profesor", id_profesor);
-                    await command.ExecuteNonQueryAsync();
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (reader.Read())
+                        {
+                            capacidad = Convert.ToInt32(reader.GetDecimal(0));
+                            ocupados = Convert.ToInt32(reader.GetDecimal(1));
+                        }
+                    }
                 }
-                string query2 = "UPDATE Curso SET ocupados = ISNULL(ocupados, 0) + 1 WHERE id_cursos = @id_curso;";
+            }
+            int espacioDisponible = capacidad - ocupados;
+            if (alumnosSeleccionados.Count > espacioDisponible)
+            {
+                TempData["mensaje"] = $"Solo hay {espacioDisponible} espacios disponibles.";
+                return RedirectToAction("BuscarAlumnos");
+            }
+            using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
+            {
+                await connection.OpenAsync();
+                foreach (var id in alumnosSeleccionados)
+                {
+                    string query = "INSERT INTO Avance_Alumnos (id_estudiantes, id_cursos, id_profesor) VALUES (@id, @id_curso, @id_profesor)";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@id", id);
+                        command.Parameters.AddWithValue("@id_curso", id_curso);
+                        command.Parameters.AddWithValue("@id_profesor", id_profesor);
+                        await command.ExecuteNonQueryAsync();
+                    }
+                }
+                string query2 = "UPDATE Curso SET ocupados = ISNULL(ocupados, 0) + @cantidad WHERE id_cursos = @id_curso;";
                 using (SqlCommand command = new SqlCommand(query2, connection))
                 {
+                    command.Parameters.AddWithValue("@cantidad", alumnosSeleccionados.Count);
                     command.Parameters.AddWithValue("@id_curso", id_curso);
                     await command.ExecuteNonQueryAsync();
                 }
@@ -534,14 +568,13 @@ namespace CelexWebApp.Controllers.Administrador
                 }
                 TempData["mensaje"] = "Se ejecutó el bloque TERMINAR.";
             }
-            int id_curso = int.Parse(HttpContext.Session.GetString("id_curso"));
             ExtraerInformacion extraerInformacion = new ExtraerInformacion(_logger, _graphServiceClient, _downstreamApi, _conexion);
-            TempData["Informacion"] = await extraerInformacion.EstadoGrupo(id_curso);
+            TempData["Informacion"] = await extraerInformacion.EstadoGrupo(IdGrupo);
             if (TempData["Informacion"] == "Informacion")
             {
                 string nombre_profesor = HttpContext.Session.GetString("profesor_nombre");
                 nombre_profesor = await extraerInformacion.ProfesorNombre(nombre_profesor);
-                grupo = await extraerInformacion.GrupoInfo(id_curso, nombre_profesor);
+                grupo = await extraerInformacion.GrupoInfo(IdGrupo, nombre_profesor);
             }
             if (TempData["Informacion"] == "Informacion")
             {

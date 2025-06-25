@@ -38,7 +38,7 @@ namespace CelexWebApp.Controllers.Administrador
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                string query = "SELECT * FROM Curso";
+                string query = "SELECT * FROM Curso ORDER BY id_nivel ASC;";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())

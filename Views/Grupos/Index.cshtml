@@ -12,6 +12,9 @@
     <div class="row-container">
         <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
             <h1>Grupos Creados</h1>
+            <div class="form-group" style="max-width: 350px; margin-bottom: 15px;">
+                <input type="text" id="buscadorGrupos" class="form-control" placeholder="Buscar grupo..." onkeyup="filtrarGrupos()" />
+            </div>
 
             <!-- Sección: Lista de Grupos -->
             <div class="glass-section">
@@ -159,4 +162,19 @@
             card.style.transform = "translateY(0)";
         }, 500 + index * 150);
     });
+        function filtrarGrupos() {
+        var input = document.getElementById("buscadorGrupos");
+        var filtro = input.value.toLowerCase();
+        var cards = document.querySelectorAll(".group-card");
+
+        cards.forEach(function(card) {
+            var texto = card.textContent.toLowerCase();
+            if (texto.includes(filtro)) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+
 </script>

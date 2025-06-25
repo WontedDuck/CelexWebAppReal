@@ -438,7 +438,7 @@ namespace CelexWebApp.Controllers.Administrador
                     using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
                     {
                         await connection.OpenAsync();
-                        string query = "UPDATE Curso SET nombre_curso = @Nombre, id_nivel = @Nivel, id_tipo_curso = @TipoCurso, fecha_inicio = @FechaInicio, fecha_fin = @FechaFin, capacidad = @Capacidad, ocupados = @Ocupados WHERE id_cursos = @IdGrupo";
+                        string query = "UPDATE Curso SET nombre_curso = @Nombre, id_nivel = @Nivel, id_tipo_curso = @TipoCurso, fecha_inicio = @FechaInicio, fecha_fin = @FechaFin, capacidad = @Capacidad WHERE id_cursos = @IdGrupo";
                         using (SqlCommand command = new SqlCommand(query, connection))
                         {
                             command.Parameters.AddWithValue("@Nombre", Nombre);
@@ -447,7 +447,6 @@ namespace CelexWebApp.Controllers.Administrador
                             command.Parameters.AddWithValue("@FechaInicio", FechaInicio);
                             command.Parameters.AddWithValue("@FechaFin", FechaFin);
                             command.Parameters.AddWithValue("@Capacidad", Capacidad);
-                            command.Parameters.AddWithValue("@Ocupados", Ocupados);
                             command.Parameters.AddWithValue("@IdGrupo", IdGrupo);
                             await command.ExecuteNonQueryAsync();
                         }

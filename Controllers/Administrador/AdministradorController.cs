@@ -397,7 +397,7 @@ namespace CelexWebApp.Controllers.Administrador
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {
                 await connection.OpenAsync();
-                string query = "SELECT * FROM Historial_Avance_Alumnos WHERE id_estudiantes = @Id_Estudiante";
+                string query = "SELECT * FROM Historial_Avance_Alumnos WHERE id_estudiantes = @Id_Estudiante ORDER BY id_nivel ASC";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id_Estudiante", idAlumno);

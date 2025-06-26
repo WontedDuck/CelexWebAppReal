@@ -41,11 +41,11 @@
                     </div>
                     <div class="form-group">
                         <label>Calificación Examen Medio:</label>
-                        <input asp-for="CalExMedia" class="form-control" type="number" max="10" min="0"/>
+                        <input asp-for="CalExMedia" class="form-control" type="number" max="10" min="0" />
                     </div>
                     <div class="form-group">
                         <label>Calificación Examen Final:</label>
-                        <input asp-for="CaliExFinal" class="form-control" type="number" max="10" min="0"/>
+                        <input asp-for="CaliExFinal" class="form-control" type="number" max="10" min="0" />
                     </div>
 
                     <button type="submit" class="btn btn-primary">Actualizar Información</button>
@@ -190,7 +190,12 @@
         datasets: [{
             label: 'Calificaciones',
             data: [@Model.CalContinua, @Model.CalExMedia, @Model.CaliExFinal, faltante],
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#CCCCCC'],
+                backgroundColor: [
+        '#1E90FF', // Azul
+        '#6A4D7A', // Morado
+        '#C71585', // Rosa
+        '#2F2F2F'  // Gris oscuro (para "faltante")
+    ],
         }]
     };
 

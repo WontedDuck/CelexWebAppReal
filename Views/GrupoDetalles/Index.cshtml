@@ -91,10 +91,10 @@
                             @if (idRol == "3")
                             {
                                 <div class="button-group" style="margin-top: 15px; justify-content: center; gap: 10px;">
-                                    <button type="submit" name="accion" value="modificar" class="btn btn-primary" onclick="return confirm('¿Estás seguro de modificar el curso?');">
+                                    <button type="submit" name="accion" value="modificar" class="btn btn-primary" onclick="return alert('¿Estás seguro de modificar el curso?');">
                                         Modificar Información
                                     </button>
-                                    <button type="submit" name="accion" value="terminar" class="btn btn-success" onclick="return confirm('¿Estás seguro de terminar el ciclo?');">
+                                    <button type="submit" name="accion" value="terminar" class="btn btn-success" onclick="return alert('¿Estás seguro de terminar el ciclo?');">
                                         Terminar Ciclo
                                     </button>
                                 </div>
@@ -108,7 +108,7 @@
                 {
                     <form asp-action="BorrarGrupo" asp-controller="GrupoDetalles" method="post" style="margin-top: 15px;">
                         <input type="hidden" name="IdGrupo" value="@Model.Id" />
-                        <button type="submit" class="btn btn-danger w-100" onclick="return confirm('¿Estás seguro de borrar el grupo?');">Borrar Grupo</button>
+                        <button type="submit" class="btn btn-danger w-100" onclick="return alert('¿Estás seguro de borrar el grupo?');">Borrar Grupo</button>
                     </form>
                 }
             </div>

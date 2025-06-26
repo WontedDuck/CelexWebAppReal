@@ -76,7 +76,37 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+   
+    <!-- Modal Glassmorphism -->
+    <div id="customAlertOverlay" style="display:none;">
+        <div id="customAlertModal">
+            <div id="customAlertMessage"></div>
+            <button id="customAlertButton">Aceptar</button>
+        </div>
+    </div>
 
-    
+
+    <script>
+        window.customAlert = function(message, buttonText = "Aceptar") {
+            return new Promise(resolve => {
+                const overlay = document.getElementById('customAlertOverlay');
+                const modal = document.getElementById('customAlertModal');
+                const msg = document.getElementById('customAlertMessage');
+                const btn = document.getElementById('customAlertButton');
+                msg.textContent = message;
+                btn.textContent = buttonText;
+                overlay.style.display = 'flex';
+                btn.focus();
+                btn.onclick = () => {
+                    overlay.style.display = 'none';
+                    resolve();
+                };
+            });
+        };
+
+        // Opcional: Sobrescribe alert() globalmente
+        window.alert = window.customAlert;
+    </script>
+
 </body>
 </html>

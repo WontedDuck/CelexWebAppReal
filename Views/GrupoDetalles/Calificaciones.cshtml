@@ -12,19 +12,12 @@
     <div class="row-container">
         <div class="glass-panel" style="opacity: 0; transform: translateY(50px);">
             <h2>Calificaciones del Alumno</h2>
-            <div class="row">
-                <!-- Foto de perfil -->
-                <div class="col-md-3 col-12">
-                    <div class="profile-picture" style="width: 150px; height: 150px; border: 1px solid rgba(255, 255, 255, 0.4); text-align: center; line-height: 150px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border-radius: 15px; color: #FFFFFF; margin: 0 auto;">
-                        Foto de Perfil
-                    </div>
-                </div>
-                <form asp-action="ActualizarInformacion" asp-controller="GrupoDetalles" method="post" class="col-md-9 col-12">
-                    <!-- ID del alumno (HIDDEN obligatorio para que se envíe) -->
+            <div class="row-container-horizontal">
+                <!-- Formulario -->
+                <form asp-action="ActualizarInformacion" asp-controller="GrupoDetalles" method="post" class="col-section">
                     <input asp-for="alumno.Id" type="hidden" />
-
                     <div class="form-group">
-                        <label>Nombre:</label>
+                        <label>Nombre:</label> 
                         <input asp-for="alumno.Nombre" class="form-control" readonly />
                     </div>
                     <div class="form-group">
@@ -47,14 +40,10 @@
                         <label>Calificación Examen Final:</label>
                         <input asp-for="CaliExFinal" class="form-control" type="number" max="10" min="0" />
                     </div>
-
                     <button type="submit" class="btn btn-primary">Actualizar Información</button>
                 </form>
-            </div>
-
-            <!-- Gráfica de pastel -->
-            <div class="row mt-4">
-                <div class="col-12">
+                <!-- Gráfica -->
+                <div class="col-section">
                     <h3>Comparación de Calificaciones</h3>
                     <div class="chart-container">
                         <canvas id="graficaCalificaciones" style="max-width: 400px; max-height: 400px;"></canvas>
@@ -64,7 +53,6 @@
         </div>
     </div>
 </div>
-
 <!-- Pie de página -->
 <footer class="footer">
     <p>© @DateTime.Now.Year - CelexWebApp</p>

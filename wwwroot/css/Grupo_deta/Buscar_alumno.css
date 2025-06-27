@@ -232,7 +232,7 @@ h2 {
     color: var(--text-color);
     font-weight: 800;
     font-size: 1em;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(95, 89, 120);
     border-radius: 12px;
     backdrop-filter: blur(6px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
@@ -260,7 +260,7 @@ h2 {
     padding: 8px;
     text-align: center;
     color: var(--text-color);
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(113, 110, 126);
     border-radius: 20px;
     backdrop-filter: blur(5px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -392,7 +392,7 @@ h2 {
             content: attr(data-label);
             font-weight: bold;
             font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(113, 110, 126);
             margin-bottom: 5px;
         }
 

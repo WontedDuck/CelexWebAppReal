@@ -39,6 +39,11 @@ namespace CelexWebApp.Controllers.Administrador
 
         public async Task<IActionResult> Index()
         {
+            int idrol = int.Parse(HttpContext.Session.GetString("id_rol"));
+            if (idrol != 3)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             List<NotificacionesModel> notificaciones = new List<NotificacionesModel>();
             using (SqlConnection connection = new SqlConnection(await _conexion.GetConexionAsync()))
             {

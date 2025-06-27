@@ -247,7 +247,7 @@ h2 {
     color: var(--text-color);
     font-weight: 800;
     font-size: 1em;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgb(95, 89, 120); /*gris obscuro*/
     border-radius: 12px;
     backdrop-filter: blur(6px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
@@ -284,7 +284,7 @@ h2 {
     padding: 8px;
     text-align: center;
     color: var(--text-color);
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(113, 110, 126); /*gris azulado*/
     border-radius: 20px;
     backdrop-filter: blur(5px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -394,7 +394,7 @@ h2 {
         flex-direction: column;
         gap: 5px;
         padding: 6px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(113, 110, 126);
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         width: calc(100% - 12px);
@@ -406,7 +406,7 @@ h2 {
         width: 100%;
         text-align: left;
         padding: 6px;
-        border-radius: 8px;
+        border-radius: 12px;
         min-height: auto;
         display: flex;
         flex-direction: column;
@@ -423,7 +423,7 @@ h2 {
             content: attr(data-label);
             font-weight: bold;
             font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(101, 63, 226, 0.30);
             margin-bottom: 5px;
         }
 
@@ -434,6 +434,7 @@ h2 {
     .table-row:hover .row-item {
         transform: none;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        background: rgb(113, 110, 126);
     }
 }
 

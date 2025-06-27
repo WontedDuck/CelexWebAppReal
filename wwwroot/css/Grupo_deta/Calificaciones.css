@@ -370,3 +370,66 @@ h3 {
     color: #FFFFFF;
     font-size: 1.2em;
 }
+
+.row-container-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px; /* Espacio entre secciones */
+    width: 100%;
+    flex-wrap: wrap; /* Permite el ajuste en pantallas pequeñas */
+}
+
+.col-section {
+    flex: 1;
+    min-width: 0; /* Previene desbordamiento */
+    max-width: 100%; /* Asegura responsividad */
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    text-align: center;
+    line-height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    color: #FFFFFF;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.chart-container {
+    max-width: 400px;
+    max-height: 400px;
+    margin: 0 auto;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .row-container-horizontal {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .col-section {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .profile-picture {
+        margin-bottom: 20px;
+    }
+}
+
+.form-control[readonly] {
+    background: var(--input-bg); /* Mismo fondo translúcido: rgba(255, 255, 247, 0.15) */
+    border: 1px solid var(--section-border); /* Mismo borde: rgba(255, 255, 255, 0.4) */
+    color: var(--text-color); /* Mismo color de texto: #FFFFFF */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Misma sombra */
+    opacity: 1; /* Evita que el campo parezca atenuado */
+}

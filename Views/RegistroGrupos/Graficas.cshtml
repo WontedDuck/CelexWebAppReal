@@ -21,18 +21,18 @@
 
     .grafica-wrapper {
         width: 100%;
-        max-width: 600px;
-        margin: 40px auto 0 auto;
+        max-width: 100%;
+        margin: 0px auto 0 auto;
         background: var(--glass-bg, rgba(255,255,255,0.1));
         border-radius: 15px;
         box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        padding: 30px 20px;
+        padding: 0px 0px;
         text-align: center;
     }
 
     .grafica-container {
         width: 100%;
-        max-width: 400px;
+        max-width: 90%;
         margin: 0 auto;
         background: transparent;
     }
@@ -122,21 +122,20 @@
                     datasets: [{
                         label: 'Cantidad',
                         data: valores,
-                                backgroundColor: [
-            '#1E90FF', // Azul
-            '#6A4D7A', // Morado
-            '#C71585', // Rosa
-            '#A3BFFA', // Azul claro
-            '#2F2F2F' // Gris oscuro
-         
-        ],
-        borderColor: [
-            '#1E90FF',
-            '#6A4D7A',
-            '#C71585',
-            '#A3BFFA',
-            '#2F2F2F'
-        ],
+                        backgroundColor: [
+                            '#1E90FF', // Azul
+                            '#6A4D7A', // Morado
+                            '#C71585', // Rosa
+                            '#A3BFFA', // Azul claro
+                            '#2F2F2F' // Gris oscuro
+                        ],
+                        borderColor: [
+                            '#1E90FF',
+                            '#6A4D7A',
+                            '#C71585',
+                            '#A3BFFA',
+                            '#2F2F2F'
+                        ],
                         borderWidth: 1
                     }]
                 },
